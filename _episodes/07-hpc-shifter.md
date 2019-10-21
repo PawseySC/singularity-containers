@@ -31,7 +31,7 @@ NCI (the National Computational Infrastructure in Canberra) is using Singularity
 
 > ## How to login on Pawsey HPC systems? ##
 > 
-> Pawsey currently has two sytems, **Magnus** and **Zeus**. We're using Zeus for this tutorial. You can login using the `ssh` command and your Pawsey access credentials (they will be provided for live workshops):
+> Pawsey currently has two systems, **Magnus** and **Zeus**. We're using Zeus for this tutorial. You can login using the `ssh` command and your Pawsey access credentials (they will be provided for live workshops):
 > 
 > ```
 > $ ssh <your-pawsey-account-name>@zeus.pawsey.org.au
@@ -158,7 +158,7 @@ mdelapierre@zeus-1:/group/pawsey0001/mdelapierre$ exit   # or hit CTRL-D
 
 Shifter has support to run containers exploiting MPI parallelism and GPU acceleration (the latter only through CSCS Shifter).
 
-* `shifter run --mpi` allows containers to take advantage on inter-node communication on the host fabric. The container image needs to have been built with MPI libraries thatare ABI compatible with the host MPI libraries;
+* `shifter run --mpi` allows containers to take advantage on inter-node communication on the host fabric. The container image needs to have been built with MPI libraries that are ABI compatible with the host MPI libraries;
 
 * to run GPU enabled containers, no extra flags are required.
 

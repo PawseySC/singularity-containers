@@ -33,7 +33,7 @@ $ docker run -d -p 80:8787 --name rstudio -v `pwd`/data:/home/rstudio/data -e PA
 ```
 {: .bash}
 
-Here we're opening up the container port `8787` and mapping it to the host port `80` so we can access the Rtudio server remotely. Note you need to store a password in a variable; it will be required below for the web login.
+Here we're opening up the container port `8787` and mapping it to the host port `80` so we can access the Rstudio server remotely. Note you need to store a password in a variable; it will be required below for the web login.
 
 You just need to open a web browser and point it to `localhost` if you are running Docker on your machine, or `<Your VM's IP Address>` if you are running on a cloud service.
 
@@ -59,7 +59,7 @@ $ cd rstudio_ex
 ```
 {: .bash}
 
-For this example, we'll use an RStudio image thas has already been built.  R images can take a while to build sometimes, depending on the number of packages and dependencies you're installing.  The Dockerfile used here is included, and we'll go through it to explain how Docker builds images.
+For this example, we'll use an RStudio image that has already been built.  R images can take a while to build sometimes, depending on the number of packages and dependencies you're installing.  The Dockerfile used here is included, and we'll go through it to explain how Docker builds images.
  
 ```
 FROM rocker/tidyverse:3.5
@@ -120,7 +120,7 @@ The last section is the main R package installation section.  Here we run severa
 * `BiocManager` is a [CRAN package](https://cran.r-project.org/package=BiocManager) for installing bioinformatics software
 * `install_github()` is method for installing R packages from GitHub.
 
-We'll skip building this image for now, and just pull and use a prebuilt image.  We're also going to use `docker-compose` to help with setting up our container (see previous episode on long running servies). Here we'll use it for managing several options we want to use for our Rstudio image.
+We'll skip building this image for now, and just pull and use a prebuilt image.  We're also going to use `docker-compose` to help with setting up our container (see previous episode on long running services). Here we'll use it for managing several options we want to use for our Rstudio image.
 
 ```
 version: "2"

@@ -97,7 +97,7 @@ $ docker run -d -p 80:8787 --name rstudio -v `pwd`/data:/home/rstudio/data -e PA
 ```
 {: .bash}
 
-Here we're opening up the container port `8787` and mapping it to the host port `80` so we can access the Rtudio server remotely. Note you need to store a password in a variable; it will be required below for the web login.
+Here we're opening up the container port `8787` and mapping it to the host port `80` so we can access the Rstudio server remotely. Note you need to store a password in a variable; it will be required below for the web login.
 
 You just need to open a web browser and point it to `localhost` if you are running Docker on your machine, or `<Your VM's IP Address>` if you are running on a cloud service.
 

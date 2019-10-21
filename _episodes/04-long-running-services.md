@@ -6,7 +6,7 @@ questions:
 objectives:
 - Learn how to start containers for a running (web) service
 keypoints:
-- "You-ve learned how to run long-running services (like a web server) through containers"
+- "You've learned how to run long-running services (like a web server) through containers"
 - "Use the flag `-d` to run the containers in background"
 - "Use the flag `-p <host port:<container port>` to map communication ports"
 - "Additional options to manage and query containers include `--name` and `docker logs`"
@@ -82,7 +82,7 @@ $ docker run -p 80:80 --name=nginx nginx
 
 The option `-p 80:80` tells Docker to map port `80` on the host to port `80` in the container, so you can communicate with it.
 
-We've also introduced a second new option: `--name`. Docker automatically names containers, but these names don't reflect the purpose of the container (e.g. `pensive_booth` was the name of the nginx container I ran for this example without the `--name` option).  You can name your container whatever you want, but it's helpful to give it a name similar to the container you're using, or the specific service or application you're running in the container. This can be useful when we need to act on the container while it's running, e.g. to stop it, or to get logs, as wwe'll see soon. In this example, we've called our container `nginx`. 
+We've also introduced a second new option: `--name`. Docker automatically names containers, but these names don't reflect the purpose of the container (e.g. `pensive_booth` was the name of the nginx container I ran for this example without the `--name` option).  You can name your container whatever you want, but it's helpful to give it a name similar to the container you're using, or the specific service or application you're running in the container. This can be useful when we need to act on the container while it's running, e.g. to stop it, or to get logs, as we'll see soon. In this example, we've called our container `nginx`. 
 
 Note also that we didn't tell docker what program to run, that's baked into the container in this case. More on that later.
 

@@ -57,7 +57,7 @@ CMD ["/bin/bash"]
 
 * `FROM`: compulsory, it provides the starting image we will use to build our customised one;
 * `MAINTAINER`: details of the person who wrote the Dockerfile, optional;
-* `RUN`: this is the most used instruction, that alllows to run most shell commands during the build. Multiple `RUN` instructions are often found in a single Dockerfile;
+* `RUN`: this is the most used instruction, that allows to run most shell commands during the build. Multiple `RUN` instructions are often found in a single Dockerfile;
 * `VOLUME`: creates a mount point ready to be used for mounting external (e.g. host) volumes; creates the corresponding directory if not existing;
 * `WORKDIR`: changes directory to the specified path; the last current directory in the build will be the working directory in the running container.  
   **Note**: if you use instead `RUN cd <..>`, the changed directory will only persist within that `RUN` instruction, and then be lost in subsequent build steps;
@@ -173,7 +173,7 @@ If you need interactive Jupyter Notebooks, [Jupyter Docker Stacks](https://jupyt
 
 ### Base images for R ###
 
-The [Rocker Project](https://www.rocker-project.org) maintains a number of good R base images. Of particular relevance is [rocker/tidyverse](https://hub.docker.com/r/rocker/tidyverse/tags), which embeds the basic R distribution, an RStudio web-server installation and the [tydiverse](https://www.tidyverse.org) collection of packages for data science, that are also quite popular across the bioinformatics community of [Bioconductor](https://www.bioconductor.org). At the time of writing, the most recent version is `3.5.3`.
+The [Rocker Project](https://www.rocker-project.org) maintains a number of good R base images. Of particular relevance is [rocker/tidyverse](https://hub.docker.com/r/rocker/tidyverse/tags), which embeds the basic R distribution, an RStudio web-server installation and the [tidyverse](https://www.tidyverse.org) collection of packages for data science, that are also quite popular across the bioinformatics community of [Bioconductor](https://www.bioconductor.org). At the time of writing, the most recent version is `3.5.3`.
 
 Other more basic images are [rocker/r-ver](https://hub.docker.com/r/rocker/r-ver/tags) (R only) and [rocker/rstudio](https://hub.docker.com/r/rocker/rstudio/tags) (R + RStudio).
 

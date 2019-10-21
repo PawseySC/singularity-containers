@@ -28,7 +28,7 @@ $ export NVIDIA_KEY=<Paste Key Here>
 
 ### Run a molecular dynamics simulation on GPUs with containers ### 
 
-For our example we are going to use Gromacs, a quite popular molecuar dynamics package, among the ones that have been optimised to run on GPUs through Nvidia containers.
+For our example we are going to use Gromacs, a quite popular molecular dynamics package, among the ones that have been optimised to run on GPUs through Nvidia containers.
 
 Let us pull the Gromacs container on the Zeus HPC system at Pawsey. We'll need to use `shifter pull --login` in order to enter the Nvidia cloud credentials. Also note we are prepending `nvcr.io/` to the repository name, to tell Shifter we are pulling from the Nvidia GPU Cloud:
 
