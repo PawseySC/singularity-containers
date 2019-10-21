@@ -8,7 +8,7 @@ objectives:
 ---
 
 
-### Containers vs Virtual Machines ###
+### Containers vs Virtual Machines
 
 Many of you have probably used a VM, so you're actually already familiar with some of the concepts of a container.
 
@@ -21,7 +21,7 @@ The key difference here is that VMs virtualise **hardware** while containers vir
 * Modular (can easily combine multiple containers that work together)
 
 
-### Terminology ###
+### Terminology
 
 An **image** is a file (or set of files) that contains the application and all its dependencies, libraries, run-time systems, etc. required to run.  You can copy images around, upload them, download them etc.
 
@@ -34,7 +34,7 @@ A **registry** is a server application where images are stored and can be access
 To build an image we need a recipe. A recipe file is called a **Dockerfile** in the *Docker* world, and a **Definition File**, or **def-file**, in the *Singularity* jargon.
 
 
-### Containers and your workflow ###
+### Containers and your workflow
 
 There are a number of reasons for using containers in your daily work:
 
@@ -60,7 +60,7 @@ Here's an overview of what a workflow might look like:
 ![Docker Workflow]({{ page.root }}/fig/docker_workflow.png)
 
 
-### Container engines ###
+### Container engines
 
 A number of tools are available to create, deploy and run containerised applications. Some of these will be covered throughout this tutorial:
 
