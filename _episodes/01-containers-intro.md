@@ -60,7 +60,7 @@ Here's an overview of what a workflow might look like:
 ![Docker Workflow]({{ page.root }}/fig/docker_workflow.png)
 
 
-## Container engines ##
+### Container engines ###
 
 A number of tools are available to create, deploy and run containerised applications. Some of these will be covered throughout this tutorial:
 
