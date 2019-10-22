@@ -1,0 +1,7 @@
+F77=/usr/bin/gfortran
+FC=$F77
+CFLAGS=-fopenmp
+CXXFLAGS=-fopenmp
+FFLAGS=-fopenmp
+SHLIB_OPENMP_CXXFLAGS=-fopenmp
+LDFLAGS=-fopenmp
