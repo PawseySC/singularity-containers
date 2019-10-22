@@ -1,139 +1,181 @@
 ---
-title: "Sharing files with the host with Docker"
-teaching: 15
-exercises: 15
+title: "Share files with the host: BLAST, a bioinformatics example"
+teaching: 10
+exercises: 5
 questions:
 objectives:
 - Learn how to mount host directories in a container
 - Run a real-world bioinformatics application in a Docker container
 keypoints:
-- "Map host directories in the containers with the flag `-v <host dir>:<container dir>`"
-- "Change working directory at container runtime with the flag `-w <working dir>`"
+- "By default Singularity mounts the host current directory, and uses it as container working directory"
+- "Map additional host directories in the containers with the flag `-B`"
 ---
 
-### Default directory access in Docker ###
 
-Try and run the following to get to know what is the starting point in the Ubuntu container and what it contains. First: 
+### Get ready for the hands-on
+
+Before we start, let us ensure we have got the required files to run the tutorials.
 
 ```
-$ docker run ubuntu pwd
+$ cd ~
+```
+{: .bash}
+
+If it does not exist already, download the following Github repo. Then `cd` into it, assign its location to a handy variable, finally `cd demos`:
+
+```
+$ git clone https://github.com/PawseySC/sc19-containers
+$ cd sc19-containers
+$ export SC19=$(pwd)
+$ cd demos
+```
+{: .bash}
+
+
+### Access to host directories
+
+What directories can we access from the container?
+
+First, let us assess what the content of the root directory `/` looks like outside *vs* inside the container, to highlight the fact that a container runs on his own filesystem:
+
+```
+$ ls /
 ```
 {: .bash}
 
 ```
-/
+bin   data  etc   initrd.img      lib    lost+found  mnt  proc  run   snap  sys    tmp  var      vmlinuz.old
+boot  dev   home  initrd.img.old  lib64  media       opt  root  sbin  srv   test1  usr  vmlinuz
 ```
 {: .output}
 
-Then:
-
 ```
-docker run ubuntu ls -l
+$ singularity exec library://ubuntu:18.04 ls /
 ```
 {: .bash}
 
 ```
-total 64
-drwxr-xr-x   2 root root 4096 Nov 12 20:56 bin
-drwxr-xr-x   2 root root 4096 Apr 24  2018 boot
-drwxr-xr-x   5 root root  340 Dec 19 08:01 dev
-drwxr-xr-x   1 root root 4096 Dec 19 08:01 etc
-drwxr-xr-x   2 root root 4096 Apr 24  2018 home
-drwxr-xr-x   8 root root 4096 Nov 12 20:54 lib
-drwxr-xr-x   2 root root 4096 Nov 12 20:55 lib64
-drwxr-xr-x   2 root root 4096 Nov 12 20:54 media
-drwxr-xr-x   2 root root 4096 Nov 12 20:54 mnt
-drwxr-xr-x   2 root root 4096 Nov 12 20:54 opt
-dr-xr-xr-x 125 root root    0 Dec 19 08:01 proc
-drwx------   2 root root 4096 Nov 12 20:56 root
-drwxr-xr-x   1 root root 4096 Nov 19 21:20 run
-drwxr-xr-x   1 root root 4096 Nov 19 21:20 sbin
-drwxr-xr-x   2 root root 4096 Nov 12 20:54 srv
-dr-xr-xr-x  13 root root    0 Dec 14 13:27 sys
-drwxrwxrwt   2 root root 4096 Nov 12 20:56 tmp
-drwxr-xr-x   1 root root 4096 Nov 12 20:54 usr
-drwxr-xr-x   1 root root 4096 Nov 12 20:56 var
+bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  root  run  sbin  singularity  srv  sys  tmp  usr  var
 ```
 {: .output}
 
-You are in the root `/` directory of the container, and if you compare the listing of directories with what you get in the host (type `ls -l /` for this), you will notice the two are different; even directories with the same name will have in general different timestamps, suggesting they are in fact distinct directories.
 
-This is the consequence of a default Docker behaviour: a container hasn't got any access to directories in the host filesystem (i.e. directories in the computer where you're running the container from)
+> ## In which directory is the container running?
+> 
+> For reference, let's check the host first:
+> 
+> ```
+> $ pwd
+> ```
+> {: .bash}
+> 
+> ```
+> /data/work/sc19-containers/demos
+> ```
+> {: .output}
+> 
+> And now the container:
+> 
+> > ```
+> > $ singularity exec library://ubuntu:18.04 pwd
+> > ```
+> > {: .bash}
+> > 
+> > ```
+> > /data/work/sc19-containers/demos
+> > ```
+> > {: .output}
+> > 
+> > Host and container working directories coincide!
+> {: .solution}
+{: .challenge}
 
 
-### Accessing host directories ###
+> ## Can we see the content of the current directory inside the container?
+> 
+> Hopefully yes..
+> 
+> > ```
+> > $ singularity exec library://ubuntu:18.04 ls
+> > ```
+> > {: .bash}
+> > 
+> > ```
+> > 03_blast          03_blast_database 04_overlay        05_gromacs        > > 06_openfoam       07_build_intro    08_rstudio        09_python
+> > ```
+> > {: .output}
+> > 
+> > Indeed we can!
+> {: .solution}
+{: .challenge}
 
-Docker has the ability to mount host directories into a container.  This allows you to add data to your container, as well as specify output directories you can use to store data after a container ends.  This is extremely useful as it's a bad idea to package up your containers with lots of data; it increases the size of the containers and makes them less portable (what if someone else wants to run the same container with different data?).
 
-![Docker Volumes]({{ page.root }}/fig/docker-volume.png)
+> ## How about other directories in the host?
+> 
+> For instance let us inspect `$SC19/_episodes`:
+> 
+> > ```
+> > $ singularity exec library://ubuntu:18.04 ls $SC19/_episodes
+> > ```
+> > {: .bash}
+> > 
+> > ```
+> > ls: cannot access '/data/work/sc19-containers/_episodes': No such file or directory
+> > ```
+> > {: .output}
+> > 
+> > Host directories external to the current directory are not visible! How can we fix this? Read on..
+> {: .solution}
+{: .challenge}
 
-The docker daemon has a parameter called volume (`-v` or `--volume`), which we'll use to specify directories to be mounted.
 
-The format is `-v /host/path:/container/path`.  Docker will create the directory inside the container if required.  Be aware the behaviour is different if you use absolute or relative paths, we use absolute paths here.
+### Bind mounting host directories
 
-As an example, let us run the following:
+Singularity has the runtime flag `--bind`, `-B` in short, to mount host directories. 
+
+The long syntax allows to map the host dir onto a container dir with a different name/path, `-B hostdir:containerdir`.  
+The short syntax just mounts the dir using the same name and path: `-B hostdir`.
+
+Let's use the latter syntax to mount `$SC19/_episodes` into the container and re-run `ls`.
 
 ```
-$ docker run -v `pwd`:/data ubuntu ls -l /data
+$ singularity exec -B $SC19/_episodes library://ubuntu:18.04 ls $SC19/_episodes
 ```
 {: .bash}
 
-Here we are using ``` `pwd` ``` as a shortcut for the current working directory. As a result of using the mapping option `-v`, the `ls` command run inside the container will display the content of the current directory in the host.
-
-The `-v` flag maps host directories in the container, allowing to read/write within them. Let us use a container to create a file in a mapped directory:
-
 ```
-$ docker run -v `pwd`:/data ubuntu touch /data/container1
-```
-{: .bash}
-
-Now, let us look for that file in the host:
-
-```
-$ ls -l container1 
-```
-{: .bash}
-
-```
--rw-r--r-- 1 root root 0 Dec 19 08:16 container1
+01-containers-intro.md   03-bio-example-mounts.md   05-gpu-gromacs.md         07-build-intro.md          09-ml-python.md  11-podman-shifter-sarus.md
+02-singularity-intro.md  04-writable-containers.md  06-mpi-slurm-openfoam.md  08-rstudio-interactive.md  10-docker.md
 ```
 {: .output}
 
-The file created in the container is actually available from the host, as a consequence of volume mapping.
+Now we are talking!
+
+If you need to mount multiple directories, you can either repeat the `-B` flag multiple times, or use a comma-separated list of paths, $i.e.$ `-B dir1,dir2,dir3`.
 
 
-### Changing working directory at runtime
-
-Docker has a flag to change working directory in the container, `-w` or `--workdir`. For instance let us use it to change dir to the mapped host directory, which allows us to adopt relative rather than absolute paths for files:
-
-```
-$ docker run -v `pwd`:/data -w /data ubuntu touch container2
-$ ls -l container2
-```
-{: .bash}
-
-```
--rw-r--r-- 1 root root 0 Dec 19 08:19 container2
-```
-{: .output}
-
-This can be useful to make your workflow uniform, as different container providers may have different default working directories.
-
-
-### More on volumes ###
-
-Docker has several ways to mount data into containers. Here we've only partially covered the first one:
-
-1. **bind mounts**: map a host directory inside the container. There are two possible syntaxes for this option, `-v` (or `--volume`) and `--mount`, the most significant difference being that `-v` is able to create the host directory to be mapped, if this doesn't exist, whereas `--mount` will throw an error. Docker is currently promoting `--mount` as the preferred syntax for mounting data.
-
-2. **Docker volumes**: use storage spaces completely managed by Docker; they offer extra features compared to bind mounts.
-
-3. **tmpfs mounts**: store data temporarily in the host memory.
-
-[Manage data in Docker](https://docs.docker.com/storage/) contains detailed information on these options.
+> ## Mounting $HOME
+> 
+> Depending on the site configuration of Singularity, 
+> user home directories might or might not be mounted into containers by default. 
+> We do recommend avoid mounting home whenever possible, 
+> to avoid sharing potentially sensitive data, such as SSH keys, with the container, 
+> especially if exposing it to the public through a web service.
+> 
+> If you need to share data inside the container home, you might just mount that specific file/directory, *e.g.* 
+> ```
+> -B $HOME/.local
+> ```
+> {: .bash}
+> 
+> Or, if you want a full fledged home, you might define an alternative host directory to act as your container home, as in 
+> ```
+> -B /path/to/fake/home:$HOME
+> ```
+{: .callout}
 
 
-> ## Running BLAST from a container with Docker ##
+> ## Running BLAST from a container
 > 
 > We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro).  BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics tools.
 > 
@@ -244,27 +286,3 @@ Docker has several ways to mount data into containers. Here we've only partially
 > 
 > We can see that several proteins in the zebrafish genome match those in the human prion (interesting?).
 {: .challenge}
-
-
-### Useful container registries ###
-
-There are a lot of applications (not just bioinformatics) already wrapped up in container images. 
-Here's a small list of some of the web registries we use at Pawsey: 
-
-* [Docker Hub](https://hub.docker.com)
-* [Biocontainers](https://biocontainers.pro)
-* [Quay](https://quay.io)^
-* [Nvidia GPU Cloud (NGC)](https://ngc.nvidia.com)^
-
-^The last two require you to create an account and login to access containers.
-
-
-> ## Best practices ##
-> 
-> * Figuring out a standard way to consistently map host directories in container can help scripting and automation. For instance:
->     * ``` -v `pwd`:/data -w /data ``` can be useful when just working in the current directory
->     * ``` -v <DATA-DIRECTORY>:/data -w /data ``` can be useful if your workstation/cluster is organised with one directory called `<DATA-DIRECTORY>` that contains all sample data and reference data
-> * Eventually, multiple volume mappings are allowed at the same time, for instance:
->         ```-v `pwd`:/data -v /reference-database:/ref -w /data ```
-> * These syntaxes look ugly, but once learnt it can be reused with minimal variations
-{: .callout}

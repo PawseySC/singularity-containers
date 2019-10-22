@@ -6,10 +6,10 @@ questions:
 objectives:
 - Learn how to download and run images
 keypoints:
-- Singularity can run both Singularity and Docker container images
-- Execute commands in containers with `singularity exec`
-- Open a shell in a container with `singularity shell`
-- Download a container image in a selected location with `singularity pull`
+- "Singularity can run both Singularity and Docker container images"
+- "Execute commands in containers with `singularity exec`"
+- "Open a shell in a container with `singularity shell`"
+- "Download a container image in a selected location with `singularity pull`"
 ---
 
 
