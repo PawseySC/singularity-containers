@@ -12,6 +12,21 @@ keypoints:
 - "`docker push` is used to push images to a web registry"
 ---
 
+
+WORK IN PROGRESS
+
+**Note**: if your Docker machine has got an Nvidia GPU installed, then you can install the `nvidia-docker` (e.g. see <https://devblogs.nvidia.com/gpu-containers-runtime> ). For this tutorial, we are instead going to use Shifter and the GPU nodes available on the Zeus HPC system at Pawsey.
+
+
+One key aspect is that to pull containers from the Nvidia GPU Cloud you'll need to provide Docker/Shifter with some login credentials. The username is always `$oauthtoken`, whereas the password needs to be retrieved in your Nvidia account. This password can be regenerated, so don't worry if you lose it. On the left side of the page, click on the **Configuration** tab, then on the button **Get API Key**. Then in the new page click on the button **Generate API Key** (currently at the top right corner), and click on confirm. An API Key string will appear in the page, copy it in your clipboard, then store it somewhere useful for your shell session, for instance in an environment variable:
+
+```
+$ export NVIDIA_KEY=<Paste Key Here>
+```
+{: .bash}
+
+
+
 ### What is a Dockerfile? ###
 
 A Dockerfile is a recipe to build a container image with Docker. It is basically a collection of the standard shell commands you would use to build your software through prompt; in addition, it contains Docker-specific instructions that handle the build process. We will see some examples below.

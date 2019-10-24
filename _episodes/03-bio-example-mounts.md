@@ -21,12 +21,13 @@ $ cd ~
 ```
 {: .bash}
 
-If it does not exist already, download the following Github repo. Then `cd` into it, and assign its path to a handy variable, *e.g.* `SC19`:
+If it does not exist already, download the following Github repo. Then `cd` into it, assign its path to a handy variable, *e.g.* `SC19`, and finally `cd` into `demos`:
 
 ```
 $ git clone https://github.com/PawseySC/sc19-containers
 $ cd sc19-containers
 $ export SC19=$(pwd)
+$ cd demos
 ```
 {: .bash}
 
@@ -110,7 +111,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > {: .bash}
 > > 
 > > ```
-> > 03_blast          03_blast_db       04_trinity        05_gromacs03_blast       03_blast_db    04_trinity     05_gromacs     06_openfoam    07_build_intro 08_rstudio     09_python        > > 06_openfoam       07_build_intro    08_rstudio        09_python
+03_blast    03_blast_db 04_trinity  05_gromacs  06_openfoam 07_lolcow   08_rstudio  09_python
 > > ```
 > > {: .output}
 > > 
