@@ -1,7 +1,7 @@
 ---
 title: "Share files with the host: BLAST, a bioinformatics example"
 teaching: 10
-exercises: 5
+exercises: 10
 questions:
 objectives:
 - Learn how to mount host directories in a container
@@ -110,7 +110,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > {: .bash}
 > > 
 > > ```
-> > 03_blast          03_blast_database 04_overlay        05_gromacs        > > 06_openfoam       07_build_intro    08_rstudio        09_python
+> > 03_blast          03_blast_db       04_trinity        05_gromacs03_blast       03_blast_db    04_trinity     05_gromacs     06_openfoam    07_build_intro 08_rstudio     09_python        > > 06_openfoam       07_build_intro    08_rstudio        09_python
 > > ```
 > > {: .output}
 > > 
@@ -156,7 +156,7 @@ $ singularity exec -B $SC19/_episodes library://ubuntu:18.04 ls $SC19/_episodes
 
 ```
 01-containers-intro.md   03-bio-example-mounts.md   05-gpu-gromacs.md         07-build-intro.md          09-ml-python.md  11-podman-shifter-sarus.md
-02-singularity-intro.md  04-writable-containers.md  06-mpi-slurm-openfoam.md  08-rstudio-interactive.md  10-docker.md
+02-singularity-intro.md  04-writable-containers.md  06-mpi-openfoam.md        08-interactive-rstudio.md  10-docker.md
 ```
 {: .output}
 
@@ -298,3 +298,5 @@ Sequences producing significant alignments:                          (Bits)  Val
 {: .output}
 
 We can see that several proteins in the zebrafish genome match those in the human prion (interesting?).
+
+**Credits** for this example: 

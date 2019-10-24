@@ -38,6 +38,8 @@ Since version 3.0, Singularity has developed the *Singularity Image Format*, a s
 
 Interestingly, Singularity is able to download and run both types of images.
 
+Note that Singularity versions prior to 3.0 used a slightly different image format, characterised by the extension `.simg`. You can still find these around in the web; newer Singularity versions are still able to run them.
+
 
 ### Executing a simple command in a Singularity container
 
