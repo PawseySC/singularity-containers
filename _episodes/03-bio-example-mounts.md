@@ -5,7 +5,7 @@ exercises: 5
 questions:
 objectives:
 - Learn how to mount host directories in a container
-- Run a real-world bioinformatics application in a Docker container
+- Run a real-world bioinformatics application in a container
 keypoints:
 - "By default Singularity mounts the host current directory, and uses it as container working directory"
 - "Map additional host directories in the containers with the flag `-B`"
@@ -21,15 +21,20 @@ $ cd ~
 ```
 {: .bash}
 
-If it does not exist already, download the following Github repo. Then `cd` into it, assign its location to a handy variable, finally `cd demos`:
+If it does not exist already, download the following Github repo. Then `cd` into it, and assign its path to a handy variable, *e.g.* `SC19`:
 
 ```
 $ git clone https://github.com/PawseySC/sc19-containers
 $ cd sc19-containers
 $ export SC19=$(pwd)
-$ cd demos
 ```
 {: .bash}
+
+
+> ## Note on this tutorial: local copies of container images
+> 
+> In the interest of time, in the software setup for this tutorial we might have pre-cached some of the required container images.
+{: .callout}
 
 
 ### Access to host directories
@@ -74,9 +79,11 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > ```
 > {: .output}
 > 
-> And now the container:
+> Now inspect the container.
 > 
-> > ```
+> > ## Solution
+> > 
+> > > ```
 > > $ singularity exec library://ubuntu:18.04 pwd
 > > ```
 > > {: .bash}
@@ -95,6 +102,8 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > 
 > Hopefully yes..
 > 
+> > ## Solution
+> > 
 > > ```
 > > $ singularity exec library://ubuntu:18.04 ls
 > > ```
@@ -112,8 +121,10 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 
 > ## How about other directories in the host?
 > 
-> For instance let us inspect `$SC19/_episodes`:
+> For instance, let us inspect `$SC19/_episodes`.
 > 
+> > ## Solution
+> > 
 > > ```
 > > $ singularity exec library://ubuntu:18.04 ls $SC19/_episodes
 > > ```
@@ -185,40 +196,23 @@ $ export SINGULARITY_BINBPATH="dir1,dir2,dir3"
 {: .callout}
 
 
-> ## Running BLAST from a container
+### Running BLAST from a container
+
+We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro). BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics tools.
+
+> To begin, let us run a simple command using the BLAST image `biocontainers/blast:v2.2.31_cv2`, 
+> for instance `blastp -help`, to download the image in the cache and to verify that it actually works:
 > 
-> We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro).  BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics tools.
-> 
-> To begin, try and pull the BLAST image `biocontainers/blast:v2.2.31_cv2` (this will take a little bit):
-> 
-> > ## Solution ##
+> > ## Solution
 > > 
 > > ```
-> > $ docker pull biocontainers/blast:v2.2.31_cv2
+> > $ singularity exec docker://biocontainers/blast:v2.2.31_cv2 blastp -help
 > > ```
 > > {: .bash}
 > > 
 > > ```
-> > v2.2.31_cv2: Pulling from biocontainers/blast
-> > 22dc81ace0ea: Pull complete 
-> > 1a8b3c87dba3: Pull complete 
-> > [..]
-> > Digest: sha256:238717ec69830ec62a19fc05c6f70183f218a13f7678864060f0157dc63dc54f
-> > Status: Downloaded newer image for biocontainers/blast:v2.2.31_cv2
-> > ```
-> > {: .output}
-> {: .solution}
-> 
-> Now, run a simple command to verify the image works, for instance `blastp -help`:
-> 
-> > ## Solution ##
 > > 
-> > ```
-> > $ docker run biocontainers/blast:v2.2.31_cv2 blastp -help
-> > ```
-> > {: .bash}
 > > 
-> > ```
 > > USAGE
 > >   blastp [-h] [-help] [-import_search_strategy filename]
 > > [..]
@@ -227,72 +221,80 @@ $ export SINGULARITY_BINBPATH="dir1,dir2,dir3"
 > > ```
 > > {: .output}
 > {: .solution}
-> 
-> The `03_blast` demo directory contains a human prion FASTA sequence, `P04156.fasta`, 
-> and a gzipped reference database to blast against, `zebrafish.1.protein.faa.gz`. 
-> Let us `cd` to it, and uncompress the database:
-> 
-> ```
-> $ cd <top-level>/demos/03_blast
-> $ gunzip zebrafish.1.protein.faa.gz
-> ```
-> {: .bash}
-> 
-> We need to prepare the zebrafish database with `makeblastdb` for the search, using the following command through a container:
+{: .challenge}
+
+Now, the `03_blast` demo directory contains a human prion FASTA sequence, `P04156.fasta`, whereas another directory, `demos/03_blast_db`, contains a gzipped reference database to blast against, `zebrafish.1.protein.faa.gz`. Let us `cd` to the latter directory and uncompress the database:
+
+```
+$ cd $SC19/demos/03_blast
+$ gunzip zebrafish.1.protein.faa.gz
+```
+{: .bash}
+
+> We then need to prepare the zebrafish database with `makeblastdb` for the search, using the following command through a container:
 > 
 > ```
 > $ makeblastdb -in zebrafish.1.protein.faa -dbtype prot
 > ```
 > {: .bash}
 > 
-> To run it via Docker, you will need to mount the current directory to be able to read inputs and write outputs on the host.
+> Try and run it via Singularity.
 > 
-> Hint: the default directory in this BLAST image is `/data`, which can then be used as a convenient mount directory.
-> 
-> > ## Solution ##
+> > ## Solution
 > > 
 > > ```
-> > $ docker run -v `pwd`:/data biocontainers/blast:v2.2.31_cv2 makeblastdb -in zebrafish.1.protein.faa -dbtype prot
+> > $ singularity exec docker://biocontainers/blast:v2.2.31_cv2 makeblastdb -in zebrafish.1.protein.faa -dbtype prot
 > > ```
 > > {: .bash}
 > {: .solution}
-> 
-> After the container has terminated, you should see several new files in the current directory.  We can now do the final alignment step using `blastp`, i.e.:
-> 
-> ```
-> $ blastp -query P04156.fasta -db zebrafish.1.protein.faa -out results.txt
-> ```
-> {: .bash}
-> 
-> > ## Solution ##
-> > 
-> > ```
-> > $ docker run -v `pwd`:/data biocontainers/blast:v2.2.31_cv2 blastp -query P04156.fasta -db zebrafish.1.protein.faa -out results.txt
-> > ```
-> > {: .bash}
-> {: .solution}
-> 
-> The final results are stored in `results.txt`:
-> 
-> ```
-> $ less results.txt
-> ```
-> {: .bash}
-> 
-> ```
->                                                                       Score     E
-> Sequences producing significant alignments:                          (Bits)  Value
-> 
->   XP_017207509.1 protein piccolo isoform X2 [Danio rerio]             43.9    2e-04
->   XP_017207511.1 mucin-16 isoform X4 [Danio rerio]                    43.9    2e-04
->   XP_021323434.1 protein piccolo isoform X5 [Danio rerio]             43.5    3e-04
->   XP_017207510.1 protein piccolo isoform X3 [Danio rerio]             43.5    3e-04
->   XP_021323433.1 protein piccolo isoform X1 [Danio rerio]             43.5    3e-04
->   XP_009291733.1 protein piccolo isoform X1 [Danio rerio]             43.5    3e-04
->   NP_001268391.1 chromodomain-helicase-DNA-binding protein 2 [Dan...  35.8    0.072
-> [..]
-> ```
-> {: .output}
-> 
-> We can see that several proteins in the zebrafish genome match those in the human prion (interesting?).
 {: .challenge}
+
+After the container has terminated, you should see several new files in the current directory (try `ls`).  
+Now let's proceed to the final alignment step using `blastp`. We need to cd into `demos/03_blast`:
+
+```
+$ cd ../03_blast
+```
+{: .bash}
+
+> and then adapt the following command to run into the container:
+> 
+> ```
+> $ blastp -query P04156.fasta -db $SC19/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
+> ```
+> {: .bash}
+> 
+> Note how we put the database files in a separate directory on purpose, so that you will need to bind mount its path with Singularity. Give it a go with building the syntax to run the `blastp` command.
+> 
+> > ## Solution
+> > 
+> > ```
+> > $ singularity exec -B $SC19/demos/03_blast_db docker://biocontainers/blast:v2.2.31_cv2 blastp -query P04156.fasta -db $SC19/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
+> > ```
+> > {: .bash}
+> {: .solution}
+{: .challenge}
+
+The final results are stored in `results.txt`:
+
+```
+$ less results.txt
+```
+{: .bash}
+
+```
+                                                                      Score     E
+Sequences producing significant alignments:                          (Bits)  Value
+
+  XP_017207509.1 protein piccolo isoform X2 [Danio rerio]             43.9    2e-04
+  XP_017207511.1 mucin-16 isoform X4 [Danio rerio]                    43.9    2e-04
+  XP_021323434.1 protein piccolo isoform X5 [Danio rerio]             43.5    3e-04
+  XP_017207510.1 protein piccolo isoform X3 [Danio rerio]             43.5    3e-04
+  XP_021323433.1 protein piccolo isoform X1 [Danio rerio]             43.5    3e-04
+  XP_009291733.1 protein piccolo isoform X1 [Danio rerio]             43.5    3e-04
+  NP_001268391.1 chromodomain-helicase-DNA-binding protein 2 [Dan...  35.8    0.072
+[..]
+```
+{: .output}
+
+We can see that several proteins in the zebrafish genome match those in the human prion (interesting?).

@@ -78,7 +78,7 @@ Container images have a **name** and a **tag**, in this case `ubuntu` and `18.04
 > The practice of using the `latest` tag can be handy for quick typing, but is dangerous when it comes to reproducibility of your workflow, as under the hood the *latest* image could change over time.
 {: .callout}
 
-The prefix `library://` makes Singularity pull the image from the default registry, that is the [**Sylabs Cloud Library**](https://cloud.sylabs.io). Images in there are organised in terms of **users** (`library` in this case) and **user collections** (optional, `default` in the example above). Note that in the specific case of `library/default/`, this specification could be skipped, for instance:
+The prefix `library://` makes Singularity pull the image from the default registry, that is the [**Sylabs Cloud Library**](https://cloud.sylabs.io). Images in there are organised in terms of **users** (`library` in this case) and **user collections** (optional, `default` in the example above). Note that in the particular case of `library/default/`, this specification could be skipped, for instance:
 
 ```
 $ singularity exec library://ubuntu:18.04 echo "Hello World!"
@@ -318,7 +318,7 @@ Nvidia maintains the [Nvidia GPU Cloud (NGC)](https://ngc.nvidia.com), hosting a
 > 
 > Once you've pulled it, enquire the Python version inside the container by running `python --version`.
 > 
-> > ## Solution ##
+> > ## Solution
 > > 
 > > Pull: 
 > > 
