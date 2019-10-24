@@ -1,57 +1,62 @@
 ---
 title: "Molecular dynamics with GPU containers"
-teaching: 0
-exercises: 20
+teaching: 5
+exercises: 10
 questions:
 objectives:
 - Get started with Nvidia GPU containers for HPC applications
 keypoints:
-- You can use containers to ship GPU applications
+- You can run containerised GPU applications using the flag `--nv`
+- Singularity transparently interfaces with HPC schedulers such as Slurm
 ---
 
-### Nvidia GPU Cloud ###
 
-**Note**: if your Docker machine has got an Nvidia GPU installed, then you can install the `nvidia-docker` (e.g. see <https://devblogs.nvidia.com/gpu-containers-runtime> ). For this tutorial, we are instead going to use Shifter and the GPU nodes available on the Zeus HPC system at Pawsey.
+### Nvidia GPU Cloud
 
-The GPU manufacturer Nvidia has a dedicated web registry for container images, shipping GPU optimised applications: <https://ngc.nvidia.com>.
+The GPU manufacturer *Nvidia* has a dedicated web registry for container images, shipping GPU optimised applications: <https://ngc.nvidia.com>.
 
-To access this registry, you'll need a free account. Go to <https://ngc.nvidia.com>, complete the procedure to **Create an account**, then **Sign in** (currently both options are available on the top right corner of the page).
+To browse this registry, you'll need a free account. Go to <https://ngc.nvidia.com>, complete the procedure to **Create an account**, then **Sign in** (currently both options are available on the top right corner of the page).
 
-You can browse the available containerised packages by browsing the different categories. E.g. click on the **High Performance Computing** box, then click on the **Gromacs** one. The page will briefly discuss the code, with instructions on how to pull and run the container.
+You can browse the available containerised packages through the various category boxes. E.g. click on the **High Performance Computing** box, then click on the **Gromacs** one. The page will briefly discuss the code, with instructions on how to pull and run the container.
 
-One key aspect is that to pull containers from the Nvidia GPU Cloud you'll need to provide Docker/Shifter with some login credentials. The username is always `$oauthtoken`, whereas the password needs to be retrieved in your Nvidia account. This password can be regenerated, so don't worry if you lose it. On the left side of the page, click on the **Configuration** tab, then on the button **Get API Key**. Then in the new page click on the button **Generate API Key** (currently at the top right corner), and click on confirm. An API Key string will appear in the page, copy it in your clipboard, then store it somewhere useful for your shell session, for instance in an environment variable:
 
-```
-$ export NVIDIA_KEY=<Paste Key Here>
-```
-{: .bash}
-
-### Run a molecular dynamics simulation on GPUs with containers ### 
+### Run a molecular dynamics simulation on a GPU with containers
 
 For our example we are going to use Gromacs, a quite popular molecular dynamics package, among the ones that have been optimised to run on GPUs through Nvidia containers.
 
-Let us pull the Gromacs container on the Zeus HPC system at Pawsey. We'll need to use `shifter pull --login` in order to enter the Nvidia cloud credentials. Also note we are prepending `nvcr.io/` to the repository name, to tell Shifter we are pulling from the Nvidia GPU Cloud:
+First, let us cd into `demos/05_gromacs`:
 
 ```
-$ module load shifter
-$ sg $PAWSEY_PROJECT -c 'shifter pull --login nvcr.io/hpc/gromacs:2018.2'
+$ cd $SC19/demos/05_gromacs
 ```
 {: .bash}
 
-When prompted, enter `$oauthtoken` as username, and the copied key as password; if you've forgotten the latter, retrieve it from the environment variable you exported, using `echo $NVIDIA_KEY`.
+> Now, try and `pull` the container `nvcr.io/hpc/gromacs:2018.2`. **Hint**: container images in this registry are in Docker format, so you will need to prepend the prefix `docker://`.
+> 
+> > ## Solution
+> > 
+> > ```
+> > $ singularity pull docker://nvcr.io/hpc/gromacs:2018.2'
+> > ```
+> > {: .bash}
+> {: .solution}
+{: .challenge}
 
-Now, let us create a working directory, and pull some example files:
+The current directory has got some sample input files picked from the collection of [Gromacs benchmark examples](ftp://ftp.gromacs.org/pub/benchmarks/water_GMX50_bare.tar.gz).
 
+
+THIS NEEDS TO BE PREPARED
 ```
-$ cd $MYSCRATCH
-$ mkdir gpu_example
-$ cd gpu_example
-
 $ wget ftp://ftp.gromacs.org/pub/benchmarks/water_GMX50_bare.tar.gz
 $ tar xzf water_GMX50_bare.tar.gz
 $ cp water-cut1.0_GMX50_bare/1536/* .
 ```
 {: .bash}
+
+Now, from a Singularity perspective, all we need to do to run a GPU application from a container is to add the runtime flag `--nv`. This will make Singularity look for the Nvidia drivers in the host, and mount them inside the container.
+
+GPU resources are usually made available in HPC systems through schedulers, to which Singularity natively and transparently interfaces. This is how a batch script ..
+
 
 Similar to the GPU machine learning example in a previous episode, only minor modifications are required in the SLURM script to run on GPUs:
 
