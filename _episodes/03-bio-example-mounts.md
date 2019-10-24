@@ -151,7 +151,17 @@ $ singularity exec -B $SC19/_episodes library://ubuntu:18.04 ls $SC19/_episodes
 
 Now we are talking!
 
-If you need to mount multiple directories, you can either repeat the `-B` flag multiple times, or use a comma-separated list of paths, $i.e.$ `-B dir1,dir2,dir3`.
+If you need to mount multiple directories, you can either repeat the `-B` flag multiple times, or use a comma-separated list of paths, $i.e.$ 
+```
+-B dir1,dir2,dir3
+```
+{: .bash}
+
+Also, if you want to keep the runtime command compact, you can equivalently specify directories to be bind mounting using an environment variable:
+```
+$ export SINGULARITY_BINBPATH="dir1,dir2,dir3"
+```
+{: .bash}
 
 
 > ## Mounting $HOME
