@@ -36,7 +36,7 @@ $ cd $SC19/demos/05_gromacs
 > > ## Solution
 > > 
 > > ```
-> > $ singularity pull docker://nvcr.io/hpc/gromacs:2018.2'
+> > $ singularity pull docker://nvcr.io/hpc/gromacs:2018.2
 > > ```
 > > {: .bash}
 > {: .solution}
@@ -55,43 +55,52 @@ $ cp water-cut1.0_GMX50_bare/1536/* .
 
 Now, from a Singularity perspective, all we need to do to run a GPU application from a container is to add the runtime flag `--nv`. This will make Singularity look for the Nvidia drivers in the host, and mount them inside the container.
 
-GPU resources are usually made available in HPC systems through schedulers, to which Singularity natively and transparently interfaces. This is how a batch script ..
+Do not execute the next two commands, let us just have a look at them.
 
+* Preliminary step
+  ```
+  $ singularity exec --nv docker://nvcr.io/hpc/gromacs:2018.2 gmx grompp -f pme.mdp
+  ```
+  {: .bash}
+* Production step
+  ```
+  $ singularity exec --nv docker://nvcr.io/hpc/gromacs:2018.2 gmx mdrun -ntmpi 1 -nb gpu -pin on -v -noconfout -nsteps 5000 -s topol.tpr -ntomp 1
+  ```
+  {: .bash} 
 
-Similar to the GPU machine learning example in a previous episode, only minor modifications are required in the SLURM script to run on GPUs:
-
-* the GPU partition on Zeus is called `gpuq`, this is in substitution for the `workq` we've used in CPU jobs;
-* we need to set an additional SBATCH flag, `--gres=gpu:1`, to request use of a GPU.
-
-Use your favourite text editor to create a script `gpu.sh`:
+Now, GPU resources are usually made available in HPC systems through schedulers, to which Singularity natively and transparently interfaces. So, for instance let us have a look in the current directory at the Slurm batch script called `gpu.sh`:
 
 ```
 #!/bin/bash -l
 
-#SBATCH --account=<your-pawsey-project>
-#SBATCH --partition=gpuq
+#SBATCH --job-name=gpu
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --time=01:00:00
 #SBATCH --export=NONE
-#SBATCH --job-name=gpu
-
-module load shifter
 
 # run Gromacs preliminary step with container
-srun --export=all shifter run nvcr.io/hpc/gromacs:2018.2 \
+srun --export=all \
+    singularity exec --nv docker://nvcr.io/hpc/gromacs:2018.2 \
     gmx grompp -f pme.mdp
 
 # Run Gromacs MD with container
-srun --export=all shifter run nvcr.io/hpc/gromacs:2018.2 \
+srun --export=all \
+    singularity exec --nv docker://nvcr.io/hpc/gromacs:2018.2 \
     gmx mdrun -ntmpi 1 -nb gpu -pin on -v -noconfout -nsteps 5000 -s topol.tpr -ntomp 1
 ```
 {: .bash}
 
-The script is ready for submission:
+Basically, we have just combined the Slurm command `srun` with `singularity exec <..>`. We can submit the script with:
 
 ```
-$ sbatch --reservation <your-pawsey-reservation> gpu.sh
+$ sbatch gpu.sh
 ```
 {: .bash}
 
+> **Note**: if you try and run this on Zeus at Pawsey, you might want to edit the submission command as follows:
+> ```
+> $ sbatch --account=<your-pawsey-project> --partition=gpuq gpu.sh
+> ```
+> {: .bash}
+{: .callout}
