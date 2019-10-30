@@ -1,7 +1,7 @@
 ---
 title: "Basics of Singularity"
 teaching: 15
-exercises: 10
+exercises: 15
 questions:
 objectives:
 - Learn how to download and run images
