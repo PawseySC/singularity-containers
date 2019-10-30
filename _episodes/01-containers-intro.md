@@ -31,7 +31,7 @@ In general, an image corresponds to a file, a container corresponds to a process
 
 A **registry** is a server application where images are stored and can be accessed by users. It can be public (e.g. Docker Hub) or private.
 
-To build an image we need a recipe. A recipe file is called a **Dockerfile** in the *Docker* world, and a **Definition File**, or **def-file**, in the *Singularity* jargon.
+To build an image we need a recipe. A recipe file is called a **Dockerfile** in the *Docker* world, and a **Definition File**, or **def file**, in the *Singularity* jargon.
 
 
 ### Containers and your workflow

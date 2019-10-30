@@ -70,6 +70,9 @@ $ exit
 ```
 {: .bash}
 
+
+> ## Access a pre-existing overlay filesystem
+> 
 > Once exited the container, the newly created directory is not available in the host filesystem. Try and inspect the content of `/australia` from the host.
 > 
 > > ## Solution
@@ -100,6 +103,7 @@ $ exit
 > > {: .output}
 > {: .solution}
 {: .challenge}
+
 
 Note how the newly created directories and files are persistent, therefore can be re-accessed and re-used in future runs, even by containers instantiated from different images. All we have to do is to mount the filesystem image `my_overlay`.
 

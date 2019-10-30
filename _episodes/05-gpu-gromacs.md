@@ -31,6 +31,9 @@ $ cd $SC19/demos/05_gromacs
 ```
 {: .bash}
 
+
+> ## Pull the container
+> 
 > Now, try and `pull` the container `nvcr.io/hpc/gromacs:2018.2`. **Hint**: container images in this registry are in Docker format, so you will need to prepend the prefix `docker://`.
 > 
 > > ## Solution
@@ -41,6 +44,7 @@ $ cd $SC19/demos/05_gromacs
 > > {: .bash}
 > {: .solution}
 {: .challenge}
+
 
 The current directory has got some sample input files picked from the collection of [Gromacs benchmark examples](ftp://ftp.gromacs.org/pub/benchmarks/water_GMX50_bare.tar.gz).
 
@@ -98,6 +102,9 @@ $ sbatch gpu.sh
 ```
 {: .bash}
 
+
+> ## Running at Pawsey
+> 
 > **Note**: if you try and run this on Zeus at Pawsey, you might want to edit the submission command as follows:
 > ```
 > $ sbatch --account=<your-pawsey-project> --partition=gpuq gpu.sh

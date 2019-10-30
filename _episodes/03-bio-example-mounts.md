@@ -199,8 +199,12 @@ $ export SINGULARITY_BINBPATH="dir1,dir2,dir3"
 
 ### Running BLAST from a container
 
-We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro). BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics tools.
+We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro). BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics tools.  
+This example is adapted from the [BioContainers documentation](http://biocontainers-edu.biocontainers.pro/en/latest/running_example.html).
 
+
+> ## Run a test command
+> 
 > To begin, let us run a simple command using the BLAST image `biocontainers/blast:v2.2.31_cv2`, 
 > for instance `blastp -help`, to download the image in the cache and to verify that it actually works:
 > 
@@ -224,6 +228,7 @@ We'll be running a BLAST (Basic Local Alignment Search Tool) example with a cont
 > {: .solution}
 {: .challenge}
 
+
 Now, the `03_blast` demo directory contains a human prion FASTA sequence, `P04156.fasta`, whereas another directory, `demos/03_blast_db`, contains a gzipped reference database to blast against, `zebrafish.1.protein.faa.gz`. Let us `cd` to the latter directory and uncompress the database:
 
 ```
@@ -232,6 +237,9 @@ $ gunzip zebrafish.1.protein.faa.gz
 ```
 {: .bash}
 
+
+> ## Prepare the database
+> 
 > We then need to prepare the zebrafish database with `makeblastdb` for the search, using the following command through a container:
 > 
 > ```
@@ -250,6 +258,7 @@ $ gunzip zebrafish.1.protein.faa.gz
 > {: .solution}
 {: .challenge}
 
+
 After the container has terminated, you should see several new files in the current directory (try `ls`).  
 Now let's proceed to the final alignment step using `blastp`. We need to cd into `demos/03_blast`:
 
@@ -258,6 +267,9 @@ $ cd ../03_blast
 ```
 {: .bash}
 
+
+> ## Run the alignment
+> 
 > and then adapt the following command to run into the container:
 > 
 > ```
@@ -299,5 +311,3 @@ Sequences producing significant alignments:                          (Bits)  Val
 {: .output}
 
 We can see that several proteins in the zebrafish genome match those in the human prion (interesting?).
-
-**Credits** for this example: 

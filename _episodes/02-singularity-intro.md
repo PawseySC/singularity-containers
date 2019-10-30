@@ -34,7 +34,7 @@ One of the differences between Docker and Singularity is the adopted format to s
 
 Docker adopts a layered format compliant with the *Open Containers Initiative* (OCI). Each build command in the recipe file results in the creation of a distinct image layer. These layers are cached during the build process, making them quite useful for development. In fact, repeated build attempts that make use of the same layers will exploit the cache, thus reducing the overall build time. On the other hand, shipping a container image is not straightforward, and requires either relying on a public registry, or compressing the image in a *tar* archive.
 
-Since version 3.0, Singularity has developed the *Singularity Image Format*, a single file layout for container images. Among the benefits, an image is simply a very large file, and thus can be transferred and shipped as any other file. Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption. A drawback of this approach is that during build time a progressive, incremental approach is not possible.
+Since version 3.0, Singularity has developed the *Singularity Image Format* (*SIF*), a single file layout for container images. Among the benefits, an image is simply a very large file, and thus can be transferred and shipped as any other file. Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption. A drawback of this approach is that during build time a progressive, incremental approach is not possible.
 
 Interestingly, Singularity is able to download and run both types of images.
 
@@ -77,8 +77,12 @@ Here is what Singularity has just done:
 
 Container images have a **name** and a **tag**, in this case `ubuntu` and `18.04`. The tag can be omitted, in which case Singularity will default to a tag named `latest`. 
 
+
+> ## Using the *latest* tag
+> 
 > The practice of using the `latest` tag can be handy for quick typing, but is dangerous when it comes to reproducibility of your workflow, as under the hood the *latest* image could change over time.
 {: .callout}
+
 
 The prefix `library://` makes Singularity pull the image from the default registry, that is the [**Sylabs Cloud Library**](https://cloud.sylabs.io). Images in there are organised in terms of **users** (`library` in this case) and **user collections** (optional, `default` in the example above). Note that in the particular case of `library/default/`, this specification could be skipped, for instance:
 
