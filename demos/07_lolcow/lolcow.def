@@ -1,0 +1,20 @@
+BootStrap: docker
+From: ubuntu:18.04
+
+%post
+    apt-get -y update
+    apt-get -y install fortune cowsay lolcat
+
+%environment
+    export LC_ALL=C
+    export PATH=/usr/games:$PATH
+
+%labels
+    Author Pawsey Supercomputing Centre
+    Version v0.0.1
+
+%help
+    This is a demo container used to illustrate a def file.
+
+%runscript
+    fortune | cowsay | lolcat
