@@ -79,11 +79,11 @@ $ rserver --www-port 8787 --www-address 0.0.0.0 --auth-none=0  --auth-pam-helper
 Here, we're saying we want the web server to listen to port 8787 on any IP address (0.0.0.0), and then we're using another two flags to configure the authenticator.
 
 
-## Communication ports
-
-In order to be able to use the web server, you need to ensure that the machine you are running Singularity from has opened the communication port you're using.  
-In cloud virtual machines this will typically involve some setup in the system dashboard.  
-The machines we provided for this workshop are ready to go in this regard.
+> ## Communication ports
+> 
+> In order to be able to use the web server, you need to ensure that the machine you are running Singularity from has opened the communication port you're using.  
+> In cloud virtual machines this will typically involve some setup in the system dashboard.  
+> The machines we provided for this workshop are ready to go in this regard.
 {: .callout}
 
 
