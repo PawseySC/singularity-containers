@@ -37,7 +37,7 @@ Singularity can build container images in different formats. Let's focus on the 
 Let us cd into the appropriate directory:
 
 ```
-$ cd $SC19/demos/07_lolcow
+$ cd $SC19/demos/06_lolcow
 ```
 {: .bash}
 
@@ -185,9 +185,9 @@ $ singularity inspect --deffile lolcow.sif
 
 > ## Use the newly created container
 > 
-> You can use this new container using the same Singularity syntax we introduced > earlier on in this tutorial.
+> You can use this new container using the same Singularity syntax we introduced earlier on in this tutorial.
 > 
-> For instance, how would you run the command `fortune` from inside this > container?
+> For instance, how would you run the command `fortune` from inside this container?
 > 
 > > ## Solution
 > > 
@@ -364,7 +364,7 @@ At the time of writing, when using the Remote Builder you won't be able to use t
 
 The def file specification has a number of other interesting features, to know more about them you can visit the [Sylabs docs on def files](https://sylabs.io/guides/3.3/user-guide/definition_files.html).
 
-In one of the following episodes we'll see how to use `%startscript` to configure the behaviour of containers running in background.
+In the episode on GUI applications we'll see how to use `%startscript` to configure the behaviour of containers running in background.
 
 If you are in a development phase, where you don't know yet what you will include in your final container image, you can start with a *sandbox* image. This is a special type of image designed for development purposes, consisting not of a single file, but instead of a directory. To create one, run something like:
 
@@ -387,12 +387,12 @@ One last notable feature is the ability to use PGP keys to sign and verify conta
 
 ### Singularity *vs* Docker builds
 
-We'll discuss how to build an image with Docker on a later episode. For now, let's just point out some of the advantages when building with one or the other tool. This will hopefully inform on which tool is best suited for you, depending on your specific context.
+We'll discuss how to build an image with Docker in a dedicated episode. For now, let's just point out some of the advantages when building with one or the other tool. This will hopefully inform on which tool is best suited for you, depending on your specific context.
 
 #### Singularity
 * Single file image, can be handled as any other file
 * Ability to sign/verify images
-* Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on interactive containers)
+* Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on GUI applications)
 
 #### Docker
 * Image format can be run by all existing container engines
