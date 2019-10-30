@@ -4,217 +4,200 @@ teaching: 0
 exercises: 20
 questions:
 objectives:
-- Embed a Python app in a container and run it
+- Run Python applications using container
+- Use JupyterHub in a container
 keypoints:
 - Containers are great way to manage Python workflows
 ---
 
 ### Why can Python be Awful? ###
 
-Python is a great language for doing all kinds of work.
+Python is a great language for doing all kinds of work, but sometimes it can present issues...
 
 ![Python can get messy]({{ page.root }}/fig/python-complexity-cartoon.png)
 
 
-### Build and run a dockerised Python app ###
+### Build and run a basic Python app ###
 
-This is a quick Python data science example.  We'll build a Python container, add a simple Python app, and run it.
-
-To begin, let's clone another repo:
-
-```
-$ git clone https://github.com/skjerven/python-demo.git
-$ cd python-demo
-```
-{: .bash}
-
-There a few files here:
-
-* `Dockerfile`: outlines how we'll build our container
+Let's start by running a very simple hello world example with a basic Python container.  To start, `cd` 
+to the `/demos/07_python` directory and create a basic `helloworld.py`:
 
 ```
-# Use an official Python runtime as a parent image
-FROM python:3.6-slim
+#!/usr/bin/env python
 
-# Set the working directory to /app
-WORKDIR /app
-
-# Copy the current directory contents into the container at /app
-ADD . /app
-
-# Install any needed packages specified in requirements.txt
-RUN pip install -r requirements.txt
-
-# Define environment variable
-ENV NAME World
-
-# Run app.py when the container launches
-CMD ["python", "my_app.py"]
+print("Hello World")
 ```
 {: .source}
 
-* `requirements.txt`: what python packages we want to install with pip
+And we can run this without even building a new Docker image:
 
 ```
-numpy
-scipy
-scikit-learn
-```
-{: .source}
+chmod +x helloworld.py
 
-* `my_app.py`: a simple python app that builds a decision tree using Scikit-Learn
-
-```
-from sklearn import tree
-#DataSet
-#[size,weight,texture]
-X = [[181, 80, 44], [177, 70, 43], [160, 60, 38], [154, 54, 37],[166, 65, 40],
-     [190, 90, 47], [175, 64, 39],
-     [177, 70, 40], [159, 55, 37], [171, 75, 42], [181, 85, 43]]
-
-Y = ['apple', 'apple', 'orange', 'orange', 'apple', 'apple', 'orange', 'orange',
-     'orange', 'apple', 'apple']
-
-#classifier - DecisionTreeClassifier
-clf_tree = tree.DecisionTreeClassifier();
-clf_tree = clf_tree.fit(X,Y);
-
-#test_data
-test_data = [[190,70,42],[172,64,39],[182,80,42]];
-
-#prediction
-prediction_tree = clf_tree.predict(test_data);
-
-print("Prediction of DecisionTreeClassifier:",prediction_tree);
-```
-{: .python}
-
-There are some aspects of this Dockerfile that are worth mentioning:
-
-* we are using the base image `python:3.6-slim`, which comes from the official Python repository on Docker Hub; images in this repo whose tag has `slim` are characterised by a very small size, in this case about 100 MB as opposed to about 400 MB for the `miniconda3` image;
-* the Docker instruction `ADD` permits to copy the content of the build context from the host machine inside the container image;
-* the `CMD` instruction sets the default behaviour for this container: running the embedded Python app;
-* finally, note from the requirement libraries that this is quite a standard scientific Python stack.
-
-Now to build our container we can simply run:
-
-```
-$ docker build -t python-demo .
-```
-{: .bash}
-
-After that, we can run it with:
-
-```
-$ docker run python-demo
+docker run --rm -v $(pwd):/app -w /app python:3.6-slim python ./helloworld.py
 ```
 {: .bash}
 
 
-### Run a Python app on HPC with Shifter ###
-
-#### a) re-use the image we have just built ####
-
-On our Docker machine let us push the container image we created above to Docker Hub; you'll need a free account.
-
-First we must give the image a name that complies with the Hub's nomenclature (see previous episode on build):
-
 ```
-$ docker tag python-demo <your-dockerhub-account>/python-demo
-```
-{: .bash}
+Unable to find image 'python:3.6-slim' locally
+3.6-slim: Pulling from library/python
+fc7181108d40: Pull complete
+01f3b6f74410: Pull complete
+d8e6069e053d: Pull complete
+e6bd64ad4fe3: Pull complete
+a034e22b86de: Pull complete
+Digest: sha256:0d095570901e7cf0dac93ba4d0ee75ee2364715338b0396874589c9cc23343b6
+Status: Downloaded newer image for python:3.6-slim
 
-Now let's push the image:
-
-```
-$ docker push <your-dockerhub-account>/python-demo
-```
-{: .bash}
-
-```
-The push refers to repository [docker.io/marcodelapierre/python-demo]
-862d6710cd15: Pushed 
-302ce4960403: Pushed 
-[..]
-latest: digest: sha256:4db5f0f69cc888d47f4c4b4cac33fad6b004a8e333b36a699ebd43f5b44a7241 size: 1999
+Hello World
 ```
 {: .output}
 
-We are now moving to the Pawsey HPC system. Let's pull the image, then change directory to either `$MYSCRATCH` or `$MYGROUP`:
+
+### Adding Python modules to a container ###
+
+We want to be able leverate other Python modules to do some acutal work, so we need to be able
+to build Python containers that use tools like `pip` and `conda`.
+
+For this example, `cd` to the `demos/07_python/logistic-regression` and we'll trying installing some
+ML packages to run a logistic regression model.
+
+We have both a Jupyter notebook (`LogisticRegression.ipynb`) and source code (`logreg.py`) that we'll use.
+An example Dockerfile is also provided.
+
+> Build a custom Jupyter/Python container
+> For this example you should try building your own Docker container.  Some hints:
+>
+> * Decide if you should use a base image (the [Jupyter Docker Stacks](https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html) might be a good place to start)
+> * You'll need to install the Plotly pacakge
+>
+> > ## Solution ##
+> >
+> > ```
+> > FROM jupyter/datascience-notebook:latest
+> >
+> > RUN conda install plotly
+> > ```
+> > {: .source}
+> >
+> > You can build it with
+> >
+> > ```
+> > docker build -t logreg-py .
+> > ```
+> > {: .bash}
+> {: .solution}
+
+After you've built your image we'll start up the container and log into our Jupyter notebook server:
 
 ```
-$ module load shifter
-$ sg $PAWSEY_PROJECT -c 'shifter pull <your-dockerhub-account>/python-demo'
-
-$ cd $MYSCRATCH
-```
-{: .bash}
-
-Let us write a SLURM script to execute our Python app using this container, we'll use our favourite text editor to save it as `python.sh` (remember to specify your Pawsey project ID in the script!): 
-
-```
-#!/bin/bash -l
-
-#SBATCH --account=<your-pawsey-project>
-#SBATCH --partition=workq
-#SBATCH --ntasks=1
-#SBATCH --time=00:05:00
-#SBATCH --export=NONE
-#SBATCH --job-name=python
-
-module load shifter
-
-# run Python app
-srun --export=all shifter run <your-dockerhub-account>/python-demo
-```
-{: .bash}
-
-Let's submit it to the SLURM scheduler:
-
-```
-$ sbatch --reservation <your-pawsey-reservation> python.sh
-```
-{: .bash}
-
-#### b) use a publicly available image for scientific Python ####
-
-In this case we are going to use `jupyter/scipy-notebook`:
-
-```
-$ module load shifter
-$ sg $PAWSEY_PROJECT -c 'shifter pull jupyter/scipy-notebook'
-
-$ cd $MYSCRATCH
+docker run --name=jupyter-logreg -d -p 80:8888 -v $(pwd):/home/jovyan -w /home/jovyan jupyter-logreg:latest
 ```
 {: .bash}
 
-Let us write a second SLURM script, we'll call it `python2.sh`. Contrary to Docker example above, our Python app is not embedded in the image, so we'll need to explicitly download it from the Git repo, and then run it through the Python interpreter in the container:
+Then you'll need to use `docker logs` to find out the access key for your Jupyter server:
 
 ```
-#!/bin/bash -l
-
-#SBATCH --account=<your-pawsey-project>
-#SBATCH --partition=workq
-#SBATCH --ntasks=1
-#SBATCH --time=00:05:00
-#SBATCH --export=NONE
-#SBATCH --job-name=python2
-
-module load shifter
-
-# clone Git repo with the app
-git clone https://github.com/skjerven/python-demo.git
-cd python-demo
-
-# run Python app
-srun --export=all shifter run jupyter/scipy-notebook python my_app.py
+docker logs jupyter-logreg
 ```
 {: .bash}
 
-Finally we are submitting the script with SLURM:
+```
+Executing the command: jupyter notebook
+[I 02:55:14.895 NotebookApp] Writing notebook server cookie secret to /home/jovyan/.local/share/jupyter/runtime/notebook_cookie_secret
+[I 02:55:16.361 NotebookApp] JupyterLab extension loaded from /opt/conda/lib/python3.7/site-packages/jupyterlab
+[I 02:55:16.361 NotebookApp] JupyterLab application directory is /opt/conda/share/jupyter/lab
+[I 02:55:16.363 NotebookApp] Serving notebooks from local directory: /home/jovyan
+[I 02:55:16.363 NotebookApp] The Jupyter Notebook is running at:
+[I 02:55:16.363 NotebookApp] http://(54bdc6f5c9cd or 127.0.0.1):8888/?token=82be2f08380f138a92ad9c6323f7fcfd124c453144492d3f
+[I 02:55:16.363 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 02:55:16.387 NotebookApp]
+
+    To access the notebook, open this file in a browser:
+        file:///home/jovyan/.local/share/jupyter/runtime/nbserver-6-open.html
+    Or copy and paste one of these URLs:
+        http://(54bdc6f5c9cd or 127.0.0.1)/?token=82be2f08380f138a92ad9c6323f7fcfd124c453144492d3f
+```
+{: .output}
+
+Point your web browser to **http://<nimbus-ip/?token=<token>** and we'll go through the notebook.
+
+### Running Python code without Jupyter ###
+
+Because our Jupyter container has a functioning version of Python installed, we can also run our container
+and Python code directly from the command line:
 
 ```
-$ sbatch --reservation <your-pawsey-reservation> python2.sh
+docker run --name=python-logreg -v $(pwd):/home/jovyan -w /home/jovyan jupyter-logreg:latest python ./logreg.py
+```
+
+You should have plot now saved as a `.png` file.
+
+### Machine Learning Example ###
+
+Let's try another ML example.  We'll build another Docker image that uses Jupyter.  For this  this example, `cd` to the `demos/07_python/image-classification`.
+
+In here we have some image data (`dataset/`), a Jupyter notebook, and a Dockerfile.
+
+Just like before, we'll have you build your own Jupyter container.
+
+> Build a custom Jupyter/Python container
+> For this example you should try building your own Docker container.  Some hints:
+>
+> * Decide if you should use a base image (the [Jupyter Docker Stacks](https://jupyter-docke
+stacks.readthedocs.io/en/latest/using/selecting.html) might be a good place to start)
+> * You'll need to install 2 modules: **mahotas** annd **opencv-python**
+>
+> > ## Solution ##
+> >
+> > ```
+> > FROM jupyter/datascience-notebook:latest
+> >
+> > RUN conda install mahotas
+> > RUN pip install opencv-python
+> > ```
+> > {: .source}
+> >
+> > You can build it with
+> >
+> > ```
+> > docker build -t jupyter-image .
+> > ```
+> > {: .bash}
+> {: .solution}
+
+After you've built your image we'll start up the container and log into our Jupyter notebook
+server:
+
+```
+docker run --name=jupyter-image -d -p 80:8888 -v $(pwd):/home/jovyan -w /home/jovyan jupyter-image:latest
 ```
 {: .bash}
 
+Then you'll need to use `docker logs` to find out the access key for your Jupyter server:
+
+```
+docker logs jupyter-images
+```
+{: .bash}
+
+```
+Executing the command: jupyter notebook
+[I 02:55:14.895 NotebookApp] Writing notebook server cookie secret to /home/jovyan/.local/share/jupyter/runtime/notebook_cookie_secret
+[I 02:55:16.361 NotebookApp] JupyterLab extension loaded from /opt/conda/lib/python3.7/site-packages/jupyterlab
+[I 02:55:16.361 NotebookApp] JupyterLab application directory is /opt/conda/share/jupyter/lab
+[I 02:55:16.363 NotebookApp] Serving notebooks from local directory: /home/jovyan
+[I 02:55:16.363 NotebookApp] The Jupyter Notebook is running at:
+[I 02:55:16.363 NotebookApp] http://(54bdc6f5c9cd or 127.0.0.1):8888/?token=82be2f08380f138a92ad9c6323f7fcfd124c453144492d3f
+[I 02:55:16.363 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 02:55:16.387 NotebookApp]
+
+    To access the notebook, open this file in a browser:
+        file:///home/jovyan/.local/share/jupyter/runtime/nbserver-6-open.html
+    Or copy and paste one of these URLs:
+        http://(54bdc6f5c9cd or 127.0.0.1)/?token=82be2f08380f138a92ad9c6323f7fcfd124c453144492d3f
+```
+{: .output}
+
+Point your web browser to **http://<nimbus-ip/?token=<token>** and we'll go through the notebook.
