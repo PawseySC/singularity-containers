@@ -409,7 +409,7 @@ At the time of writing, [Docker Hub](https://hub.docker.com) is the most popular
 
 #### MPI
 
-As you will see in a later episode, when containerising MPI applications the MPI libraries in the image need to be ABI compatible with the MPI libraries in the host. The Pawsey Supercomputing Centre maintains some **MPICH** base images at [pawsey/mpi-base](https://hub.docker.com/r/pawsey/mpi-base), for building images that will run on our HPC systems.
+As you can see in the episode on MPI applications, when containerising this type of software the MPI libraries in the image need to be ABI compatible with the MPI libraries in the host. The Pawsey Supercomputing Centre maintains some **MPICH** base images at [pawsey/mpi-base](https://hub.docker.com/r/pawsey/mpi-base), for building images that will run on our HPC systems.
 
 #### Python
 
