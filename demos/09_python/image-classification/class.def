@@ -1,0 +1,6 @@
+Bootstrap: docker
+From: jupyter/datascience-notebook:latest
+
+%post
+  /opt/conda/bin/conda install mahotas
+  /opt/conda/bin/pip install opencv-python

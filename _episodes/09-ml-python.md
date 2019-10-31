@@ -1,7 +1,7 @@
 ---
 title: "Making Python not awful with containers"
-teaching: 15
-exercises: 15
+teaching: 10
+exercises: 10
 questions:
 objectives:
 - Run Python applications using a container
@@ -116,6 +116,8 @@ $ singularity exec -C -B $(pwd):$HOME plotly.sif jupyter notebook --no-browser -
 ```
 {: .bash}
 
+Here the `-C` flag is to completely insulate the container from the host, including the use of a volatile `/run` directory instead of the host one.
+
 The output on the terminal will look like:
 
 ```
@@ -158,68 +160,71 @@ As a result you should now have a plot saved as a `.png` file.
 
 ### Bonus: another Machine Learning Example
 
-Let's try another ML example.  We'll build another Docker image that uses Jupyter.  For this  this example, `cd` to the `demos/07_python/image-classification`.
+Let's try another ML example. We'll build another container image that uses Jupyter. For this this example, change directory to:
 
-In here we have some image data (`dataset/`), a Jupyter notebook, and a Dockerfile.
+```
+$ cd $SC19/demos/09_python/image-classification
+```
+{: .bash}
 
-Just like before, we'll have you build your own Jupyter container.
+In here we have some image data (`dataset/`), the Jupyter notebook `FlowerClassification.ipynb`, and a def file.
 
-> Build a custom Jupyter/Python container
-> For this example you should try building your own Docker container.  Some hints:
->
-> * Decide if you should use a base image (the [Jupyter Docker Stacks](https://jupyter-docker
-stacks.readthedocs.io/en/latest/using/selecting.html) might be a good place to start)
-> * You'll need to install 2 modules: **mahotas** and **opencv-python**
->
-> > ## Solution ##
-> >
+
+> ## Write the def file for your Jupyter container
+> 
+> Similar to before, keep the following in mind:
+> * use `jupyter/datascience-notebook:latest` from Docker Hub as base image 
+> * install the package *mahotas* with `conda`
+> * install the package *opencv-python* using `pip`
+> * use the complete paths of `conda` and `pip`, *i.e.* `/opt/conda/bin/`
+> * do not care about `%startscript`
+> 
+> > ## Solution
+> > 
 > > ```
-> > FROM jupyter/datascience-notebook:latest
-> >
-> > RUN conda install mahotas
-> > RUN pip install opencv-python
-> > ```
-> > {: .source}
-> >
-> > You can build it with
-> >
-> > ```
-> > docker build -t jupyter-image .
+> > Bootstrap: docker
+> > From: jupyter/datascience-notebook:latest
+> > 
+> > %post
+> >   /opt/conda/bin/conda install mahotas
+> >   /opt/conda/bin/pip install opencv-python
 > > ```
 > > {: .bash}
 > {: .solution}
+{: .challenge}
 
-After you've built your image we'll start up the container and log into our Jupyter notebook
-server:
 
-```
-docker run --name=jupyter-image -d -p 80:8888 -v $(pwd):/home/jovyan -w /home/jovyan jupyter-image:latest
-```
-{: .bash}
+> ## Build your own container
+> 
+> The current directory has a copy of the def file, `class.def`; use it to build the image file `class.sif`.
+> 
+> > ## Solution
+> > 
+> > ```
+> > $ sudo singularity build class.sif class.def
+> > ```
+> > {: .bash}
+> {: .solution}
+{: .challenge}
 
-Then you'll need to use `docker logs` to find out the access key for your Jupyter server:
 
-```
-docker logs jupyter-images
-```
-{: .bash}
+> ## Launch the Jupyter interactive session
+> 
+> Use the same syntax described above.
+> 
+> > ## Solution
+> > 
+> > ```
+> > $ singularity exec -C -B $(pwd):$HOME class.sif jupyter notebook --no-browser --port=8888 --ip 0.0.0.0 --notebook-dir=$HOME
+> > ```
+> > {: .bash}
+> {: .solution}
+{: .challenge}
 
-```
-Executing the command: jupyter notebook
-[I 02:55:14.895 NotebookApp] Writing notebook server cookie secret to /home/jovyan/.local/share/jupyter/runtime/notebook_cookie_secret
-[I 02:55:16.361 NotebookApp] JupyterLab extension loaded from /opt/conda/lib/python3.7/site-packages/jupyterlab
-[I 02:55:16.361 NotebookApp] JupyterLab application directory is /opt/conda/share/jupyter/lab
-[I 02:55:16.363 NotebookApp] Serving notebooks from local directory: /home/jovyan
-[I 02:55:16.363 NotebookApp] The Jupyter Notebook is running at:
-[I 02:55:16.363 NotebookApp] http://(54bdc6f5c9cd or 127.0.0.1):8888/?token=82be2f08380f138a92ad9c6323f7fcfd124c453144492d3f
-[I 02:55:16.363 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
-[C 02:55:16.387 NotebookApp]
 
-    To access the notebook, open this file in a browser:
-        file:///home/jovyan/.local/share/jupyter/runtime/nbserver-6-open.html
-    Or copy and paste one of these URLs:
-        http://(54bdc6f5c9cd or 127.0.0.1)/?token=82be2f08380f138a92ad9c6323f7fcfd124c453144492d3f
-```
-{: .output}
+Now, locate the last line in the output, and copy in the clipboard the alphanumeric string that follows after `token=`.  
+Open your web browser, and type as URL `<Singularity machine IP Address>:8888`. Paste the clipboard content in the *Token* field and click on *Login*.  
+ 
+From the list of files & directories, click on `FlowerClassification.ipynb`, and we'll go through the notebook.
 
-Point your web browser to **http://<nimbus-ip/?token=<token>** and we'll go through the notebook.
+When we're done, press twice `Ctrl-C` to kill the Notebook.
