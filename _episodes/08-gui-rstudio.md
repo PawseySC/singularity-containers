@@ -117,7 +117,7 @@ $ singularity exec -c -B $(pwd):/home/$R_USER tidyverse_3.6.1.sif rserver --www-
 Note the `-c` flag for `singularity exec`, used to avoid sharing directories such as `/tmp` with the host, and thus to better clean up the session upon exit.  
 If everything is fine, no output will be printed.
 
-Now, open your web browser, and type as URL <Singularity machine IP Address>:8787.  
+Now, open your web browser, and type as URL `<Singularity machine IP Address>:8787`.  
 Use `$USER` and `$PASSWORD` as printed by the commands above to fill the credential fields.  
 Then we can use RStudio!
 

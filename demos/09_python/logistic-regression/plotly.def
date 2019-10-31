@@ -1,0 +1,5 @@
+Bootstrap: docker
+From: jupyter/datascience-notebook:latest
+
+%post
+  /opt/conda/bin/conda install plotly=3.10
