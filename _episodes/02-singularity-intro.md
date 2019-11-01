@@ -15,7 +15,7 @@ keypoints:
 
 ### Singularity: a container engine for HPC
 
-Singularity is developed and maintained by [Sylabs](https://sylabs.io), and was designed from scratch as a container engine for HPC applications, and this is clearly reflected in some of its main features:
+[Singularity](https://sylabs.io/singularity/) is developed and maintained by [Sylabs](https://sylabs.io), and was designed from scratch as a container engine for HPC applications, and this is clearly reflected in some of its main features:
 
 * *unprivileged* runtime: Singularity containers do not require the user to hold root privileges to run; 
 
@@ -307,6 +307,12 @@ and then clean it up, *e.g.* to wipe everything use the `-a` flag:
 $ singularity cache clean -a
 ```
 {: .bash}
+
+
+> ## Contextual help on Singularity commands
+> 
+> Use `singularity help`, optionally followed by a command name, to print help information on features and options.
+{: .callout}
 
 
 ### Popular image libraries
