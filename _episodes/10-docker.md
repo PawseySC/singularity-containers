@@ -29,7 +29,9 @@ On the other hand, some features make it not ideal for HPC. These include:
 
 * users need *root* privileges to run it, which is not really a good idea in a shared system;
 * *isolation* over *integration* means users need to get used to a more articulated syntax to get things working with typical HPC applications;
-* no support offered to interface Docker with MPI runtime, or HPC schedulers.
+* no support offered to interface Docker with MPI runtime, or HPC schedulers;
+* usually requires an up-to-date kernel.
+
 
 As you might encounter Docker in your container journey, let's have a quick look at how the syntax looks like for the most basic operations.
 
