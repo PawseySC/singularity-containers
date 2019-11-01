@@ -30,7 +30,7 @@ $ cd $SC19/demos/04_trinity
 and then discuss how to use the Linux tools `dd` and `mkfs.ext3` to create and format an empty ext3 file system image, which we will call `my_overlay`. These tools typically require `sudo` privileges to run. However, we can bypass this requirement by using the ones provided inside a standard *Ubuntu* container. The following command looks a bit cumbersome, but is indeed just an idiomatic syntax to achieve our goal:
 
 ```
-singularity exec library://ubuntu:18.04 bash -c " \
+$ singularity exec library://ubuntu:18.04 bash -c " \
   mkdir -p overlay_tmp/upper && \
   dd if=/dev/zero of=my_overlay count=1048576 bs=1024 && \
   mkfs.ext3 -d overlay_tmp my_overlay && \
@@ -138,7 +138,7 @@ $ ls ~/write-to-home
 ```
 ls: /home/ubuntu/write-to-home: No such file or directory
 ```
-{:. output}
+{: .output}
 
 There are situations where `--writable-tmpfs` is not usable, in particular if you are trying to write to a directory owned by *root*, such as `/run`.  
 In this case, the solution is to create a host directory and bind mount it as the path you need to write into, *e.g.*:

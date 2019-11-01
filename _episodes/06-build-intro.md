@@ -65,7 +65,7 @@ From: ubuntu:18.04
 %runscript
     fortune | cowsay | lolcat
 ```
-{: .bash}
+{: .source}
 
 Let us build the image and run it first, then we'll comment on the contents of the def file. To this end we're using `sudo singularity build`, followed by the filename we decide to attribute to the container image, and then by the filename of the def file to be used:
 
@@ -129,7 +129,7 @@ Another section that is often useful can be defined by the header `%files`, like
 %files
     <src-file> <dst-file>
 ```
-{: .bash}
+{: .source}
 
 This section is used to copy files from the host, *i.e.* <src-file>, inside the container in the destination <dst-file>.
 

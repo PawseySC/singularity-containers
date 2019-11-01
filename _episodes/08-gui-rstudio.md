@@ -159,7 +159,7 @@ From: rocker/tidyverse:3.6.1
 
   rserver --www-port $R_PORT --www-address $R_ADDRESS --auth-none=0 --auth-pam-helper-path=pam-helper
 ```
-{: .bash}
+{: .source}
 
 Basically, we're starting from the `tidyverse` Docker image we used above, and then adding some commands under the `%startscript` header. In particular, we're adding some flexibility to the `rserver <..>` command we used above, allowing for port and address to be redefined by the user through environment variables, and at the same time by providing sensible defaults.
 
@@ -174,7 +174,7 @@ Basically, we're starting from the `tidyverse` Docker image we used above, and t
 > > $ sudo singularity build tidyverse_long.sif tidyverse_long.def
 > > ```
 > > {: .bash}
-> {:.solution}
+> {: .solution}
 {: .challenge}
 
 Once the container image is build, let's use it to start an instance via `singularity instance start`. Note how the other options are the same as in the interactive session above; the only addition is the specification of a name for the instance, `myserver` in this case, that has to follow the image name:

@@ -79,7 +79,7 @@ For this example we'll try installing some ML packages to run a logistic regress
 > > %post
 > >   /opt/conda/bin/conda install plotly=3.10
 > > ```
-> > {: .bash}
+> > {: .source}
 > {: .solution}
 {: .challenge}
 
@@ -189,7 +189,7 @@ In here we have some image data (`dataset/`), the Jupyter notebook `FlowerClassi
 > >   /opt/conda/bin/conda install mahotas
 > >   /opt/conda/bin/pip install opencv-python
 > > ```
-> > {: .bash}
+> > {: .source}
 > {: .solution}
 {: .challenge}
 

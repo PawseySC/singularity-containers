@@ -343,6 +343,6 @@ Nvidia maintains the [Nvidia GPU Cloud (NGC)](https://ngc.nvidia.com), hosting a
 > > ```
 > > Python 3.7.4
 > > ```
-> > {: .bash}
+> > {: .output}
 > {: .solution}
 {: .challenge}
