@@ -1,6 +1,6 @@
 ---
 title: "Overview of Docker"
-teaching: 20
+teaching: 10
 exercises: 10
 questions:
 objectives:
