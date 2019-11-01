@@ -1,150 +1,329 @@
 ---
-title: "Build your own container image with Docker"
+title: "Overview of Docker"
 teaching: 20
 exercises: 10
 questions:
 objectives:
-- Learn what is a Dockerfile and its basic syntax
-- Learn how to build a container and push it to a web registry
+- "Be aware of the pros and cons compared to Singularity"
+- "Get started with Docker: download and run container images"
+- "Learn how to build an image with Docker"
 keypoints:
-- "A Dockerfile is a recipe that uses specific instructions to direct the image building process"
-- "`docker build` is used to build images"
+- "Use `docker pull` to download container images"
+- "Use `docker run` to execute commands in containers"
+- "`docker build` is used to build images starting from a `Dockerfile` recipe"
 - "`docker push` is used to push images to a web registry"
 ---
 
 
-WORK IN PROGRESS
+### What's the deal with Docker?
 
-**Note**: if your Docker machine has got an Nvidia GPU installed, then you can install the `nvidia-docker` (e.g. see <https://devblogs.nvidia.com/gpu-containers-runtime> ). For this tutorial, we are instead going to use Shifter and the GPU nodes available on the Zeus HPC system at Pawsey.
+[Docker](https://hub.docker.com/search/?type=edition&offering=community) has been the first container engine to get widespread popularity. It has achieved this mostly in the world of IT companies, where it can be a very effective tool in the hands of system administrators, to deploy all sorts of micro-services. It can also be a useful engine for running containers in laptops, personal workstations, and cloud VMs. Among its advantages: 
+
+* *root* execution allows for complete control and customisation;
+* *isolation* over *integration*: by default Docker runs containers in complete isolation compared to the host, with highest security. Users are in control of plugging in additional host features, such as directories/volumes, networks, communications ports
+* *docker-compose* to define and run multi-container applications, allowing to manage complex workflows; *e.g.* this can make Docker convenient for deploying long running services including Jupyter and RStudio servers;
+* caching of exited containers, to eventually restart them;
+* layered image format allows for caching of container building steps during build time, reducing development time.
+
+On the other hand, some features make it not ideal for HPC. These include:
+
+* users need *root* privileges to run it, which is not really a good idea in a shared system;
+* *isolation* over *integration* means users need to get used to a more articulated syntax to get things working with typical HPC applications;
+* no support offered to interface Docker with MPI runtime, or HPC schedulers.
+
+As you might encounter Docker in your container journey, let's have a quick look at how the syntax looks like for the most basic operations.
+
+To get a more detailed introduction on Docker containers, see this other workshop on [Container workflows with Docker](https://pawseysc.github.io/container-workflows/).
 
 
-One key aspect is that to pull containers from the Nvidia GPU Cloud you'll need to provide Docker/Shifter with some login credentials. The username is always `$oauthtoken`, whereas the password needs to be retrieved in your Nvidia account. This password can be regenerated, so don't worry if you lose it. On the left side of the page, click on the **Configuration** tab, then on the button **Get API Key**. Then in the new page click on the button **Generate API Key** (currently at the top right corner), and click on confirm. An API Key string will appear in the page, copy it in your clipboard, then store it somewhere useful for your shell session, for instance in an environment variable:
+### Downloading images and running containers
+
+Let's download a Ubuntu container image, using `docker pull`:
 
 ```
-$ export NVIDIA_KEY=<Paste Key Here>
+$ sudo docker pull ubuntu:18.04
 ```
 {: .bash}
 
-
-
-### What is a Dockerfile? ###
-
-A Dockerfile is a recipe to build a container image with Docker. It is basically a collection of the standard shell commands you would use to build your software through prompt; in addition, it contains Docker-specific instructions that handle the build process. We will see some examples below.
-
-
-### Let's write a Dockerfile ###
-
-We will build a very simple container image: a Ubuntu box featuring tools for building software and a text editor. Its Dockerfile will contain most of the basic Docker instructions that can also be used to build more complicated images.
-
-First let us create a directory where we'll store the Dockerfile. This directory will be the so called Docker **build context**. Docker will include files in this directory in the build process and in the final image. As a by-product, this will make the build process longer and the image larger, so that we want to include only those strictly required for the build, even none if possible.
+```
+18.04: Pulling from library/ubuntu
+7ddbc47eeb70: Pull complete 
+c1bbdc448b72: Pull complete 
+8c3b70e39044: Pull complete 
+45d437916d57: Pull complete 
+Digest: sha256:6e9f67fa63b0323e9a1e587fd71c561ba48a034504fb804fd26fd8800039835d
+Status: Downloaded newer image for ubuntu:18.04
 
 ```
-$ mkdir build_dockerfile
-$ cd build_dockerfile
+{: .output}
+
+Now, let's use this image via `docker run`:
+
+```
+$ sudo docker run ubuntu:18.04 cat /etc/os-release
 ```
 {: .bash}
 
-Now use your favourite text editor to create a file named `Dockerfile` and edit it. Here is its contents:
+```
+NAME="Ubuntu"
+VERSION="18.04.3 LTS (Bionic Beaver)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 18.04.3 LTS"
+VERSION_ID="18.04"
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+VERSION_CODENAME=bionic
+UBUNTU_CODENAME=bionic
+```
+{: .output}
+
+Similar to Singularity, the `pull` step could be skipped, as trying to run an image which is not locally available would trigger the download anyway.
+
+To open up a shell in the image, use `docker run -it`:
+
+```
+$ sudo docker run -it ubuntu:18.04 bash
+```
+{: .bash}
+
+```
+root@dd1ca993f4ad:/#
+```
+{: .output}
+
+Then type `exit`, or hit `Ctrl-D`, to leave the interactive shell.
+
+
+As we mentioned above, lots of Docker defaults are about privileged runtime and container isolation. Some extra syntax is required in order to achieve a container execution comparable to Singularity, *i.e.* with
+* visibility of the host current working directory
+* container working directory same as host one
+* right user file ownership
+* ability to pipe commands in the container
+
+Long story short, this is what it takes:
+
+```
+$ sudo docker run --rm -v $(pwd):/data -w /data -u $(id -u):$(id -g) -i ubuntu:18.04 echo "Good Morning" >hello1.txt
+$ ls -l hello1.txt
+```
+{: .bash}
+
+```
+-rw-r----- 1 ubuntu ubuntu 13 Nov  1 08:29 hello1.txt
+```
+{: .output}
+
+Let's comment on the flags:
+* `-v` is to bind mount host directories in the container
+* `-w` is to set the container working directory
+* `-u` is to set user/group in the container
+* `-i` is to keep *STDIN* open in the container
+
+What about the `--rm` flag? To respond to this, let's move on.
+
+
+### Managing containers and images
+
+By default, when containers exit, they remain cached in the system for potential future restart. Have a look at a list of running and stopped containers with `docker ps -a` (remove `-a` to only list running ones):
+
+```
+$ sudo docker ps -a
+```
+{: .bash}
+
+```
+CONTAINER ID        IMAGE               COMMAND                 CREATED             STATUS                       PORTS               NAMES
+375a021f8674        ubuntu:18.04        "bash"                  52 seconds ago      Exited (0) 4 seconds ago                         reverent_volhard
+6000f459c132        ubuntu:18.04        "cat /etc/os-release"   57 seconds ago      Exited (0) 55 seconds ago                        hungry_bhabha
+
+```
+{: .output}
+
+It's possible to clean up cached, exited containers by means of `docker rm`; there's also an idiomatic way to clean all of them at once:
+
+```
+$ sudo docker rm $(sudo docker ps -qa)
+```
+{: .bash}
+
+```
+375a021f8674
+6000f459c132
+```
+{: .output}
+
+If I know in advance I won't need to re-run a container after it exits, I can use the runtime flag `--rm`, as in `docker run --rm`, to clean it up automatically, as we did in the example above.
+
+
+Docker stores container images in a hidden directory under its own control. To get the list of downloaded images use `docker images`:
+
+```
+$ sudo docker images
+```
+{: .bash}
+
+```
+REPOSITORY                        TAG                      IMAGE ID            CREATED             SIZE
+ubuntu                            18.04                    775349758637        10 hours ago        64.2MB
+```
+{: .output}
+
+If you don't need an image any more and want to clear up disk space, use `docker rmi` to remove it:
+
+```
+$ sudo docker rmi ubuntu:18.04
+```
+{: .bash}
+
+```
+Untagged: ubuntu:18.04
+Untagged: ubuntu@sha256:6e9f67fa63b0323e9a1e587fd71c561ba48a034504fb804fd26fd8800039835d
+Deleted: sha256:775349758637aff77bf85e2ff0597e86e3e859183ef0baba8b3e8fc8d3cba51c
+Deleted: sha256:4fc26b0b0c6903db3b4fe96856034a1bd9411ed963a96c1bc8f03f18ee92ac2a
+Deleted: sha256:b53837dafdd21f67e607ae642ce49d326b0c30b39734b6710c682a50a9f932bf
+Deleted: sha256:565879c6effe6a013e0b2e492f182b40049f1c083fc582ef61e49a98dca23f7e
+Deleted: sha256:cc967c529ced563b7746b663d98248bc571afdb3c012019d7f54d6c092793b8b
+```
+{: .output}
+
+
+### A Dockerfile recipe
+
+It can be interesting to have an idea of how to build images with Docker. In fact, as we mentioned earlier on, the layered image format of Docker can sometimes help in reducing image development time. In addition, Docker images are quite universally compatible, as they can be run by Singularity, too.
+
+Let's cd into the relevant demo directory:
+
+```
+$ cd $SC19/demos/10_lolcow_docker
+```
+{: .bash}
+
+We're going to build a very similar image to the one we built with Singularity. The `Dockerfile` recipe file looks like:
 
 ```
 FROM ubuntu:18.04
-  
-MAINTAINER Your Name <youremail@yourdomain>
 
-RUN apt-get update && \
-    apt-get install -y \
-        autoconf \
-        automake \
-        g++ \
-        gcc \
-        gfortran \
-        make \
-        nano \
-    && apt-get clean all \
-    && rm -rf /var/lib/apt/lists/*
+MAINTAINER Pawsey Supercomputing Centre
 
-VOLUME ["/data"]
+RUN apt-get -y update && \
+  apt-get -y install fortune cowsay lolcat
+
+ENV PATH=/usr/games:$PATH
+
+VOLUME /data
 WORKDIR /data
 
 CMD ["/bin/bash"]
 ```
-{: .source}
+{:. source}
+
+The directory where the the Dockerfile is stored is the so called the Docker **build context**. Docker will include files in this directory in the build process and in the final image. As a by-product, this will make the build process longer and the image larger, so that we want to include only those strictly required for the build, even none if possible.
+
+Let's comment on the Docker instructions that appear in this Dockerfile.
 
 * `FROM`: compulsory, it provides the starting image we will use to build our customised one;
 * `MAINTAINER`: details of the person who wrote the Dockerfile, optional;
 * `RUN`: this is the most used instruction, that allows to run most shell commands during the build. Multiple `RUN` instructions are often found in a single Dockerfile;
+* `ENV`: set environment variables that will persist at runtime in the container; **DO NOT** use `RUN export <..>` to this end, as the variable will be lost after the `RUN` step is completed;
 * `VOLUME`: creates a mount point ready to be used for mounting external (e.g. host) volumes; creates the corresponding directory if not existing;
 * `WORKDIR`: changes directory to the specified path; the last current directory in the build will be the working directory in the running container.  
   **Note**: if you use instead `RUN cd <..>`, the changed directory will only persist within that `RUN` instruction, and then be lost in subsequent build steps;
 * `CMD`: specifies the default command to be executed with the container. `bash` is the default anyway for Ubuntu containers, but it's good to be aware of this syntax.
 
 
-### Building the image ###
+### Layers in a container image
+
+Note how the `RUN` instruction above is used to execute a sequence of commands to update the list of available packages and install a set of Linux packages.  
+We have concatenated all these commands in one using the `&&` linux operator, and then the `\` symbol to break them into multiple lines for readability.
+
+We could have used one `RUN` instruction per command, so why concatenating instead?  
+Well, each `RUN` creates a distinct **layer** in the final image, increasing its size. It is a good practice to use as few layers, and thus `RUN` instructions, as possible, to keep the image size smaller.
+
+
+### Building the container image
 
 Once the Dockerfile is ready, let us build the image with `docker build`:
 
 ```
-$ docker build -t build:2019May29 .
+$ sudo docker build -t lolcow:1Nov19 .
 ```
 {: .bash}
-
-```
-Sending build context to Docker daemon  2.048kB
-Step 1/6 : FROM ubuntu:18.04
- ---> d131e0fa2585
-[..]
-Step 6/6 : CMD ["/bin/bash"]
- ---> Running in fb003b87b020
-Removing intermediate container fb003b87b020
- ---> 8986ee76d9a9
-Successfully built 8986ee76d9a9
-Successfully tagged build:2019May29
-```
-{: .output}
 
 In the command above, `.` is the location of the build context (i.e. the directory for the Dockerfile).  
 The `-t` flag is used to specify the image name (compulsory) and tag (optional).
 
-Any lowercase alphanumeric string can be used as image name; here we've used `build`. The image tag (following the colon) can be optionally used to maintain a set of different image versions on Docker Hub, and is a key feature in enabling reproducibility of your computations through containers; here we've used `2019May29`.
+Any lowercase alphanumeric string can be used as image name; here we've used `lolcow`. The image tag (following the colon) can be optionally used to maintain a set of different image versions on Docker Hub, and is a key feature in enabling reproducibility of your computations through containers; here we've used `1Nov19`.
 
 Adding the prefix `<Your Docker Hub account>/` to the image name is also optional and allows to push the built image to your Docker Hub registry (see below). 
 
 The complete format for the image name looks like: `<Your Docker Hub account ^>/<Image name>:<Image tag ^>`. `^`These are optional.
- 
 
-### Layers in a container image ###
+This is the output of our build:
 
-Note how the `RUN` instruction above is used to execute a sequence of commands to:
+```
+Sending build context to Docker daemon  2.048kB
+Step 1/7 : FROM ubuntu:18.04
+ ---> 775349758637
+Step 2/7 : MAINTAINER Pawsey Supercomputing Centre
+ ---> Running in 170c796f2fa8
+Removing intermediate container 170c796f2fa8
+ ---> 6fc68acdbda9
+Step 3/7 : RUN apt-get -y update &&   apt-get -y install fortune cowsay lolcat
+ ---> Running in 29a2a0a87f79
+[..]
+Removing intermediate container 29a2a0a87f79
+ ---> 18dc14ff53d0
+Step 4/7 : ENV PATH=/usr/games:$PATH
+ ---> Running in 509d50241e56
+Removing intermediate container 509d50241e56
+ ---> fbb08fedeafa
+Step 5/7 : VOLUME /data
+ ---> Running in 80df7eec5858
+Removing intermediate container 80df7eec5858
+ ---> c2b2947ac8f2
+Step 6/7 : WORKDIR /data
+ ---> Running in 98d98ea2ecfa
+Removing intermediate container 98d98ea2ecfa
+ ---> 06633cf96731
+Step 7/7 : CMD ["/bin/bash"]
+ ---> Running in 8b772570f957
+Removing intermediate container 8b772570f957
+ ---> c41edb9359f3
+Successfully built c41edb9359f3
+Successfully tagged lolcow:1Nov19
+```
+{: .output}
 
-* update the list of available packages
-* install a set of Linux packages
-* clean build directories
+Let's give this image a go!
 
-We have concatenated all these commands in one using the `&&` linux operator, and then the `\` symbol to break them into multiple lines for readability.
+```
+$ sudo docker run --rm lolcow:1Nov19 bash -c 'fortune | cowsay | lolcat'
+```
+{: .bash}
 
-We could have used one `RUN` instruction per command, so why concatenating instead?
-
-Well, each `RUN` creates a distinct **layer** in the final image, increasing its size. It is a good practice to use as few layers, and thus `RUN` instructions, as possible, to keep the image size smaller.
-
-
-### More Dockerfile instructions ###
-
-Several other instructions are available, that we haven't covered in this introduction. You can find more information on them at [Dockerfile reference](https://docs.docker.com/engine/reference/builder/). Just to mention a few possibilities:
-
-* `ARG`: set temporary values that will be used during the build process, and that might need to be changed in future builds; a common use is to specify package versions; `docker build` has an option to change at build time the value of temporary `ARG` variables set in the Dockerfile: `--build-arg <variable>=<value>`;
-* `ENV`: set environment variables that will persist at runtime in the container; **DO NOT** use `RUN export <..>` to this end, as the variable will be lost after the `RUN` step is completed;
-* `ADD`/`COPY`: embed files/directories from your computer into the container image;
-* `EXPOSE`: make the container listen on specified network ports;
-* `CMD`/`ENTRYPOINT`: tweak the default behaviour of the executing container;
-* `USER`: switch user.
+```
+ _______________________________________
+/ Good news. Ten weeks from Friday will \
+\ be a pretty good day.                 /
+ ---------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+```
+{: .output}
 
 
-### Pushing the image to Docker Hub ###
+### Pushing the image to Docker Hub
 
 If you have a (free) Docker Hub account you must first login to Docker.
 
 ```
-$ docker login
+$ sudo docker login
 ```
 {: .bash}
 
@@ -154,98 +333,28 @@ You are now ready to push your newly created image to the Docker Hub web registr
 First, let us create a second tag for the image, that includes your Docker Account. To this end we'll use `docker tag`:
 
 ```
-$ docker tag build:2019May29 <your-dockerhub-account>/build:2019May29
+$ sudo docker tag lolcow:1Nov19 <your-dockerhub-account>/lolcow:1Nov19
 ```
 {: .bash}
 
 Now we can push the image:
 
 ```
-$ docker push <your-dockerhub-account>/build:2019May29
+$ sudo docker push <your-dockerhub-account>/lolcow:1Nov19
 ```
 {: .bash}
 
 ```
-The push refers to repository [docker.io/marcodelapierre/build]
-cab15c00fd34: Pushed 
-cf5522ba3624: Pushed 
-[..]
-2019May29: digest: sha256:bcb0e09927291c7a36a37ee686aa870939ab6c2cee2ef06ae4e742dba4bb1dd4 size: 1569
+The push refers to repository [docker.io/marcodelapierre/lolcow]
+880c0bcdc8af: Pushed 
+0ccb665e6ce8: Pushed 
+e0b3afb09dc3: Mounted from library/ubuntu 
+6c01b5a53aac: Mounted from library/ubuntu 
+2c6ac8e5063e: Mounted from library/ubuntu 
+cc967c529ced: Mounted from library/ubuntu 
+1Nov19: digest: sha256:e7c5c2ec58e93b6cf36eb70815677e0a8719d1d6e7497082274beb9c2ab9cceb size: 1571
 ```
 {: .output}
 
-Congratulations! Your image is now publicly available for anyone to pull.
+Your image is now publicly available for anyone to pull.
 
-
-### Base images for Python ###
-
-[continuumio/miniconda2](https://hub.docker.com/r/continuumio/miniconda2/tags) and [continuumio/miniconda3](https://hub.docker.com/r/continuumio/miniconda3/tags) are Docker images provided by the maintainers of the [Anaconda](https://anaconda.org) project. They ship with Python 2 and 3, respectively, as well as `pip` and `conda` to install and manage packages. At the time of writing, the most recent version is `4.5.12`, which is based on Python `2.7.15` and `3.7.1`, respectively.
-
-Among other use cases, these base images can be very useful for maintaining Python containers, as well as bioinformatics containers based on the [Bioconda](https://bioconda.github.io) project.
-
-If you need interactive Jupyter Notebooks, [Jupyter Docker Stacks](https://jupyter-docker-stacks.readthedocs.io/en/latest/) are a series of dedicated container images. Among others, there is the base SciPy image [jupyter/scipy-notebook](https://hub.docker.com/r/jupyter/scipy-notebook/tags/), the data science image [jupyter/datascience-notebook](https://hub.docker.com/r/jupyter/datascience-notebook/tags/), and the machine learning image [jupyter/tensorflow-notebook](https://hub.docker.com/r/jupyter/tensorflow-notebook/tags/).
-
-
-### Base images for R ###
-
-The [Rocker Project](https://www.rocker-project.org) maintains a number of good R base images. Of particular relevance is [rocker/tidyverse](https://hub.docker.com/r/rocker/tidyverse/tags), which embeds the basic R distribution, an RStudio web-server installation and the [tidyverse](https://www.tidyverse.org) collection of packages for data science, that are also quite popular across the bioinformatics community of [Bioconductor](https://www.bioconductor.org). At the time of writing, the most recent version is `3.5.3`.
-
-Other more basic images are [rocker/r-ver](https://hub.docker.com/r/rocker/r-ver/tags) (R only) and [rocker/rstudio](https://hub.docker.com/r/rocker/rstudio/tags) (R + RStudio).
-
-
-> ## Build your own Scientific Python container ##
-> 
-> Using `continuumio/miniconda3:4.5.12` as base image, create an image called `mypython`, which includes the Python packages **numpy**, **scipy** and **pandas**. Hint: you can use `pip install` or `conda install -y` in the Dockerfile to this end. 
-> 
-> If you have a Docker Hub account, for the image name use the format `<Your Docker Hub account>/<Image name>:<Version tag>`. Then, push the image to the web registry.
-> 
-> > ## Solution ##
-> > 
-> > Dockerfile:
-> > 
-> > ```
-> > FROM continuumio/miniconda3:4.5.12
-> > 
-> > MAINTAINER Marco De La Pierre <marco.delapierre@pawsey.org.au>
-> > 
-> > RUN pip install numpy scipy pandas
-> > 
-> > VOLUME ["/data"]
-> > WORKDIR /data
-> > 
-> > CMD ["/bin/bash"]
-> > ```
-> > {: .source}
-> > 
-> > Build the image:
-> > 
-> > a) Plain (no Docker Hub account):
-> > 
-> > ```
-> > $ docker build -t mypython:2019Apr23 .
-> > ```
-> > {: .bash}
-> > 
-> > b) With a Docker Hub account:
-> > 
-> > ```
-> > $ docker build -t <your-dockerhub-account>/mypython:2019Apr23 .
-> > ```
-> > {: .bash}
-> > 
-> > Push the image (optional):
-> > 
-> > ```
-> > $ docker push <your-dockerhub-account>/mypython:2019Apr23
-> > ```
-> > {: .bash}
-> {: .solution}
-{: .challenge}
-
-
-> ## Best practices ##
-> 
-> * for stand-alone packages, it is suggested to use the policy of one container per package
-> * for Python or R pipelines, it may be handier to use the policy of a single container for the entire pipeline
-> * [Best practices for writing Dockerfiles](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/) are found in the Docker website
-{: .callout}
