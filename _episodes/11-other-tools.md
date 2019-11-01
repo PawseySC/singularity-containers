@@ -1,6 +1,6 @@
 ---
 title: "Other notable container tools"
-teaching: 15
+teaching: 10
 exercises: 0
 questions:
 objectives:
