@@ -1,386 +1,72 @@
 ---
-title: "Run containers on HPC with Shifter (and Singularity)"
+title: "Other notable container tools"
 teaching: 15
-exercises: 5
+exercises: 0
 questions:
 objectives:
-- Learn how to manage and run containers on a HPC cluster with Shifter
-keypoints:
-- "Shifter has a quite simple syntax that allows to pull, manage and run containers on HPC systems"
-- "`shifter pull` and `shifter run` are the key commands"
+- Get an overview of other tools of interest for containers on HPC
 ---
 
-### Why not Docker on HPC? ###
 
-There are a few issues preventing Docker from being used as a container engine on HPC systems:
+### Podman
 
-* Security: Docker requires root privileges
-* Batch systems: doesn't integrate well with schedulers
-* Underlying kernel: usually requires an up-to-date kernel
+[Podman](https://podman.io) is an open-source container engine maintained by Red Hat. It has quite similar features to Docker, with two important differences:
 
-Fortunately, a number of alternatives are available to run containers at HPC facilities, including:
+* runs daemon-less, making it simpler to deploy;
+* can be used in root-less mode (with some [limitations](https://github.com/containers/libpod/blob/master/rootless.md)), making it a bit friendlier for HPC.
 
-* [Shifter](https://docs.nersc.gov/programming/shifter/overview/): developed by NERSC and Cray, Docker-like interface, MPI support 
-* [CSCS Shifter](https://user.cscs.ch/tools/containers/): forked by CSCS, adds features including GPU support 
-* [Singularity](https://www.sylabs.io/singularity/): originally developed by LBL, has its own image format and can run Docker containers as well
+Like Docker, it still doesn't provide support for MPI, schedulers, GPU.
 
-At the moment, Pawsey is using CSCS Shifter on its HPC systems, and therefore this will be the tool of choice in this tutorial.
+One reason to consider it is for building container images in rootless mode, right within a HPC system. On the other hand, for HPC runtime it lacks relevant features when compared to Singularity, Shifter and Sarus. Notably, at the time of writing it is still a bit buggy.
 
-NCI (the National Computational Infrastructure in Canberra) is using Singularity on its HPC systems, for which examples will be provided as well.
-
-
-> ## How to login on Pawsey HPC systems? ##
-> 
-> Pawsey currently has two systems, **Magnus** and **Zeus**. We're using Zeus for this tutorial. You can login using the `ssh` command and your Pawsey access credentials (they will be provided for live workshops):
-> 
-> ```
-> $ ssh <your-pawsey-account-name>@zeus.pawsey.org.au
-> ```
-> {: .bash}
-> 
-> After this, you'll be prompted to enter your Pawsey account password.
-{: .callout}
-
-
-### Pulling and managing images with Shifter ###
-
-To use Shifter on Pawsey HPC systems, we need first to load the corresponding module:
+Interestingly, the API is mostly identical to that of Docker, so that in principle one could just use `podman` by means of
 
 ```
-$ module load shifter
-```
-{: .bash}
-
-In principle, the command to pull container images is very similar to Docker, `shifter pull`.  
-However, to avoid disk quota issues on Pawsey HPC systems, the following syntax is recommended, that makes use of the `sg` linux command, for instance:
-
-```
-$ sg $PAWSEY_PROJECT -c 'shifter pull ubuntu'
-```
-{: .bash}
-
-```
-# image     : index.docker.io/library/ubuntu/latest
-# cacheDir  : /group/shifterrepos/mdelapierre/.shifter/cache
-# tmpDir    : /tmp
-# imageDir  : /group/shifterrepos/mdelapierre/.shifter/images
-> save image layers ...
-> pulling        : sha256:f85999a86bef2603a9e9a4fa488a7c1f82e471cbb76c3b5068e54e1a9320964a
-> pulling        : sha256:da1315cffa03c17988ae5c66f56d5f50517652a622afc1611a8bdd6c00b1fde3
-[..]
-> extracting     : /group/shifterrepos/mdelapierre/.shifter/cache/sha256:f85999a86bef2603a9e9a4fa488a7c1f82e471cbb76c3b5068e54e1a9320964a.tar
-> make squashfs ...
-> create metadata ...
-# created: /group/shifterrepos/mdelapierre/.shifter/images/index.docker.io/library/ubuntu/latest.squashfs
-# created: /group/shifterrepos/mdelapierre/.shifter/images/index.docker.io/library/ubuntu/latest.meta
-```
-{: .output}
-
-```
-$ sg $PAWSEY_PROJECT -c 'shifter pull centos'
-$ sg $PAWSEY_PROJECT -c 'shifter pull busybox'
-```
-{: .bash}
-
-Similar again to Docker, we can list locally pulled images with `shifter images`:
-
-```
-$ shifter images
-```
-{: .bash}
-
-```
-library/centos                   latest                       ea4b646d9000   2018-11-27T07:05:23   69.62MB      index.docker.io
-library/busybox                  latest                       7dc9d60af829   2018-12-19T22:31:48   704.00KB     index.docker.io
-library/ubuntu                   latest                       d71fc6939e16   2018-12-19T22:30:41   29.94MB      index.docker.io
-```
-{: .output}
-
-and remove undesired images with `shifter rmi`:
-
-```
-$ shifter rmi busybox
-```
-{: .bash}
-
-```
-removed image index.docker.io/library/busybox/latest
-```
-{: .output}
-
-
-### Running images with Shifter ###
-
-Let us change directory to our group directory with:
-
-```
-$ cd $MYGROUP
-```
-{: .bash}
-
-and then run `ls` using the Ubuntu image we just pulled, via `shifter run`:
-
-```
-$ shifter run ubuntu ls
-```
-{: .bash}
-
-The output will display the content of the current host directory!
-
-A few differences in behaviour can be noticed compared to Docker, such that using Shifter typically requires to specify less options and flags:
-
-* by default, some relevant directories in the Pawsey HPC filesystems are mounted in the containers; these include `/group`, `/scratch`, `/pawsey` and `/tmp`.  
-  **Note**: `/home` is NOT mounted instead;
-* if running from a mapped host directory, this becomes the working directory at container runtime;
-* standard input is always open, allowing redirection;
-* the host user is automatically set for the container;
-* Shifter automatically removes containers after execution is terminated.
-
-As additional examples, you might want to run:
-
-```
-$ shifter run ubuntu ls /
-$ shifter run ubuntu whoami
-```
-{: .bash}
-
-Note how no flag is required to run a container interactively. To launch an interactive shell from within the container, just run it without any commands, for instance:
-
-```
-$ shifter run ubuntu
-```
-{: .bash}
-
-```
-mdelapierre@zeus-1:/group/pawsey0001/mdelapierre$ exit   # or hit CTRL-D
-```
-{: .bash}
-
-Shifter has support to run containers exploiting MPI parallelism and GPU acceleration (the latter only through CSCS Shifter).
-
-* `shifter run --mpi` allows containers to take advantage on inter-node communication on the host fabric. The container image needs to have been built with MPI libraries that are ABI compatible with the host MPI libraries;
-
-* to run GPU enabled containers, no extra flags are required.
-
-
-### Using Shifter with a job scheduler ###
-
-Shifter is compatible with **SLURM**, the job scheduler installed on Pawsey HPC systems. In particular, SLURM job executor `srun` is compatible with `shifter run`, and the two syntaxes can be combined together.
-
-As an example, the following script uses a Ubuntu container to output the machine hostname:
-
-```
-#!/bin/bash -l
-  
-#SBATCH --account=<your-pawsey-project>
-#SBATCH --partition=workq
-#SBATCH --ntasks=1
-#SBATCH --time=00:05:00
-#SBATCH --export=NONE
-#SBATCH --job-name=blast
-
-module load shifter
-
-srun --export=all shifter run ubuntu hostname
-```
-{: .bash}
-
-Now use your favourite text editor to copy paste the script above in a file called `hostname.sh` somewhere under `$MYSCRATCH` or `$MYGROUP` (remember to specify your Pawsey Project ID in the script!),
-
-and then submit this script using SLURM. If you are running this during a live workshop, use the flag `--reservation <your-pawsey-reservation>` to use the compute nodes that have been reserved for the event:
-
-```
-$ sbatch --reservation <your-pawsey-reservation> hostname.sh
+$ alias docker=podman
 ```
 {: .bash}
 
 
-### Can Shifter build container images? ###
+### NERSC Shifter
 
-Shifter does not allow to build container images. The best way to create an image to be pulled and run through it is to use Docker on a distinct machine (see previous episode).
+[NERSC Shifter](https://docs.nersc.gov/programming/shifter/overview/) is a container engine developed by NERSC for HPC. 
 
+It complies with HPC security requirements by design, and features native support for MPI and schedulers; interestingly, it cannot run GPU applications. It cannot be used to build images, just to run them.
 
-> ## Run a Python app in a container on HPC ##
-> 
-> First, pull the container `continuumio/miniconda3:4.5.12`.
-> 
-> Then, with your favourite text editor create a file called `app.py` with the following content:
-> 
-> ```
-> import sys
-> 
-> def print_sums(data):
->     with open("row_sums",'w') as output:
->         for line in data:
->             row = 0
->             for word in line.strip().split():
->                 row += int(word)
->             output.write(str(row)+"\n")
->             print("Sum of the row is ",row)
-> 
-> if len(sys.argv) > 1 and sys.argv[1] != "-":
->     with open(sys.argv[1], 'r') as infile:
->         print_sums(infile)
-> else:
->     print_sums(sys.stdin)
-> ```
-> {: .python}
-> 
-> and an input file `input` containing:
-> 
-> ```
-> 1 2 3
-> 4 5 6
-> 7 8 9
-> ```
-> {: .source}
-> 
-> The app reads rows containing integers and outputs their sums line by line. Input can be given through file or via standard input. The output is produced both in formatted form through standard output and in raw form written to a file named `row_sums`.
-> 
-> Now, run `python app.py` using the the container image you have just pulled. For instance, give the input filename as an argument to the app.
-> 
-> Finally, re-run it by means of a SLURM script called `python_slurm.sh`.
-> 
-> > ## Solution ##
-> > 
-> > Pull the container image:
-> > 
-> > ```
-> > $ sg $PAWSEY_PROJECT -c 'shifter pull continuumio/miniconda3:4.5.12'
-> > ```
-> > {: .bash}
-> > 
-> > Run the app:
-> > 
-> > ```
-> > $ shifter run continuumio/miniconda3:4.5.12 python app.py input
-> > ```
-> > {: .bash}
-> > 
-> > SLURM script for scheduler submission, `python_slurm.sh` (insert Pawsey Project ID!):
-> > 
-> > ```
-> > #!/bin/bash -l
-> > 
-> > #SBATCH --account=<your-pawsey-project>
-> > #SBATCH --partition=workq
-> > #SBATCH --ntasks=1
-> > #SBATCH --time=00:05:00
-> > #SBATCH --export=NONE
-> > #SBATCH --job-name=python
-> > 
-> > module load shifter
-> > 
-> > srun --export=all shifter run continuumio/miniconda3:4.5.12 python app.py input
-> > ```
-> > {: .bash}
-> > 
-> > SLURM submission:
-> > 
-> > ```
-> > $ sbatch --reservation <your-pawsey-reservation> python_slurm.sh
-> > ```
-> > {: .bash}
-> {: .solution}
-{: .challenge}
+At the time of writing, its development seems a bit stalled, for which reason we suggest considering CSCS Shifter/Sarus instead.
 
 
-### HPC containers with Singularity at NCI ###
+### CSCS Shifter (or Shifter-NG)
 
-Raijin, the NCI HPC system, uses Singularity as the container engine, instead of Shifter. However, much of the user-facing interface is similar, or even the same. The biggest difference is that on Raijin you cannot pull and use your own images; instead, you’ll need to contact the NCI Help Desk at <mailto:help@nci.org.au> and ask for your image to be added to the library.
- 
-This allows the NCI staff to inspect and sanitise the containers before use. For example, to ensure that they allow the use of system MPI libraries, or at least contain a compatible version. The images must be able to be built using a build script, rather than being distributed as just an opaque filesystem image. Mount points for the systems Lustre filesystems will also be included on build so that all of your user data is available at the same location as in the native image (e.g. `/home`, `/short`, and `/g/data`).
- 
-First of all, let us load the Singularity module:
+[CSCS Shifter](https://user.cscs.ch/tools/containers/shifter/) is a fork of NERSC Shifter by CSCS. 
 
-```
-module load singularity
-```
-{: .bash}
+Most notably, it adds GPU support to the runtime engine. 
 
-You can run an interactive shell inside the container using the `singularity shell` command. Here, we are using a CentOS image:
- 
-```
-$ singularity shell /apps/singularity/images/centos7/centos7-latest.simg 
-```
-{: .bash}
+It is being deprecated by CSCS, as they have evolved the project into Sarus, see below.
 
-```
-Singularity: Invoking an interactive shell within container...
- 
-Singularity centos7-2018051701.simg:~> cat /etc/centos-release
-CentOS Linux release 7.5.1804 (Core) 
-Singularity centos7-2018051701.simg:~> 
-```
-{: .output}
 
-```
-Singularity centos7-2018051701.simg:~> whoami
-```
-{: .bash}
+### Sarus
 
-```
-bjm900
-```
-{: .output}
+[Sarus](https://user.cscs.ch/tools/containers/sarus/) is the latest incarnation of a container runtime engine by CSCS. 
 
-```
-Singularity centos7-2018051701.simg:~> exit
-```
-{: .bash}
+It is fully compliant with the Docker image format (whereas it cannot run Singularity images), natively supports schedulers, MPI, and GPU applications. Then in terms of runtime features it is mostly equivalent to Singularity (although at the moment it doesn't offer a feature comparable to OverlayFS). However, to build container images, it relies on the users being able to run Docker somewhere else. Also, uptake at the moment is quite limited compared to Singularity.
 
-You can run a specific command within the container using the `singularity exec` command:
+As at the moment Sarus seems the only practical alternative to running containers on HPC, let us proceed with a quick overview of the syntax. The key commands are:
+* `sarus pull`: download container images (image name specification same as in Docker);
+* `sarus run`: execute commands in containers;
+* `sarus images`: list downloaded images;
+* `sarus rmi`: remove downloaded image.
 
-```
-$ singularity exec /apps/singularity/images/centos7/centos7-latest.simg cat /etc/centos-release
-```
-{: .bash}
+If you want to test it, you might just use the image `ubuntu:18.04` as a test bed, similar to what we did earlier on with Singularity and Docker.
 
-```
-CentOS Linux release 7.5.1804 (Core) 
-```
-{: .output}
 
-Note that the CentOS version in the container image is 7.5, whereas Raijin’s native OS is (currently) CentOS 6.10:
+### HPC Container Maker
 
-```
-$ cat /etc/centos-release
-```
-{: .bash}
+[HPC Container Maker](https://github.com/NVIDIA/hpc-container-maker) (HPCCM) is a Python tool developed by Nvidia, whose only purpose is to write recipe files for containers. 
 
-```
-CentOS release 6.10 (Final)
-```
-{: .output}
+The most interesting aspect is that recipes are written in a dedicated Python format, and then HPCCM can translate them both in Dockerfiles and Singularity def files, allowing to simply produce container images in both formats.
 
-On Raijin, Singularity is also integrated with the **PBS** batch scheduling system. This allows you to specify the image to use via the directive `#PBS -l image` in your job script (or similarly on the `qsub` command line):
+Another interesting feature is that HPCCM ships a set of so called `building blocks`, *i.e.* ready to use units that install common packages in containers in an optimised way. For instance, these include compilers, MPI libraries, scientific libraries and a few applications.
 
-```
-#!/bin/bash
-#PBS -P <your-nci-project>
-#PBS -q normal
-#PBS -l ncpus=1
-#PBS -l walltime=00:05:00
-#PBS -l image=centos7
-
-module load singularity
-
-cat /etc/centos-release
-```
-{: .bash}
-
-Of course, you can also just use `singularity exec` within your job script as in the example above:
-
-```
-#!/bin/bash
-#PBS -P <your-nci-project>
-#PBS -q normal
-#PBS -l ncpus=1
-#PBS -l walltime=00:05:00
-
-module load singularity
-
-singularity exec /apps/singularity/images/centos7/centos7-latest.simg cat /etc/centos-release
-```
-{: .bash}
+SHOULD I MAKE A HPCCM EXAMPLE HERE?
 
