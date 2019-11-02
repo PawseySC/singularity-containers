@@ -235,6 +235,8 @@ Let's comment on the Docker instructions that appear in this Dockerfile.
   **Note**: if you use instead `RUN cd <..>`, the changed directory will only persist within that `RUN` instruction, and then be lost in subsequent build steps;
 * `CMD`: specifies the default command to be executed with the container, in case no other command is provided.
 
+More information on the Dockerfile syntax can be found at the [Dockerfile reference](https://docs.docker.com/engine/reference/builder/).
+
 
 ### Layers in a container image
 
