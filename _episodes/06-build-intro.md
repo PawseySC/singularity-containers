@@ -52,7 +52,6 @@ From: ubuntu:18.04
     apt-get -y install fortune cowsay lolcat
 
 %environment
-    export LC_ALL=C
     export PATH=/usr/games:$PATH
 
 %labels
@@ -121,7 +120,7 @@ Note how we started from Ubuntu 18.04 in Docker Hub, not Sylabs Cloud, as the fo
 
 Next is a section that start with the header `%post`. This is basically a sequence of commands to be executed to install packages in the image, in essence the same commands you would use for installation in a Linux box. Here we are ensuring we have an up-to-date list of packages, and then we are installing three Linux utilities.
 
-The section `%environment` sets up environment variables that need to be defined at runtime rather than at build time. `LC_ALL` is required to avoid some locale warnings, whereas the `PATH` needs to be updated to reflect the location of the three utilities that we installed in the `%post` section.
+The section `%environment` sets up environment variables that need to be defined at runtime rather than at build time. Here the `PATH` needs to be updated to reflect the location of the three utilities that we installed in the `%post` section.
 
 Another section that is often useful can be defined by the header `%files`, like in:
 
@@ -303,7 +302,7 @@ $ singularity push -U lolcow.sif library://<YOUR-SYLABS-USERNAME>/default/lolcow
 
 ```
 WARNING: Skipping container verifying
- 67.07 MiB / 67.07 MiB [==================================================================================================================================] 100.00% 6.59 MiB/s 10s
+ 67.08 MiB / 67.08 MiB [==================================================================================================================================] 100.00% 6.37 MiB/s 10s
 ```
 {: .output}
 

@@ -6,7 +6,6 @@ From: ubuntu:18.04
     apt-get -y install fortune cowsay lolcat
 
 %environment
-    export LC_ALL=C
     export PATH=/usr/games:$PATH
 
 %labels

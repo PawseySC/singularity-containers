@@ -10,4 +10,4 @@ ENV PATH=/usr/games:$PATH
 VOLUME /data
 WORKDIR /data
 
-CMD ["/bin/bash"]
+CMD fortune | cowsay | lolcat

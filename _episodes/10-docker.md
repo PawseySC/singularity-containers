@@ -218,7 +218,7 @@ ENV PATH=/usr/games:$PATH
 VOLUME /data
 WORKDIR /data
 
-CMD ["/bin/bash"]
+CMD fortune | cowsay | lolcat
 ```
 {:. source}
 
@@ -233,7 +233,7 @@ Let's comment on the Docker instructions that appear in this Dockerfile.
 * `VOLUME`: creates a mount point ready to be used for mounting external (e.g. host) volumes; creates the corresponding directory if not existing;
 * `WORKDIR`: changes directory to the specified path; the last current directory in the build will be the working directory in the running container.  
   **Note**: if you use instead `RUN cd <..>`, the changed directory will only persist within that `RUN` instruction, and then be lost in subsequent build steps;
-* `CMD`: specifies the default command to be executed with the container. `bash` is the default anyway for Ubuntu containers, but it's good to be aware of this syntax.
+* `CMD`: specifies the default command to be executed with the container, in case no other command is provided.
 
 
 ### Layers in a container image
@@ -270,39 +270,39 @@ Sending build context to Docker daemon  2.048kB
 Step 1/7 : FROM ubuntu:18.04
  ---> 775349758637
 Step 2/7 : MAINTAINER Pawsey Supercomputing Centre
- ---> Running in 170c796f2fa8
-Removing intermediate container 170c796f2fa8
- ---> 6fc68acdbda9
+ ---> Running in 91c109dfd5ba
+Removing intermediate container 91c109dfd5ba
+ ---> 361490204a2c
 Step 3/7 : RUN apt-get -y update &&   apt-get -y install fortune cowsay lolcat
- ---> Running in 29a2a0a87f79
+ ---> Running in 4543b6bb99f1
 [..]
-Removing intermediate container 29a2a0a87f79
- ---> 18dc14ff53d0
+Removing intermediate container 4543b6bb99f1
+ ---> 7958a569068f
 Step 4/7 : ENV PATH=/usr/games:$PATH
- ---> Running in 509d50241e56
-Removing intermediate container 509d50241e56
- ---> fbb08fedeafa
+ ---> Running in 86282799c41f
+Removing intermediate container 86282799c41f
+ ---> 3ffdfe179e34
 Step 5/7 : VOLUME /data
- ---> Running in 80df7eec5858
-Removing intermediate container 80df7eec5858
- ---> c2b2947ac8f2
+ ---> Running in f93de5446caa
+Removing intermediate container f93de5446caa
+ ---> 9c174e36bf3a
 Step 6/7 : WORKDIR /data
- ---> Running in 98d98ea2ecfa
-Removing intermediate container 98d98ea2ecfa
- ---> 06633cf96731
-Step 7/7 : CMD ["/bin/bash"]
- ---> Running in 8b772570f957
-Removing intermediate container 8b772570f957
- ---> c41edb9359f3
-Successfully built c41edb9359f3
+ ---> Running in eed67d591239
+Removing intermediate container eed67d591239
+ ---> 36cc09b2c59b
+Step 7/7 : CMD fortune | cowsay | lolcat
+ ---> Running in 87a464d2ee67
+Removing intermediate container 87a464d2ee67
+ ---> 3c62a0f2e06e
+Successfully built 3c62a0f2e06e
 Successfully tagged lolcow:1Nov19
 ```
 {: .output}
 
-Let's give this image a go!
+Let's give this image a go! Let's execute it without any argument to use the default command:
 
 ```
-$ sudo docker run --rm lolcow:1Nov19 bash -c 'fortune | cowsay | lolcat'
+$ sudo docker run --rm lolcow:1Nov19
 ```
 {: .bash}
 
@@ -316,6 +316,18 @@ $ sudo docker run --rm lolcow:1Nov19 bash -c 'fortune | cowsay | lolcat'
             (__)\       )\/\
                 ||----w |
                 ||     ||
+```
+{: .output}
+
+Note how the default command can be readily overwritten:
+
+```
+$ sudo docker run --rm lolcow:1Nov19 echo "Hello World!"
+```
+{: .bash}
+
+```
+Hello World!
 ```
 {: .output}
 
@@ -348,13 +360,13 @@ $ sudo docker push <your-dockerhub-account>/lolcow:1Nov19
 
 ```
 The push refers to repository [docker.io/marcodelapierre/lolcow]
-880c0bcdc8af: Pushed 
-0ccb665e6ce8: Pushed 
+9d2959e72647: Pushed 
+317d47a452af: Pushed 
 e0b3afb09dc3: Mounted from library/ubuntu 
 6c01b5a53aac: Mounted from library/ubuntu 
 2c6ac8e5063e: Mounted from library/ubuntu 
 cc967c529ced: Mounted from library/ubuntu 
-1Nov19: digest: sha256:e7c5c2ec58e93b6cf36eb70815677e0a8719d1d6e7497082274beb9c2ab9cceb size: 1571
+1Nov19: digest: sha256:295c5695e2b05f6123bc2d8669ec7b66e45df5000ab9fc45ce3566ae3c0d839e size: 1571
 ```
 {: .output}
 
