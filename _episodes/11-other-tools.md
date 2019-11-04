@@ -5,7 +5,57 @@ exercises: 0
 questions:
 objectives:
 - Get an overview of other tools of interest for containers on HPC
+keypoints:
+- HPCCM can be useful to write image recipes that are compatible both with Docker and Singularity
+- Other than Singularity, at the moment Sarus seems to only other active project in terms of container engines for HPC
 ---
+
+
+### HPC Container Maker
+
+[HPC Container Maker](https://github.com/NVIDIA/hpc-container-maker) (HPCCM) is a Python tool developed by Nvidia, whose only purpose is to write recipe files for containers.
+
+The most interesting aspect is that recipes are written in a container engine agnostic format, and then HPCCM can translate them both in Dockerfiles and Singularity def files, allowing to simply produce container images in both formats.
+
+Another interesting feature is that HPCCM ships a set of so called `building blocks`, *i.e.* ready to use units that install common packages in containers in an optimised way. For instance, these include compilers, MPI libraries, scientific libraries and a few applications.
+
+To give an idea of how a HPCCM recipe looks like, here is one for the `lolcow` example we have explored when building Singularity and Docker containers:
+
+```
+Stage0 += baseimage(image='ubuntu:18.04')
+
+Stage0 += packages(ospackages=['fortune', 'cowsay', 'lolcat'])
+Stage0 += environment(variables={'PATH': '/usr/games:$PATH'})
+
+Stage0 += label(metadata={'Author': '"Pawsey Supercomputing Centre"'})
+Stage0 += label(metadata={'Version': 'v0.0.1'})
+```
+{: .source}
+
+You can cd into the demo directory:
+
+```
+$ cd $SC19/demos/11_lolcow_hpccm
+```
+{: .bash}
+
+And then create the def file:
+
+```
+$ hpccm --recipe lolcow.py --format singularity
+```
+{: .bash}
+
+and the Dockerfile:
+
+```
+$ hpccm --recipe lolcow.py --format docker
+```
+{: .bash}
+
+Note how this recipe does not produce exactly the def file and Dockerfile we have discussed in previous episodes. It is just meant to convey a general idea of the working principle of HPCCM.
+
+More information on HPCCM can be found in the [HPCCM docs](https://github.com/NVIDIA/hpc-container-maker/tree/master/docs).
 
 
 ### Podman
@@ -58,50 +108,3 @@ As at the moment Sarus seems the only practical alternative to running container
 * `sarus rmi`: remove downloaded image.
 
 If you want to test it, you might just use the image `ubuntu:18.04` as a test bed, similar to what we did earlier on with Singularity and Docker.
-
-
-### HPC Container Maker
-
-[HPC Container Maker](https://github.com/NVIDIA/hpc-container-maker) (HPCCM) is a Python tool developed by Nvidia, whose only purpose is to write recipe files for containers. 
-
-The most interesting aspect is that recipes are written in a container engine agnostic format, and then HPCCM can translate them both in Dockerfiles and Singularity def files, allowing to simply produce container images in both formats.
-
-Another interesting feature is that HPCCM ships a set of so called `building blocks`, *i.e.* ready to use units that install common packages in containers in an optimised way. For instance, these include compilers, MPI libraries, scientific libraries and a few applications.
-
-To give an idea of how a HPCCM recipe looks like, here is one for the `lolcow` example we have explored when building Singularity and Docker containers:
-
-```
-Stage0 += baseimage(image='ubuntu:18.04')
-  
-Stage0 += packages(ospackages=['fortune', 'cowsay', 'lolcat'])
-Stage0 += environment(variables={'PATH': '/usr/games:$PATH'})
-
-Stage0 += label(metadata={'Author': '"Pawsey Supercomputing Centre"'})
-Stage0 += label(metadata={'Version': 'v0.0.1'})
-```
-{: .source}
-
-You can cd into the demo directory:
-
-```
-$ cd $SC19/demos/11_lolcow_hpccm
-```
-{: .bash}
-
-And then create the def file:
-
-```
-$ hpccm --recipe lolcow.py --format singularity
-```
-{: .bash}
-
-and the Dockerfile:
-
-```
-$ hpccm --recipe lolcow.py --format docker
-```
-{: .bash}
-
-Note how this recipe does not produce exactly the def file and Dockerfile we have discussed in previous episodes. It is just meant to convey a general idea of the working principle of HPCCM.
-
-More information on HPCCM can be found in the [HPCCM docs](https://github.com/NVIDIA/hpc-container-maker/tree/master/docs).
