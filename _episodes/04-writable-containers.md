@@ -1,5 +1,5 @@
 ---
-title: "Set up writable containers: another bioinformatics example with Trinity"
+title: "Set up writable containers: another bio example with Trinity"
 teaching: 10
 exercises: 10
 questions:
