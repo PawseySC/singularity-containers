@@ -7,9 +7,9 @@ objectives:
 - Learn how to create and mount a writable overlay filesystem
 - Learn how to make a container temporarily writable
 keypoints:
-- "Use linux tool from a Ubuntu container to create a filesystem image file"
-- "Mount a filesystem image using the flag `--overlay`"
-- "Make a SIF container ephemerally writable with the flag `--writable-tmpfs`"
+- Use linux tool from a Ubuntu container to create a filesystem image file
+- Mount a filesystem image using the flag `--overlay`
+- Make a SIF container ephemerally writable with the flag `--writable-tmpfs`
 ---
 
 

@@ -7,8 +7,8 @@ objectives:
 - Learn how to mount host directories in a container
 - Run a real-world bioinformatics application in a container
 keypoints:
-- "By default Singularity mounts the host current directory, and uses it as container working directory"
-- "Map additional host directories in the containers with the flag `-B`"
+- By default Singularity mounts the host current directory, and uses it as container working directory
+- Map additional host directories in the containers with the flag `-B`
 ---
 
 
