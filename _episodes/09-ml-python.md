@@ -7,8 +7,8 @@ objectives:
 - Run Python applications using a container
 - Use Jupyter Notebook in a container
 keypoints:
-- "You can use idiomatic syntaxes of `singularity exec` to launch interactive sessions of Jupyter Notebooks, similar to RStudio"
-- "Run the same workflow through command line or via Notebook using the same container"
+- You can use idiomatic syntaxes of `singularity exec` to launch interactive sessions of Jupyter Notebooks, similar to RStudio
+- Run the same workflow through command line or via Notebook using the same container
 ---
 
 

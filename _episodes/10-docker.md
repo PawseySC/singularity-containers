@@ -8,10 +8,10 @@ objectives:
 - "Get started with Docker: download and run container images"
 - "Learn how to build an image with Docker"
 keypoints:
-- "Use `docker pull` to download container images"
-- "Use `docker run` to execute commands in containers"
-- "`docker build` is used to build images starting from a `Dockerfile` recipe"
-- "`docker push` is used to push images to a web registry"
+- Use `docker pull` to download container images
+- Use `docker run` to execute commands in containers
+- `docker build` is used to build images starting from a `Dockerfile` recipe
+- `docker push` is used to push images to a web registry
 ---
 
 

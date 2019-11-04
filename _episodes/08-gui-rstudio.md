@@ -7,9 +7,9 @@ objectives:
 - Learn how to run GUI interactive sessions from a container
 - Learn how to setup a long running web service from a container
 keypoints:
-- "An interactive session can essentially be executed as any other containerised application, via `singularity exec`"
-- "Use the `%startscript` section of a def file to configure an image for long running services"
-- "Launch/shutdown long running services in the background with `singularity instance start/stop`"
+- An interactive session can essentially be executed as any other containerised application, via `singularity exec`
+- Use the `%startscript` section of a def file to configure an image for long running services
+- Launch/shutdown long running services in the background with `singularity instance start/stop`
 ---
 
 
