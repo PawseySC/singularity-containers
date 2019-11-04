@@ -46,14 +46,10 @@ $ cd $SC19/demos/05_gromacs
 {: .challenge}
 
 
-The current directory has got some sample input files picked from the collection of [Gromacs benchmark examples](ftp://ftp.gromacs.org/pub/benchmarks/water_GMX50_bare.tar.gz).
+The current directory has got sample input files picked from the collection of [Gromacs benchmark examples](ftp://ftp.gromacs.org/pub/benchmarks/water_GMX50_bare.tar.gz). In particular, we're going to use the subset `water-cut1.0_GMX50_bare/1536/`. First let's `gunzip` one of the required input files:
 
-
-THIS NEEDS TO BE PREPARED
 ```
-$ wget ftp://ftp.gromacs.org/pub/benchmarks/water_GMX50_bare.tar.gz
-$ tar xzf water_GMX50_bare.tar.gz
-$ cp water-cut1.0_GMX50_bare/1536/* .
+$ gunzip conf.gro.gz
 ```
 {: .bash}
 
@@ -72,7 +68,7 @@ Do not execute the next two commands, let us just have a look at them.
   ```
   {: .bash} 
 
-Now, GPU resources are usually made available in HPC systems through schedulers, to which Singularity natively and transparently interfaces. So, for instance let us have a look in the current directory at the Slurm batch script called `gpu.sh`:
+GPU resources are usually made available in HPC systems through schedulers, to which Singularity natively and transparently interfaces. So, for instance let us have a look in the current directory at the Slurm batch script called `gpu.sh`:
 
 ```
 #!/bin/bash -l
