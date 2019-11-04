@@ -55,6 +55,8 @@ $ gunzip conf.gro.gz
 
 Now, from a Singularity perspective, all we need to do to run a GPU application from a container is to add the runtime flag `--nv`. This will make Singularity look for the Nvidia drivers in the host, and mount them inside the container.
 
+On the host system side, when running GPU applications through Singularity the only requirement consists of the Nvidia driver for the relevant GPU card (the corresponding file is typically called `libcuda.so.<VERSION>` and is located in some library subdirectory of `/usr`).
+
 Do not execute the next two commands, let us just have a look at them.
 
 * Preliminary step
