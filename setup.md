@@ -9,16 +9,16 @@ These will allow you to follow the online materials and to login to a facility w
 
 Options: 
 
-* **SC19 Workshop**: you will will need username and password to access the training VMs, which will be provided by instructors.
+* **SC19 Workshop**: you will will need username and password to access the training VMs, which will be provided by the instructors.
 
 * **Zeus @Pawsey**: if you have access, Singularity can be loaded with `module load singularity/3.3.0`. MPI libraries are configured properly, and GPU applications can be run on the Slurm partition `gpuq`.
 
 * **Nimbus Cloud @Pawsey**: if you have access, both Singularity and Docker are preinstalled in the *Ubuntu Pawsey* base image.
 
-* **BYO device**: if you have a Linux box, you can install the required software yourself (might take a while):
+* **BYO Device**: if you have a Linux box, you can install the required software yourself (might take a while):
 
   * Essential (core of the tutorial)
-    - Singularity
+    - [Singularity]({{ page.root }}/files/install-singularity.sh)
   
   * Desirable (to run all Singularity examples)
     - Slurm scheduler
