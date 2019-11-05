@@ -18,15 +18,17 @@ Options:
 * **BYO Device**: if you have a Linux box, you can install the required software yourself (might take a while):
 
   * Essential (core of the tutorial)
-    - [Singularity]({{ page.root }}/files/install-singularity.sh)
+    - Singularity [script]({{ page.root }}/files/install-singularity.sh) [docs](https://sylabs.io/guides/3.3/user-guide/installation.html)
   
   * Desirable (to run all Singularity examples)
     - Slurm scheduler
-    - MPICH library
+    - MPICH library [script]({{ page.root }}/files/install-mpich.sh) [docs](https://www.mpich.org/documentation/guides/)
     - Nvidia GPU driver (GPU card required)
   
   * Optional (extra applications for last two episodes)
-    - Docker
-    - HPCCM
-    - Podman
-    - Sarus
+    - Docker [docs (unofficial)](https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-docker-on-ubuntu-18-04-lts-bionic-beaver.html)
+    - HPCCM [script]({{ page.root }}/files/install-hpccm.sh) [docs](https://github.com/NVIDIA/hpc-container-maker/blob/master/docs/getting_started.md)
+    - Podman [script]({{ page.root }}/files/install-podman.sh) [docs](https://podman.io/getting-started/installation)
+    - Sarus [script]({{ page.root }}/files/install-sarus.sh) [docs](https://sarus.readthedocs.io/en/latest/install/requirements.html)
+
+**Note**: install scripts have been tested on a Ubuntu machine through a user that can run *sudo* commands without password prompts. There's no warranty they will work in your Linux box, you should consider them as templates.
