@@ -21,10 +21,10 @@ Options:
     - Singularity : [script]({{ page.root }}/files/install-singularity.sh) \| [docs](https://sylabs.io/guides/3.3/user-guide/installation.html)
   
   * Desirable (to run all Singularity examples)
-    - Slurm scheduler
     - MPICH library : [script]({{ page.root }}/files/install-mpich.sh) \| [docs](https://www.mpich.org/documentation/guides/)
     - Nvidia GPU driver (GPU card required)
-  
+    - Slurm scheduler
+
   * Optional (extra applications for last two episodes)
     - Docker : [docs (unofficial)](https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-docker-on-ubuntu-18-04-lts-bionic-beaver.html)
     - HPCCM : [script]({{ page.root }}/files/install-hpccm.sh) \| [docs](https://github.com/NVIDIA/hpc-container-maker/blob/master/docs/getting_started.md)
