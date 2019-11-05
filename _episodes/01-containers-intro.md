@@ -1,5 +1,5 @@
 ---
-title: "Introduction to Containers"
+title: "Introduction to containers"
 teaching: 10
 exercises: 0
 questions:
