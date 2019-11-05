@@ -18,7 +18,7 @@ Options:
 * **BYO Device**: if you have a Linux box, you can install the required software yourself (might take a while):
 
   * Essential (core of the tutorial)
-    - Singularity : [script]({{ page.root }}/files/install-singularity.sh) | [docs](https://sylabs.io/guides/3.3/user-guide/installation.html)
+    - Singularity : [script]({{ page.root }}/files/install-singularity.sh) \| [docs](https://sylabs.io/guides/3.3/user-guide/installation.html)
   
   * Desirable (to run all Singularity examples)
     - Slurm scheduler
