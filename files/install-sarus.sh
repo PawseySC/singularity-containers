@@ -109,10 +109,10 @@ cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain_files/gcc.cmake \
 make -j 4
 sudo make install
 sudo chmod -R go-w $sarus_root/openssh
-if [ "$sarus_ver" != "" ] ; then
+if [ "$sarus_ver" == "1.0.0-rc7" ] ; then
   sudo mkdir -p /var/sarus/centralized_repository /var/sarus/OCIBundleDir
 else
-  sudo mkdir -p /var/sarus/centralized_repository /opt/sarus/latest/var/OCIBundleDir
+  sudo mkdir -p /var/sarus/centralized_repository $sarus_root/var/OCIBundleDir
 fi
 
 # add path to ~/.bashrc
