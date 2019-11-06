@@ -9,6 +9,11 @@ MPICH_CONFIGURE_OPTIONS="--enable-fast=all,O3 --prefix=$MPICH_DIR"
 MPICH_MAKE_OPTIONS="-j4"
 unset F90
 
+sudo apt-get update
+sudo apt-get install -y \
+    build-essential \
+    gfortran
+
 sudo mkdir -p $MPICH_ROOT
 sudo chown ${USERID}:${USERID} $MPICH_ROOT
 
