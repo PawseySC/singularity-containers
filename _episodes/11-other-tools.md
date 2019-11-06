@@ -108,3 +108,5 @@ As at the moment Sarus seems the only practical alternative to running container
 * `sarus rmi`: remove downloaded image.
 
 If you want to test it, you might just use the image `ubuntu:18.04` as a test bed, similar to what we did earlier on with Singularity and Docker.
+
+Note how, at the time of writing, Sarus is still in a phase of beta testing, with the code base still subject to relevant changes.
