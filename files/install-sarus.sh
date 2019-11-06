@@ -3,6 +3,7 @@
 
 # to get latest version from github do not define this
 #sarus_ver="1.0.0-rc7"
+sarus_ver="547af11"
 
 
 # do not change these
@@ -76,9 +77,9 @@ sudo cp -r include/rapidjson /usr/local/include/rapidjson
 
 
 # install python - for integration tests only
-sudo apt-get install -y python python-pip
-pip install setuptools
-pip install nose gcovr pexpect
+#sudo apt-get install -y python python-pip
+#pip install setuptools
+#pip install nose gcovr pexpect
 
 
 # install Sarus
@@ -119,7 +120,7 @@ echo "export PATH=\"$sarus_root/bin:\$PATH\"" >> $(eval echo ~${USERID})/.bashrc
 #sudo echo "export PATH=\"$sarus_root/bin:\$PATH\"" >> /root/.bashrc
 
 # edit configuration (disable home, enable security checks)
-if [ "$sarus_ver" != "" ] ; then
+if [ "$sarus_ver" == "1.0.0-rc7" ] ; then
   sudo sed \
     -e 's;^{;&\'$'\n    "securityChecks": true,;' \
     -e 's;\"source\": *\"/home\",;"source": "/data",;' \
