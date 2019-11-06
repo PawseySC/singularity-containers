@@ -103,7 +103,9 @@ $ sbatch gpu.sh
 
 > ## Running at Pawsey
 > 
-> **Note**: if you try and run this on Zeus at Pawsey, you might want to edit the submission command as follows:
+> **Note**: if you try and run this on Zeus at Pawsey, 
+> you might want to add `module load singularity` after the `#SBATCH` lines in the script.
+> You might also want to edit the submission command as follows:
 > ```
 > $ sbatch --account=<your-pawsey-project> --partition=gpuq gpu.sh
 > ```
