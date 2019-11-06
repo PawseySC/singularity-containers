@@ -1,5 +1,7 @@
 #!/bin/bash
 
+here=$(pwd)
+
 sudo apt-get update
 sudo apt-get install -y \
   btrfs-tools \
@@ -35,12 +37,14 @@ sudo apt-get install -y \
   meson \
   ninja-build
 
+cd $here
 git clone https://github.com/libfuse/libfuse
 cd libfuse && mkdir build && cd build 
 LDFLAGS="-lpthread" meson --prefix /usr/local ..
 ninja
 sudo ninja install 
 
+cd $here
 git clone https://github.com/containers/fuse-overlayfs
 cd fuse-overlayfs
 sh autogen.sh
@@ -50,7 +54,4 @@ sudo make install
 
 sudo apt-get -qq -y install buildah
 sudo apt-get -qq -y install skopeo
-
-
-
 
