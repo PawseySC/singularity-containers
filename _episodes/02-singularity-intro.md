@@ -25,7 +25,7 @@ keypoints:
 
 * native execution of GPU enabled containers.
 
-This tutorial assumes Singularity version 3.0 or higher. Version **3.3.0** is recommended as it offers a smoother, more bug-free experience.
+This tutorial assumes Singularity version 3.0 or higher. Version **3.3.0** or higher is recommended as it offers a smoother, more bug-free experience.
 
 
 ### Container image formats

@@ -11,7 +11,7 @@ Options:
 
 * **SC19 Workshop**: you will will need username and password to access the training VMs, which will be provided by the instructors.
 
-* **Zeus @Pawsey**: if you have access, Singularity can be loaded with `module load singularity/3.3.0`. MPI libraries are configured properly, and GPU applications can be run on the Slurm partition `gpuq`.
+* **Zeus @Pawsey**: if you have access, Singularity can be loaded with `module load singularity`. MPI libraries are configured properly, and GPU applications can be run on the Slurm partition `gpuq`.
 
 * **Nimbus Cloud @Pawsey**: if you have access, both Singularity and Docker are preinstalled in the *Ubuntu Pawsey* base image.
 

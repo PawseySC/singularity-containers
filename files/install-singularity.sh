@@ -28,7 +28,7 @@ go get -u github.com/golang/dep/cmd/dep
 
 # install singularity
 export SING_DIR=/usr/local
-export SING_VERSION=v3.3.0 # or another tag or branch if you like && \
+export SING_VERSION=v3.4.2 # or another tag or branch if you like && \
 go get -d github.com/sylabs/singularity
 cd $GOPATH/src/github.com/sylabs/singularity && \
     git fetch && \
