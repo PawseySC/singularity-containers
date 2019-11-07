@@ -235,3 +235,9 @@ Well, the benchmark figures just below reveal it's quite small..good news!
 > ```
 > {: .bash}
 {: .callout}
+
+
+> ## Running this example with *mpirun* without Slurm
+> 
+> If you want to run this example without schedulers, you might want to use the provided script `mpi_mpirun.sh`.
+{: .callout}
