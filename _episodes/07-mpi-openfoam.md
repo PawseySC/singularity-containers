@@ -12,6 +12,13 @@ keypoints:
 ---
 
 
+> ## Note
+> 
+> To run exercises from this episode on your own, you'll need a machine with MPICH libraries and Slurm scheduler installed.  
+> If you only have MPICH but not Slurm, you can achieve the same outcomes below by executing `./mpi_mpirun.sh` in substitution for `sbatch mpi_sc19.sh`.
+> {: .callout}
+
+
 ### Let's run OpenFoam in a container!
 
 We're going to start this episode with actually running a practical example, and then discuss the way this all works later on.  
@@ -239,5 +246,5 @@ Well, the benchmark figures just below reveal it's quite small..good news!
 
 > ## Running this example with *mpirun* without Slurm
 > 
-> If you want to run this example without schedulers, you might want to use the provided script `mpi_mpirun.sh`.
+> If you want to run this example without schedulers, you might want to execute the provided script `mpi_mpirun.sh`.
 {: .callout}

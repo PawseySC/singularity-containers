@@ -11,6 +11,13 @@ keypoints:
 ---
 
 
+> ## Note
+> 
+> To run exercises from this episode on your own, you'll need a machine with a GPU card and GPU drivers installed.  
+> There are examples for both using and not using the Slurm scheduler.
+> {: .callout}
+
+
 ### Nvidia GPU Cloud
 
 The GPU manufacturer *Nvidia* has a dedicated web registry for container images, shipping GPU optimised applications: <https://ngc.nvidia.com>.
