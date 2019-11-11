@@ -81,7 +81,7 @@ Here, we're saying we want the web server to listen to port 8787 on any IP addre
 
 > ## Communication ports
 > 
-> In order to be able to use the web server, you need to ensure that the machine you are running Singularity from has opened the communication port you're using.  
+> In order to be able to use the web server, you need to ensure that the machine you are running Singularity from has opened the communication port you're using, in this case `8787`.  
 > In cloud virtual machines this will typically involve some setup in the system dashboard.  
 > The machines we provided for this workshop are ready to go in this regard.
 {: .callout}
@@ -180,7 +180,7 @@ Basically, we're starting from the `tidyverse` Docker image we used above, and t
 Once the container image is build, let's use it to start an instance via `singularity instance start`. Note how the other options are the same as in the interactive session above; the only addition is the specification of a name for the instance, `myserver` in this case, that has to follow the image name:
 
 ```
-$ export PASSWORD=$(openssl rand -base64 15) && echo $PASSWORD
+$ export PASSWORD=$(openssl rand -base64 15)
 $ echo $USER && echo $PASSWORD
 $ export R_USER=$USER && [ "$(id -u)" == "1000" ] && export R_USER=rstudio
 
@@ -206,7 +206,7 @@ myserver         18080    /data/work/sc19-containers/demos/08_rstudio/tidyverse_
 ```
 {: .output}
 
-Note that we can run commands from the instance by referring to it as `instance://<INSTANCE-NAME>`, *e.g.
+Note that we can run commands from the instance by referring to it as `instance://<INSTANCE-NAME>`, *e.g.*
 
 ```
 $ singularity exec instance://myserver echo $USER $PASSWORD

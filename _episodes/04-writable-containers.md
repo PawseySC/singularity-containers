@@ -40,6 +40,22 @@ $ singularity exec library://ubuntu:18.04 bash -c " \
 {: .bash}
 
 ```
+204800+0 records in
+204800+0 records out
+209715200 bytes (210 MB, 200 MiB) copied, 0.876716 s, 239 MB/s
+mke2fs 1.44.1 (24-Mar-2018)
+ext2fs_check_if_mount: Can't check if filesystem is mounted due to missing mtab file while determining whether my_overlay is mounted.
+Discarding device blocks: done                            
+Creating filesystem with 204800 1k blocks and 51200 inodes
+Filesystem UUID: 6f1c227f-3c24-4f25-a180-5e65cab14303
+Superblock backups stored on blocks: 
+	8193, 24577, 40961, 57345, 73729
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Creating journal (4096 blocks): done
+Copying files into the device: done
+Writing superblocks and filesystem accounting information: done 
 
 ```
 {: .output}

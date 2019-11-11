@@ -118,6 +118,15 @@ $ singularity exec -C -B $(pwd):$HOME plotly.sif jupyter notebook --no-browser -
 
 Here the `-C` flag is to completely insulate the container from the host, including the use of a volatile `/run` directory instead of the host one.
 
+
+> ## Communication ports
+> 
+> In order to be able to use the web server, you need to ensure that the machine you are running Singularity from has opened the communication port you're using, in this case `8888`.  
+> In cloud virtual machines this will typically involve some setup in the system dashboard.  
+> The machines we provided for this workshop are ready to go in this regard.
+{: .callout}
+
+
 The output on the terminal will look like:
 
 ```

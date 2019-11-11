@@ -84,7 +84,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > 
 > > ## Solution
 > > 
-> > > ```
+> > ```
 > > $ singularity exec library://ubuntu:18.04 pwd
 > > ```
 > > {: .bash}
@@ -111,7 +111,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > {: .bash}
 > > 
 > > ```
-03_blast    03_blast_db 04_trinity  05_gromacs  06_openfoam 07_lolcow   08_rstudio  09_python
+> > 03_blast    03_blast_db 04_trinity  05_gromacs  06_openfoam 07_lolcow   08_rstudio  09_python
 > > ```
 > > {: .output}
 > > 
@@ -216,7 +216,16 @@ This example is adapted from the [BioContainers documentation](http://biocontain
 > > {: .bash}
 > > 
 > > ```
-> > 
+> > INFO:    Converting OCI blobs to SIF format
+> > INFO:    Starting build...
+> > Getting image source signatures
+> > Copying blob sha256:22dc81ace0ea2f45ad67b790cddad29a45e206d51db0af826dc9495ba21a0b06
+> >  40.97 MiB / 40.97 MiB [====================================================] 1s
+> > [..]
+> > Writing manifest to image destination
+> > Storing signatures
+> > INFO:    Creating SIF file...
+> > INFO:    Build complete: /data/singularity/.singularity/cache/oci-tmp/238717ec69830ec62a19fc05c6f70183f218a13f7678864060f0157dc63dc54f/blast_v2.2.31_cv2.sif
 > > 
 > > USAGE
 > >   blastp [-h] [-help] [-import_search_strategy filename]
