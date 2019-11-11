@@ -163,7 +163,7 @@ As a result you should now have a plot saved as a `.png` file.
 
 ### Bonus: another Machine Learning Example
 
-Let's try another ML example. We'll build another container image that uses Jupyter. For this this example, change directory to:
+**If time allows**, let's try another ML example. We'll build another container image that uses Jupyter. For this this example, change directory to:
 
 ```
 $ cd $SC19/demos/09_python/image-classification
