@@ -324,9 +324,9 @@ Bioinformaticians should keep in mind another container registry, [Quay](https:/
 Nvidia maintains the [Nvidia GPU Cloud (NGC)](https://ngc.nvidia.com), hosting an increasing number of containerised applications optimised to run on GPUs.
 
 
-> ## Pull and run a Python Miniconda container ##
+> ## Pull and run a Python container ##
 > 
-> How would you pull the following container image from Docker Hub, `continuumio/miniconda3:4.5.12`?
+> How would you pull the following container image from Docker Hub, `python:3-slim`?
 > 
 > Once you've pulled it, enquire the Python version inside the container by running `python --version`.
 > 
@@ -335,19 +335,19 @@ Nvidia maintains the [Nvidia GPU Cloud (NGC)](https://ngc.nvidia.com), hosting a
 > > Pull: 
 > > 
 > > ```
-> > $ singularity pull docker://continuumio/miniconda3:4.7.12
+> > $ singularity pull docker://python:3-slim
 > > ```
 > > {: .bash}
 > > 
 > > Get Python version:
 > > 
 > > ```
-> > $ singularity exec ./miniconda3_4.7.12.sif python --version
+> > $ singularity exec ./python_3-slim.sif python --version
 > > ```
 > > {: .bash}
 > > 
 > > ```
-> > Python 3.7.4
+> > Python 3.8.0
 > > ```
 > > {: .output}
 > {: .solution}

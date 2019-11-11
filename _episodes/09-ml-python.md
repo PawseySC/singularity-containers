@@ -33,22 +33,16 @@ There is an executable script called `helloworld.py`.
 
 > ## Use a Python container
 > 
-> Can you use Singularity to run `helloworld.py` using the container `python:3.8-slim`?
+> Can you use Singularity to run `helloworld.py` using the container `python:3-slim`?
 > 
 > > ## Solution
 > > 
 > > ```
-> > $ singularity exec docker://python:3.8-slim ./helloworld.py
+> > $ singularity exec docker://python:3-slim ./helloworld.py
 > > ```
 > > {: .bash}
 > > 
 > > ```
-> > INFO:    Converting OCI blobs to SIF format
-> > INFO:    Starting build...
-> > [..]
-> > INFO:    Creating SIF file...
-> > INFO:    Build complete: /data/singularity/.singularity/cache/oci-tmp/c8f8cf71e80d0ca6d71858ac38dda8027637b04ade825b6f418b4e2da832c63a/python_3.8-slim.sif
-> > 
 > > Hello World!
 > > ```
 > > {: .output}
