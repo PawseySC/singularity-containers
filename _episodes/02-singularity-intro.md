@@ -56,7 +56,7 @@ $ cd demos/02_singularity
 > ```
 > {: .bash}
 > 
-> Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
+> This will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
 {: .callout}
 
 

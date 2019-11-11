@@ -25,13 +25,19 @@ We're going to start this episode with actually running a practical example, and
 We're using OpenFoam, a widely popular package for Computational Fluid Dynamics simulations, which is able to massively scale in parallel architectures up to thousands of processes, by leveraging an MPI library.  
 The sample inputs come straight from the OpenFoam installation tree, namely `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicHill/steadyState/`.
 
-First, let us cd into the demo directory, and download an appropriate container image:
+First, let us cd into the demo directory,, ensure that `$SIFPATH` is defined, and verify that the OpenFoam container image has been downloaded:
 
 ```
 $ cd $SC19/demos/07_openfoam
-$ singularity pull library://marcodelapierre/beta/openfoam:v1812
+$ export SIFPATH=$SC19/demos/sif
+$ ls $SIFPATH/openfoam_v1812.sif
 ```
 {: .bash}
+
+```
+/home/ubuntu/sc19-containers/demos/sif/openfoam_v1812.sif
+```
+{: .output}
 
 Now, let us use the Slurm scheduler to submit the job script `mpi_sc19.sh`, that will run the sample simulation:
 
@@ -48,9 +54,8 @@ $ ls -ltr
 {: .bash}
 
 ```
-total 1121656
+total 132
 drwxr-sr-x  2 mdelapierre pawsey0001       4096 Nov  5 15:45 0
--rwxr-x---+ 1 mdelapierre pawsey0001 1148433339 Nov  6 23:54 openfoam_v1812.sif
 -rw-rw----+ 1 mdelapierre pawsey0001        927 Nov  7 00:02 update-settings.sh
 drwxr-sr-x  2 mdelapierre pawsey0001       4096 Nov  7 00:02 system
 -rw-rw----+ 1 mdelapierre pawsey0001        775 Nov  7 00:25 mpi.sh
@@ -85,7 +90,6 @@ Let's have a look at the content of the script (`mpi_sc19.sh`) we executed throu
 #SBATCH --ntasks=2
 #SBATCH --ntasks-per-node=2
 #SBATCH --time=00:20:00
-#SBATCH --export=NONE
 
 
 # this configuration depends on the host
@@ -94,28 +98,28 @@ export SINGULARITYENV_LD_LIBRARY_PATH="/opt/mpich/mpich-3.1.4/apps/lib"
 
 
 # pre-processing
-srun --export=all -n 1 \
-  singularity exec openfoam_v1812.sif \
+srun -n 1 \
+  singularity exec $SIFPATH/openfoam_v1812.sif \
   blockMesh | tee log.blockMesh
 
-srun --export=all -n 1 \
-  singularity exec openfoam_v1812.sif \
+srun -n 1 \
+  singularity exec $SIFPATH/openfoam_v1812.sif \
   topoSet | tee log.topoSet
 
-srun --export=all -n 1 \
-  singularity exec openfoam_v1812.sif \
+srun -n 1 \
+  singularity exec $SIFPATH/openfoam_v1812.sif \
   decomposePar -fileHandler uncollated | tee log.decomposePar
 
 
 # run OpenFoam with MPI
-srun --export=all -n 2 \
-  singularity exec openfoam_v1812.sif \
+srun -n 2 \
+  singularity exec $SIFPATH/openfoam_v1812.sif \
   simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
 
 
 # post-processing
-srun --export=all -n 1 \
-  singularity exec openfoam_v1812.sif \
+srun -n 1 \
+  singularity exec $SIFPATH/openfoam_v1812.sif \
   reconstructPar -latestTime -fileHandler uncollated | tee log.reconstructPar
 ```
 {: .bash}

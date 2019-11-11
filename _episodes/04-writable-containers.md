@@ -144,19 +144,17 @@ The subdirectory we are in, `trinity_test_data/` contains sample inputs for a ge
 {: .challenge}
 
 
-> ## Pull the Trinity container
-> 
-> Now, let's pull the Trinity image from Docker hub, `trinityrnaseq/trinityrnaseq:2.8.6` (this might take a while). What command do you need to run to this end?
-> 
-> > ## Solution
-> > 
-> > ```
-> > $ singularity pull docker://trinityrnaseq/trinityrnaseq:2.8.6
-> > ```
-> > {: .bash}
-> {. solution}
-{: .challenge}
+Now, let's verify that the Trinity image from Docker hub, `trinityrnaseq/trinityrnaseq:2.8.6`, has been correctly downloaded into `$SIFPATH`:
 
+```
+$ ls $SIFPATH/trinity*
+```
+{: .bash}
+
+```
+/home/ubuntu/sc19-containers/demos/sif/trinityrnaseq_2.8.6.sif
+```
+{: .output}
 
 Now, we're going to run a test assembly with our sample dataset, using the directory we just created in the OverlayFS to write the outputs. In this small case, only about a hundred output files are created. However, the Trinity assembly workflow can easily produce up to a million files, making the use of OverlayFS an interesting choice to reduce the workload on a host parallel filesystem.
 
@@ -178,7 +176,7 @@ Now, we're going to run a test assembly with our sample dataset, using the direc
 > > ## Solution
 > > 
 > > ```
-> > $ singularity exec --overlay my_overlay ./trinityrnaseq_2.8.6.sif \
+> > $ singularity exec --overlay my_overlay $SIFPATH/trinityrnaseq_2.8.6.sif \
 > >   Trinity \
 > >   --seqType fq --left trinity_test_data/reads.left.fq.gz  --right trinity_test_data/reads.right.fq.gz \
 > >   --max_memory 1G --CPU 1 --output /trinity_out_dir

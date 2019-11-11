@@ -31,27 +31,25 @@ You can browse the available containerised packages through the various category
 
 For our example we are going to use Gromacs, a quite popular molecular dynamics package, among the ones that have been optimised to run on GPUs through Nvidia containers.
 
-First, let us cd into `demos/05_gromacs`:
+First, let us cd into `demos/05_gromacs`, and ensure that `$SIFPATH` is defined:
 
 ```
 $ cd $SC19/demos/05_gromacs
+$ export SIFPATH=$SC19/demos/sif
 ```
 {: .bash}
 
+Now, let's verify that the container image `nvcr.io/hpc/gromacs:2018.2` has been correctly downloaded:
 
-> ## Pull the container
-> 
-> Now, try and `pull` the container `nvcr.io/hpc/gromacs:2018.2`. **Hint**: container images in this registry are in Docker format, so you will need to prepend the prefix `docker://`.
-> 
-> > ## Solution
-> > 
-> > ```
-> > $ singularity pull docker://nvcr.io/hpc/gromacs:2018.2
-> > ```
-> > {: .bash}
-> {: .solution}
-{: .challenge}
+```
+$ ls $SIFPATH/gromacs*
+```
+{: .bash}
 
+```
+/home/ubuntu/sc19-containers/demos/sif/gromacs_2018.2.sif
+```
+{: .output}
 
 The current directory has got sample input files picked from the collection of [Gromacs benchmark examples](ftp://ftp.gromacs.org/pub/benchmarks/water_GMX50_bare.tar.gz). In particular, we're going to use the subset `water-cut1.0_GMX50_bare/1536/`. First let's `gunzip` one of the required input files:
 
@@ -68,12 +66,12 @@ Do not execute the next two commands, let us just have a look at them.
 
 * Preliminary step
   ```
-  $ singularity exec --nv docker://nvcr.io/hpc/gromacs:2018.2 gmx grompp -f pme.mdp
+  $ singularity exec --nv $SIFPATH/gromacs_2018.2.sif gmx grompp -f pme.mdp
   ```
   {: .bash}
 * Production step
   ```
-  $ singularity exec --nv docker://nvcr.io/hpc/gromacs:2018.2 gmx mdrun -ntmpi 1 -nb gpu -pin on -v -noconfout -nsteps 5000 -s topol.tpr -ntomp 1
+  $ singularity exec --nv $SIFPATH/gromacs_2018.2.sif gmx mdrun -ntmpi 1 -nb gpu -pin on -v -noconfout -nsteps 5000 -s topol.tpr -ntomp 1
   ```
   {: .bash} 
 
@@ -86,16 +84,13 @@ GPU resources are usually made available in HPC systems through schedulers, to w
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --time=01:00:00
-#SBATCH --export=NONE
 
 # run Gromacs preliminary step with container
-srun --export=all \
-    singularity exec --nv docker://nvcr.io/hpc/gromacs:2018.2 \
+srun singularity exec --nv $SIFPATH/gromacs_2018.2.sif \
     gmx grompp -f pme.mdp
 
 # Run Gromacs MD with container
-srun --export=all \
-    singularity exec --nv docker://nvcr.io/hpc/gromacs:2018.2 \
+srun singularity exec --nv $SIFPATH/gromacs_2018.2.sif \
     gmx mdrun -ntmpi 1 -nb gpu -pin on -v -noconfout -nsteps 5000 -s topol.tpr -ntomp 1
 ```
 {: .bash}

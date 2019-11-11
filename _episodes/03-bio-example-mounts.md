@@ -183,31 +183,31 @@ $ export SINGULARITY_BINBPATH="dir1,dir2,dir3"
 We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro). BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics tools.  
 This example is adapted from the [BioContainers documentation](http://biocontainers-edu.biocontainers.pro/en/latest/running_example.html).
 
+We're going to use the BLAST image `biocontainers/blast:v2.2.31_cv2`, which we previously downloaded in `$SIFPATH`. Let's verify it's there:
+
+```
+$ ls $SIFPATH/blast*
+```
+{: .bash}
+
+```
+/home/ubuntu/sc19-containers/demos/sif/blast_v2.2.31_cv2.sif
+```
+{: .output}
 
 > ## Run a test command
 > 
-> To begin, let us run a simple command using the BLAST image `biocontainers/blast:v2.2.31_cv2`, 
-> for instance `blastp -help`, to download the image in the cache and to verify that it actually works:
+> To begin, let us run a simple command using the downloaded image `$SIFPATH/blast_v2.2.31_cv2.sif`, 
+> for instance `blastp -help`, to verify that it actually works:
 > 
 > > ## Solution
 > > 
 > > ```
-> > $ singularity exec docker://biocontainers/blast:v2.2.31_cv2 blastp -help
+> > $ singularity exec $SIFPATH/blast_v2.2.31_cv2.sif blastp -help
 > > ```
 > > {: .bash}
 > > 
 > > ```
-> > INFO:    Converting OCI blobs to SIF format
-> > INFO:    Starting build...
-> > Getting image source signatures
-> > Copying blob sha256:22dc81ace0ea2f45ad67b790cddad29a45e206d51db0af826dc9495ba21a0b06
-> >  40.97 MiB / 40.97 MiB [====================================================] 1s
-> > [..]
-> > Writing manifest to image destination
-> > Storing signatures
-> > INFO:    Creating SIF file...
-> > INFO:    Build complete: /data/singularity/.singularity/cache/oci-tmp/238717ec69830ec62a19fc05c6f70183f218a13f7678864060f0157dc63dc54f/blast_v2.2.31_cv2.sif
-> > 
 > > USAGE
 > >   blastp [-h] [-help] [-import_search_strategy filename]
 > > [..]
@@ -242,7 +242,7 @@ $ gunzip zebrafish.1.protein.faa.gz
 > > ## Solution
 > > 
 > > ```
-> > $ singularity exec docker://biocontainers/blast:v2.2.31_cv2 makeblastdb -in zebrafish.1.protein.faa -dbtype prot
+> > $ singularity exec $SIFPATH/blast_v2.2.31_cv2.sif makeblastdb -in zebrafish.1.protein.faa -dbtype prot
 > > ```
 > > {: .bash}
 > {: .solution}
@@ -272,7 +272,7 @@ $ cd ../03_blast
 > > ## Solution
 > > 
 > > ```
-> > $ singularity exec -B $SC19/demos/03_blast_db docker://biocontainers/blast:v2.2.31_cv2 blastp -query P04156.fasta -db $SC19/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
+> > $ singularity exec -B $SC19/demos/03_blast_db $SIFPATH/blast_v2.2.31_cv2.sif blastp -query P04156.fasta -db $SC19/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
 > > ```
 > > {: .bash}
 > {: .solution}
