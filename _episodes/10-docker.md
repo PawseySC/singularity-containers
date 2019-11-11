@@ -40,6 +40,13 @@ To get a more detailed introduction on Docker containers, see this other worksho
 
 ### Downloading images and running containers
 
+Let's cd into the relevant demo directory:
+
+```
+$ cd $SC19/demos/10_lolcow_docker
+```
+{: .bash}
+
 Let's download a Ubuntu container image, using `docker pull`:
 
 ```
@@ -196,14 +203,7 @@ Deleted: sha256:cc967c529ced563b7746b663d98248bc571afdb3c012019d7f54d6c092793b8b
 
 It can be interesting to have an idea of how to build images with Docker. In fact, as we mentioned earlier on, the layered image format of Docker can sometimes help in reducing image development time. In addition, Docker images are quite universally compatible, as they can be run by Singularity, too.
 
-Let's cd into the relevant demo directory:
-
-```
-$ cd $SC19/demos/10_lolcow_docker
-```
-{: .bash}
-
-We're going to build a very similar image to the one we built with Singularity. The `Dockerfile` recipe file looks like:
+We're going to build a very similar image to the one we built with Singularity. The `Dockerfile` recipe file in the demo directory looks like:
 
 ```
 FROM ubuntu:18.04

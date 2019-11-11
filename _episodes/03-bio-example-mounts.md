@@ -12,33 +12,14 @@ keypoints:
 ---
 
 
-### Get ready for the hands-on
-
-Before we start, let us ensure we have got the required files to run the tutorials.
-
-```
-$ cd ~
-```
-{: .bash}
-
-If it does not exist already, download the following Github repo. Then `cd` into it, assign its path to a handy variable, *e.g.* `SC19`, and finally `cd` into `demos`:
-
-```
-$ git clone https://github.com/PawseySC/sc19-containers
-$ cd sc19-containers
-$ export SC19=$(pwd)
-$ cd demos
-```
-{: .bash}
-
-
-> ## Note on this tutorial: local copies of container images
-> 
-> In the interest of time, in the software setup for this tutorial we might have pre-cached some of the required container images.
-{: .callout}
-
-
 ### Access to host directories
+
+Let's start and `cd` into the root demo directory:
+
+```
+$ cd $SC19/demos
+```
+{: .bash}
 
 What directories can we access from the container?
 
@@ -238,10 +219,10 @@ This example is adapted from the [BioContainers documentation](http://biocontain
 {: .challenge}
 
 
-Now, the `03_blast` demo directory contains a human prion FASTA sequence, `P04156.fasta`, whereas another directory, `demos/03_blast_db`, contains a gzipped reference database to blast against, `zebrafish.1.protein.faa.gz`. Let us `cd` to the latter directory and uncompress the database:
+Now, the `demos/03_blast` demo directory contains a human prion FASTA sequence, `P04156.fasta`, whereas another directory, `demos/03_blast_db`, contains a gzipped reference database to blast against, `zebrafish.1.protein.faa.gz`. Let us `cd` to the latter directory and uncompress the database:
 
 ```
-$ cd $SC19/demos/03_blast
+$ cd $SC19/demos/03_blast_db
 $ gunzip zebrafish.1.protein.faa.gz
 ```
 {: .bash}

@@ -13,6 +13,53 @@ keypoints:
 ---
 
 
+### Get ready for the hands-on
+
+Before we start, let us ensure we have got the required files to run the tutorials.
+
+```
+$ cd ~
+```
+{: .bash}
+
+If it does not exist already, download the following Github repo. Then `cd` into it, assign its path to a handy variable, *e.g.* `SC19`, and finally `cd` into `demos/02_singularity`:
+
+```
+$ git clone https://github.com/PawseySC/sc19-containers
+$ cd sc19-containers
+$ export SC19=$(pwd)
+$ export SIFPATH=$SC19/demos/sif
+$ cd demos/02_singularity
+```
+{: .bash}
+
+
+> ## Local copies of container images: SC19 Attendees READ THIS
+> 
+> In the interest of time, in the software setup for this tutorial we have pre-cached some of the required container images.
+> 
+> What you have to do is just to create a symbolic link between the path to the images (provided by the instructors) and $SIFPATH:
+> 
+> ```
+> $ ln -s <PATH-BY-INSTRUCTORS> $SIFPATH
+> ```
+> {: .bash}
+> 
+> ## Regular users of this tutorial: read this
+> 
+> Open a second terminal in the machine where you're running the tutorial, then run the script `pull_big_images.sh` to start downloading a few images that you'll require later: 
+> 
+> ```
+> $ export SC19=~/sc19-containers
+> $ export SIFPATH=$SC19/demos/sif
+> $ bash $SC19/demos/pull_big_images.sh
+> ```
+> {: .bash}
+> 
+> Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
+{: .callout}
+
+
 ### Singularity: a container engine for HPC
 
 [Singularity](https://sylabs.io/singularity/) is developed and maintained by [Sylabs](https://sylabs.io), and was designed from scratch as a container engine for HPC applications, and this is clearly reflected in some of its main features:
