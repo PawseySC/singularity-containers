@@ -202,7 +202,7 @@ $ singularity instance list
 
 ```
 INSTANCE NAME    PID      IMAGE
-myserver         18080    /data/work/sc19-containers/demos/08_rstudio/tidyverse_long.sif
+myserver         18080    /home/ubuntu/sc19-containers/demos/08_rstudio/tidyverse_long.sif
 ```
 {: .output}
 
@@ -221,6 +221,6 @@ $ singularity instance stop myserver
 {: .bash}
 
 ```
-Stopping myserver instance of /data/work/sc19-containers/demos/08_rstudio/tidyverse_long.sif (PID=18080)
+Stopping myserver instance of /home/ubuntu/sc19-containers/demos/08_rstudio/tidyverse_long.sif (PID=18080)
 ```
 {: .output}

@@ -57,7 +57,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > {: .bash}
 > 
 > ```
-> /data/work/sc19-containers/demos
+> /home/ubuntu/sc19-containers/demos
 > ```
 > {: .output}
 > 
@@ -71,7 +71,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > {: .bash}
 > > 
 > > ```
-> > /data/work/sc19-containers/demos
+> > /home/ubuntu/sc19-containers/demos
 > > ```
 > > {: .output}
 > > 
@@ -113,7 +113,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > {: .bash}
 > > 
 > > ```
-> > ls: cannot access '/data/work/sc19-containers/_episodes': No such file or directory
+> > ls: cannot access '/home/ubuntu/sc19-containers/_episodes': No such file or directory
 > > ```
 > > {: .output}
 > > 
