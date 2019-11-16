@@ -13,7 +13,7 @@ keypoints:
 
 
 > ## Note
-> 
+>
 > To run exercises from this episode on your own, you'll need a machine with MPICH libraries and Slurm scheduler installed.  
 > If you only have MPICH but not Slurm, you can achieve the same outcomes below by executing `./mpi_mpirun.sh` in substitution for `sbatch mpi_sc19.sh`.
 > {: .callout}
@@ -29,13 +29,12 @@ First, let us cd into the demo directory,, ensure that `$SIFPATH` is defined, an
 
 ```
 $ cd $SC19/demos/07_openfoam
-$ export SIFPATH=$SC19/demos/sif
 $ ls $SIFPATH/openfoam_v1812.sif
 ```
 {: .bash}
 
 ```
-/home/ubuntu/sc19-containers/demos/sif/openfoam_v1812.sif
+/scratch/singularity_images/openfoam_v1812.sif
 ```
 {: .output}
 
@@ -54,22 +53,24 @@ $ ls -ltr
 {: .bash}
 
 ```
-total 132
-drwxr-sr-x  2 mdelapierre pawsey0001       4096 Nov  5 15:45 0
--rw-rw----+ 1 mdelapierre pawsey0001        927 Nov  7 00:02 update-settings.sh
-drwxr-sr-x  2 mdelapierre pawsey0001       4096 Nov  7 00:02 system
--rw-rw----+ 1 mdelapierre pawsey0001        775 Nov  7 00:25 mpi.sh
-drwxrws---+ 4 mdelapierre pawsey0001       4096 Nov  7 00:27 dynamicCode
-drwxr-sr-x  3 mdelapierre pawsey0001       4096 Nov  7 00:27 constant
--rw-rw----+ 1 mdelapierre pawsey0001       3594 Nov  7 00:27 log.blockMesh
--rw-rw----+ 1 mdelapierre pawsey0001       1948 Nov  7 00:27 log.topoSet
--rw-rw----+ 1 mdelapierre pawsey0001       2311 Nov  7 00:28 log.decomposePar
-drwxrws---+ 8 mdelapierre pawsey0001       4096 Nov  7 00:29 processor1
-drwxrws---+ 8 mdelapierre pawsey0001       4096 Nov  7 00:29 processor0
--rw-rw----+ 1 mdelapierre pawsey0001      18573 Nov  7 00:29 log.simpleFoam
--rw-rw----+ 1 mdelapierre pawsey0001      28224 Nov  7 00:29 slurm-4198976.out
--rw-rw----+ 1 mdelapierre pawsey0001       1540 Nov  7 00:29 log.reconstructPar
-drwxrws---+ 3 mdelapierre pawsey0001       4096 Nov  7 00:29 20
+total 80
+-rwxr-xr-x 1 user000 tutorial  1304 Nov 16 17:36 update-settings.sh
+drwxr-xr-x 2 user000 tutorial   141 Nov 16 17:36 system
+-rw-r--r-- 1 user000 tutorial   937 Nov 16 17:36 mpi_sc19.sh
+-rw-r--r-- 1 user000 tutorial   871 Nov 16 17:36 mpi_pawsey.sh
+-rwxr-xr-x 1 user000 tutorial   789 Nov 16 17:36 mpi_mpirun.sh
+drwxr-xr-x 2 user000 tutorial    59 Nov 16 17:36 0
+drwxr-xr-x 4 user000 tutorial    72 Nov 16 22:45 dynamicCode
+drwxr-xr-x 3 user000 tutorial    77 Nov 16 22:45 constant
+-rw-rw-r-- 1 user000 tutorial  3493 Nov 16 22:45 log.blockMesh
+-rw-rw-r-- 1 user000 tutorial  1937 Nov 16 22:45 log.topoSet
+-rw-rw-r-- 1 user000 tutorial  2300 Nov 16 22:45 log.decomposePar
+drwxr-xr-x 8 user000 tutorial    70 Nov 16 22:47 processor1
+drwxr-xr-x 8 user000 tutorial    70 Nov 16 22:47 processor0
+-rw-rw-r-- 1 user000 tutorial 18569 Nov 16 22:47 log.simpleFoam
+drwxr-xr-x 3 user000 tutorial    76 Nov 16 22:47 20
+-rw-r--r-- 1 user000 tutorial 28617 Nov 16 22:47 slurm-10.out
+-rw-rw-r-- 1 user000 tutorial  1529 Nov 16 22:47 log.reconstructPar
 ```
 {: .output}
 
@@ -84,7 +85,7 @@ Let's have a look at the content of the script (`mpi_sc19.sh`) we executed throu
 
 ```
 #!/bin/bash -l
-  
+
 
 #SBATCH --job-name=mpi
 #SBATCH --ntasks=2
@@ -175,7 +176,7 @@ ldconfig
 {: .bash}
 
 > ## Base MPI image at Pawsey
-> 
+>
 > Pawsey maintains an MPICH base image at [pawsey/mpi-base](https://hub.docker.com/r/pawsey/mpi-base).  
 > At the moment, only a Docker image is provided, which of course can also be used by Singularity.
 {: .callout}
@@ -186,9 +187,9 @@ At present, there are just two families of MPI implementations, not ABI compatib
 If you anticipate your application will run in systems with non ABI compatible libraries, you will need to build variants of the image for the two MPI families.
 
 > ## MPI implementations at Pawsey
-> 
+>
 > At present, all Pawsey systems have installed at least one MPICH ABI compatible implementation: CrayMPICH on the Crays (*Magnus* and *Galaxy), IntelMPI on *Zeus*. Therefore, MPICH is the recommended MPI library to install in container images.
-{:. callout}
+{: .callout}
 
 
 * Bind mounts and environment variables need to be setup so that the containerised MPI application can use the host MPI libraries at runtime. Bind mounts can be configured by the administrators, or set up through variables. We're discussing the latter way here.  
@@ -204,20 +205,20 @@ Here, the first variable bind mounts the host path where the MPI installation is
 The second variable ensures that at runtime the container's `LD_LIBRARY_PATH` has the path to the MPICH libraries.
 
 > ## Interconnect libraries and containers
-> 
+>
 > If the HPC system you're using has high speed interconnect infrastructure, than it will also have some system libraries to handle that at the application level. These libraries will need to be exposed to the containers, too, similar to the MPI libraries, if maximum performance are to be achieved.  
 > This can be a challenging task for a user, as it requires knowing details on the installed software stack. System administrators should be able to assist in this regard.
 {: .callout}
 
 > ## Singularity environment variables at Pawsey
-> 
+>
 > In all Pawsey systems, the Singularity module sets up all of the required variables for MPI and interconnect libraries. So this will do the job:
-> 
+>
 > ```
 > $ module load singularity
 > ```
 > {: .bash}
-{: .callout}
+{: .callout}x`  
 
 
 ### MPI performance: container *vs* bare metal
@@ -233,13 +234,13 @@ Well, the benchmark figures just below reveal it's quite small..good news!
 
 
 > ## Running this example at Pawsey
-> 
-> If you try and run this on *Magnus* at Pawsey, 
+>
+> If you try and run this on *Magnus* at Pawsey,
 > you might want to use the script `mpi_pawsey.sh`.  
 > The key differences compared to the one discussed above are:
 > * using `module load singularity` rather than defining environment variables;
 > * declaring the Pawsey Project ID through a `#SBATCH` directive.
-> 
+>
 > Then you can just use the following submission command:
 > ```
 > $ sbatch mpi_pawsey.sh
@@ -249,6 +250,6 @@ Well, the benchmark figures just below reveal it's quite small..good news!
 
 
 > ## Running this example with *mpirun* without Slurm
-> 
+>
 > If you want to run this example without schedulers, you might want to execute the provided script `mpi_mpirun.sh`.
 {: .callout}

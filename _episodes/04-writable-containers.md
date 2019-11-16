@@ -48,14 +48,14 @@ ext2fs_check_if_mount: Can't check if filesystem is mounted due to missing mtab 
 Discarding device blocks: done                            
 Creating filesystem with 204800 1k blocks and 51200 inodes
 Filesystem UUID: 6f1c227f-3c24-4f25-a180-5e65cab14303
-Superblock backups stored on blocks: 
+Superblock backups stored on blocks:
 	8193, 24577, 40961, 57345, 73729
 
 Allocating group tables: done                            
 Writing inode tables: done                            
 Creating journal (4096 blocks): done
 Copying files into the device: done
-Writing superblocks and filesystem accounting information: done 
+Writing superblocks and filesystem accounting information: done
 
 ```
 {: .output}
@@ -68,7 +68,7 @@ The command `mkfs.ext3` is then used to format the file as a *ext3* filesystem i
 
 ### Mount a persistent overlay filesystem
 
-Let's give it a go with the persistent filesystem image we have just created. We can mount it at container runtime by using the flag `--overlay` followed by the image filename: 
+Let's give it a go with the persistent filesystem image we have just created. We can mount it at container runtime by using the flag `--overlay` followed by the image filename:
 
 ```
 $ singularity shell --overlay my_overlay library://ubuntu:18.04
@@ -88,31 +88,31 @@ $ exit
 
 
 > ## Access a pre-existing overlay filesystem
-> 
+>
 > Once exited the container, the newly created directory is not available in the host filesystem. Try and inspect the content of `/australia` from the host.
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ ls /australia
 > > ```
 > > {: .bash}
-> > 
+> >
 > > ```
 > > ls: /australia: No such file or directory
 > > ```
 > > {: .output}
 > {: .solution}
-> 
+>
 > But, if we run another container and mount the overlay, the files will still be there. Try and `ls` from inside a container, using the appropriate flag.
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec --overlay my_overlay library://ubuntu:18.04 ls /australia
 > > ```
 > > {: .bash}
-> > 
+> >
 > > ```
 > > act wa
 > > ```
@@ -126,21 +126,21 @@ Note how the newly created directories and files are persistent, therefore can b
 
 ### Run a Trinity genome assembly from inside the container
 
-The subdirectory we are in, `trinity_test_data/` contains sample inputs for a genome assembly, coming from the `Docker/test_data/` subset in the [Trinity Github repo](https://github.com/trinityrnaseq/trinityrnaseq).
+A subdirectory in the directory we are in, `trinity_test_data/` contains sample inputs for a genome assembly, coming from the `Docker/test_data/` subset in the [Trinity Github repo](https://github.com/trinityrnaseq/trinityrnaseq).
 
 
 > ## Create the output directory within an OverlayFS
-> 
+>
 > For this exercise we are going to reuse the file system image file `my_overlay`.  
 > To begin with, use the Singularity image `ubuntu:18.04` to create the directory `/trinity_out_dir` in the OverlayFS.
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec --overlay my_overlay library://ubuntu:18.04 mkdir /trinity_out_dir
 > > ```
 > > {: .bash}
-> {. solution}
+> {: .solution}
 {: .challenge}
 
 
@@ -152,7 +152,7 @@ $ ls $SIFPATH/trinity*
 {: .bash}
 
 ```
-/home/ubuntu/sc19-containers/demos/sif/trinityrnaseq_2.8.6.sif
+/scratch/singularity_images/trinityrnaseq_2.8.6.sif
 ```
 {: .output}
 
@@ -160,29 +160,29 @@ Now, we're going to run a test assembly with our sample dataset, using the direc
 
 
 > ## Run the Trinity workflow
-> 
+>
 > This is the command to be run:
-> 
+>
 > ```
 > $ Trinity \
 >   --seqType fq --left trinity_test_data/reads.left.fq.gz  --right trinity_test_data/test_data/reads.right.fq.gz \
 >   --max_memory 1G --CPU 1 --output <OUTPUT-DIRECTORY>
 > ```
 > {: .bash}
-> 
+>
 > Can you run it using Singularity and OverlayFS? **Hint**: you will need to specify the appropriate directory for `--output`.  
-> Expect the run to take approximately 5 minutes.
-> 
+> Expect the run to take approximately 2-3 minutes.
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec --overlay my_overlay $SIFPATH/trinityrnaseq_2.8.6.sif \
 > >   Trinity \
 > >   --seqType fq --left trinity_test_data/reads.left.fq.gz  --right trinity_test_data/reads.right.fq.gz \
 > >   --max_memory 1G --CPU 1 --output /trinity_out_dir
 > > ```
-> > {. bash}
-> {. solution}
+> > {: .bash}
+> {: .solution}
 {: .challenge}
 
 
@@ -229,7 +229,7 @@ $ ls -l Trinity.fasta*
 
 In some situations, you might need your container to be writable not to store persistent output files, but just to write temporary service files.  
 *E.g.* this can happen with applications that want to write a dot-file in your home, such as a Python package, or containerised Jupyter notebooks that need to write runtime information under `/run`.  
-In this context, a persistent overlay filesystem seems an overshooting. There alternative, simpler ways to set this up.
+In this context, a persistent overlay filesystem might more work than is desired. There are alternative, simpler ways to set this up.
 
 Singularity has a flag for rendering containers from SIF image files ephemerally writable. `--writable-tmpfs` will allocate a small amount of RAM for this purpose (configured by the sys admins, by default just a bunch of MB), e.g.:
 
@@ -238,7 +238,7 @@ $ singularity exec --writable-tmpfs library://ubuntu:18.04 touch ~/write-to-home
 ```
 {: .bash}
 
-Unless `$HOME` is bind mounted to the container (for security reasons it shouldn't), the newly created file will be gone after the container exits:
+Unless `$HOME` is bind mounted to the container (for security reasons it shouldn't be), the newly created file will be gone after the container exits:
 
 ```
 $ ls ~/write-to-home
@@ -247,9 +247,9 @@ $ ls ~/write-to-home
 
 ```
 ls: /home/ubuntu/write-to-home: No such file or directory
-the Docker test bedoutput}
+```
+{: .output}
 
- to a directory owned by *root*, such as `/run`.  
 In this case, the solution is to create a host directory and bind mount it as the path you need to write into, *e.g.*:
 
 ```

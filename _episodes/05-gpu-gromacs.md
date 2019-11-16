@@ -12,10 +12,10 @@ keypoints:
 
 
 > ## Note
-> 
+>
 > To run exercises from this episode on your own, you'll need a machine with a GPU card and GPU drivers installed.  
 > There are examples for both using and not using the Slurm scheduler.
-> {: .callout}
+{: .callout}
 
 
 ### Nvidia GPU Cloud
@@ -35,7 +35,6 @@ First, let us cd into `demos/05_gromacs`, and ensure that `$SIFPATH` is defined:
 
 ```
 $ cd $SC19/demos/05_gromacs
-$ export SIFPATH=$SC19/demos/sif
 ```
 {: .bash}
 
@@ -47,7 +46,7 @@ $ ls $SIFPATH/gromacs*
 {: .bash}
 
 ```
-/home/ubuntu/sc19-containers/demos/sif/gromacs_2018.2.sif
+/scratch/singularity_images/gromacs_2018.2.sif
 ```
 {: .output}
 
@@ -73,7 +72,7 @@ Do not execute the next two commands, let us just have a look at them.
   ```
   $ singularity exec --nv $SIFPATH/gromacs_2018.2.sif gmx mdrun -ntmpi 1 -nb gpu -pin on -v -noconfout -nsteps 5000 -s topol.tpr -ntomp 1
   ```
-  {: .bash} 
+  {: .bash}
 
 GPU resources are usually made available in HPC systems through schedulers, to which Singularity natively and transparently interfaces. So, for instance let us have a look in the current directory at the Slurm batch script called `gpu.sh`:
 
@@ -104,8 +103,8 @@ $ sbatch gpu.sh
 
 
 > ## Running at Pawsey
-> 
-> If you try and run this on *Zeus* at Pawsey, 
+>
+> If you try and run this on *Zeus* at Pawsey,
 > you might want to add `module load singularity` after the `#SBATCH` lines in the script.
 > You might also want to edit the submission command as follows:
 > ```
