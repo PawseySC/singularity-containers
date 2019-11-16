@@ -31,11 +31,12 @@ $ ls /
 {: .bash}
 
 ```
-bin   data  etc   initrd.img      lib    lost+found  mnt  proc  run   snap  sys    tmp  var      vmlinuz.old
-boot  dev   home  initrd.img.old  lib64  media       opt  root  sbin  srv   test1  usr  vmlinuz
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  scratch  shared  srv  sys  tmp  usr  var
 ```
 {: .output}
 
+
+Now let's look at the root directory when we're in the container
 ```
 $ singularity exec library://ubuntu:18.04 ls /
 ```
@@ -48,83 +49,82 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 
 
 > ## In which directory is the container running?
-> 
+>
 > For reference, let's check the host first:
-> 
+>
 > ```
 > $ pwd
 > ```
 > {: .bash}
-> 
+>
 > ```
 > /home/ubuntu/sc19-containers/demos
 > ```
 > {: .output}
-> 
-> Now inspect the container.
-> 
+>
+> Now inspect the container (HINT: we need run 'pwd' in the container)
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec library://ubuntu:18.04 pwd
 > > ```
 > > {: .bash}
-> > 
 > > ```
 > > /home/ubuntu/sc19-containers/demos
 > > ```
 > > {: .output}
-> > 
+> >
 > > Host and container working directories coincide!
 > {: .solution}
 {: .challenge}
 
 
 > ## Can we see the content of the current directory inside the container?
-> 
-> Hopefully yes..
-> 
+>
+> Hopefully yes
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec library://ubuntu:18.04 ls
 > > ```
 > > {: .bash}
-> > 
+> >
 > > ```
 > > 03_blast    03_blast_db 04_trinity  05_gromacs  06_openfoam 07_lolcow   08_rstudio  09_python
 > > ```
 > > {: .output}
-> > 
+> >
 > > Indeed we can!
 > {: .solution}
 {: .challenge}
 
 
 > ## How about other directories in the host?
-> 
+>
 > For instance, let us inspect `$SC19/_episodes`.
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec library://ubuntu:18.04 ls $SC19/_episodes
 > > ```
 > > {: .bash}
-> > 
+> >
 > > ```
 > > ls: cannot access '/home/ubuntu/sc19-containers/_episodes': No such file or directory
 > > ```
 > > {: .output}
-> > 
-> > Host directories external to the current directory are not visible! How can we fix this? Read on..
+> >
+> > Host directories external to the current directory are not visible! How can we fix this? Read on...
 > {: .solution}
 {: .challenge}
 
 
 ### Bind mounting host directories
 
-Singularity has the runtime flag `--bind`, `-B` in short, to mount host directories. 
+Singularity has the runtime flag `--bind`, `-B` in short, to mount host directories.
 
 The long syntax allows to map the host dir onto a container dir with a different name/path, `-B hostdir:containerdir`.  
 The short syntax just mounts the dir using the same name and path: `-B hostdir`.
@@ -144,7 +144,7 @@ $ singularity exec -B $SC19/_episodes library://ubuntu:18.04 ls $SC19/_episodes
 
 Now we are talking!
 
-If you need to mount multiple directories, you can either repeat the `-B` flag multiple times, or use a comma-separated list of paths, $i.e.$ 
+If you need to mount multiple directories, you can either repeat the `-B` flag multiple times, or use a comma-separated list of paths, *i.e.*
 ```
 -B dir1,dir2,dir3
 ```
@@ -158,20 +158,20 @@ $ export SINGULARITY_BINBPATH="dir1,dir2,dir3"
 
 
 > ## Mounting $HOME
-> 
-> Depending on the site configuration of Singularity, 
-> user home directories might or might not be mounted into containers by default. 
-> We do recommend avoid mounting home whenever possible, 
-> to avoid sharing potentially sensitive data, such as SSH keys, with the container, 
+>
+> Depending on the site configuration of Singularity,
+> user home directories might or might not be mounted into containers by default.
+> We do recommend avoid mounting home whenever possible,
+> to avoid sharing potentially sensitive data, such as SSH keys, with the container,
 > especially if exposing it to the public through a web service.
-> 
-> If you need to share data inside the container home, you might just mount that specific file/directory, *e.g.* 
+>
+> If you need to share data inside the container home, you might just mount that specific file/directory, *e.g.*
 > ```
 > -B $HOME/.local
 > ```
 > {: .bash}
-> 
-> Or, if you want a full fledged home, you might define an alternative host directory to act as your container home, as in 
+>
+> Or, if you want a full fledged home, you might define an alternative host directory to act as your container home, as in
 > ```
 > -B /path/to/fake/home:$HOME
 > ```
@@ -196,17 +196,17 @@ $ ls $SIFPATH/blast*
 {: .output}
 
 > ## Run a test command
-> 
-> To begin, let us run a simple command using the downloaded image `$SIFPATH/blast_v2.2.31_cv2.sif`, 
+>
+> To begin, let us run a simple command using the downloaded image `$SIFPATH/blast_v2.2.31_cv2.sif`,
 > for instance `blastp -help`, to verify that it actually works:
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec $SIFPATH/blast_v2.2.31_cv2.sif blastp -help
 > > ```
 > > {: .bash}
-> > 
+> >
 > > ```
 > > USAGE
 > >   blastp [-h] [-help] [-import_search_strategy filename]
@@ -229,22 +229,33 @@ $ gunzip zebrafish.1.protein.faa.gz
 
 
 > ## Prepare the database
-> 
+>
 > We then need to prepare the zebrafish database with `makeblastdb` for the search, using the following command through a container:
-> 
+>
 > ```
 > $ makeblastdb -in zebrafish.1.protein.faa -dbtype prot
 > ```
 > {: .bash}
-> 
+>
 > Try and run it via Singularity.
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec $SIFPATH/blast_v2.2.31_cv2.sif makeblastdb -in zebrafish.1.protein.faa -dbtype prot
 > > ```
 > > {: .bash}
+> > ```
+> > Building a new DB, current time: 11/16/2019 19:14:43
+> > New DB name:   /home/user000/sc19-containers/demos/03_blast_db/zebrafish.1.protein.faa
+> > New DB title:  zebrafish.1.protein.faa
+> > Sequence type: Protein
+> > Keep Linkouts: T
+> > Keep MBits: T
+> > Maximum file size: 1000000000B
+> > Adding sequences from FASTA; added 52951 sequences in 1.34541 seconds.
+> > ```
+> > {: .output}
 > {: .solution}
 {: .challenge}
 
@@ -259,18 +270,18 @@ $ cd ../03_blast
 
 
 > ## Run the alignment
-> 
+>
 > and then adapt the following command to run into the container:
-> 
+>
 > ```
 > $ blastp -query P04156.fasta -db $SC19/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
 > ```
 > {: .bash}
-> 
+>
 > Note how we put the database files in a separate directory on purpose, so that you will need to bind mount its path with Singularity. Give it a go with building the syntax to run the `blastp` command.
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec -B $SC19/demos/03_blast_db $SIFPATH/blast_v2.2.31_cv2.sif blastp -query P04156.fasta -db $SC19/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
 > > ```

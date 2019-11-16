@@ -28,43 +28,38 @@ If it does not exist already, download the following Github repo. Then `cd` into
 $ git clone https://github.com/PawseySC/sc19-containers
 $ cd sc19-containers
 $ export SC19=$(pwd)
-$ export SIFPATH=$SC19/demos/sif
+$ export SIFPATH=/scratch/singularity_images
 $ cd demos/02_singularity
 ```
 {: .bash}
 
+## Caching the Images
+> We have prepared the images to be downloaded in the $SIFPATH
+>
+{: .callout}
 
-> ## Local copies of container images: SC19 Attendees READ THIS
-> 
-> In the interest of time, in the software setup for this tutorial we have pre-cached some of the required container images.
-> 
-> What you have to do is just to create a symbolic link between the path to the images (provided by the instructors) and $SIFPATH:
-> 
-> ```
-> $ ln -s <PATH-BY-INSTRUCTORS> $SIFPATH
-> ```
-> {: .bash}
-> 
+
+<!---
 > ## Regular users of this tutorial: read this
-> 
-> Open a second terminal in the machine where you're running the tutorial, then run the script `pull_big_images.sh` to start downloading a few images that you'll require later: 
-> 
+>
+> Open a second terminal in the machine where you're running the tutorial, then run the script `pull_big_images.sh` to start downloading a few images that you'll require later:
+>
 > ```
 > $ export SC19=~/sc19-containers
 > $ export SIFPATH=$SC19/demos/sif
 > $ bash $SC19/demos/pull_big_images.sh
 > ```
 > {: .bash}
-> 
+>
 > This will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
 {: .callout}
-
+-->
 
 ### Singularity: a container engine for HPC
 
 [Singularity](https://sylabs.io/singularity/) is developed and maintained by [Sylabs](https://sylabs.io), and was designed from scratch as a container engine for HPC applications, and this is clearly reflected in some of its main features:
 
-* *unprivileged* runtime: Singularity containers do not require the user to hold root privileges to run; 
+* *unprivileged* runtime: Singularity containers do not require the user to hold root privileges to run;
 
 * *root* privileges are required to build container images: users can build images on their personal laptops or workstations, on the cloud, or via a Remote Build service;
 
@@ -77,7 +72,7 @@ This tutorial assumes Singularity version 3.0 or higher. Version **3.3.0** or hi
 
 ### Container image formats
 
-One of the differences between Docker and Singularity is the adopted format to store container images. 
+One of the differences between Docker and Singularity is the adopted format to store container images.
 
 Docker adopts a layered format compliant with the *Open Containers Initiative* (OCI). Each build command in the recipe file results in the creation of a distinct image layer. These layers are cached during the build process, making them quite useful for development. In fact, repeated build attempts that make use of the same layers will exploit the cache, thus reducing the overall build time. On the other hand, shipping a container image is not straightforward, and requires either relying on a public registry, or compressing the image in a *tar* archive.
 
@@ -93,6 +88,7 @@ Note that Singularity versions prior to 3.0 used a slightly different image form
 Running a command is done by means of `singularity exec`:
 
 ```
+$ salloc --nodes=1 --ntasks-per-node=4
 $ singularity exec library://library/default/ubuntu:18.04 cat /etc/os-release
 ```
 {: .bash}
@@ -122,11 +118,11 @@ Here is what Singularity has just done:
 * instantiated a container from that image;
 * executed the command `cat /etc/os-release`.
 
-Container images have a **name** and a **tag**, in this case `ubuntu` and `18.04`. The tag can be omitted, in which case Singularity will default to a tag named `latest`. 
+Container images have a **name** and a **tag**, in this case `ubuntu` and `18.04`. The tag can be omitted, in which case Singularity will default to a tag named `latest`.
 
 
 > ## Using the *latest* tag
-> 
+>
 > The practice of using the `latest` tag can be handy for quick typing, but is dangerous when it comes to reproducibility of your workflow, as under the hood the *latest* image could change over time.
 {: .callout}
 
@@ -134,12 +130,12 @@ Container images have a **name** and a **tag**, in this case `ubuntu` and `18.04
 The prefix `library://` makes Singularity pull the image from the default registry, that is the [**Sylabs Cloud Library**](https://cloud.sylabs.io). Images in there are organised in terms of **users** (`library` in this case) and **user collections** (optional, `default` in the example above). Note that in the particular case of `library/default/`, this specification could be skipped, for instance:
 
 ```
-$ singularity exec library://ubuntu:18.04 echo "Hello World!"
+$ singularity exec library://ubuntu:18.04 echo "Hello World"
 ```
 {: .bash}
 
 ```
-Hello World!
+Hello World
 ```
 {: .output}
 
@@ -200,16 +196,16 @@ Also note how Docker Hub organises images only by users (also called *repositori
 
 
 > ## What is the *latest* Ubuntu image from the Sylabs Cloud?
-> 
+>
 > Write down a Singularity command that prints the OS version through the *latest* Ubuntu image from Sylabs Cloud Library.
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec library://ubuntu cat /etc/os-release
 > > ```
 > > {: .bash}
-> > 
+> >
 > > ```
 > > [..]
 > > NAME="Ubuntu"
@@ -217,7 +213,7 @@ Also note how Docker Hub organises images only by users (also called *repositori
 > > [..]
 > > ```
 > > {: .output}
-> > 
+> >
 > > It's version 18.10.
 > {: .solution}
 {: .challenge}
@@ -235,7 +231,7 @@ $ singularity shell library://ubuntu:18.04
 {: .bash}
 
 ```
-Singularity ubuntu_18.04.sif:/some/dir> 
+Singularity ubuntu_18.04.sif:/some/dir>
 ```
 {: .output}
 
@@ -256,11 +252,7 @@ $ singularity pull library://ubuntu:18.04
 {: .bash}
 
 ```
-INFO:    Key with ID EDECE4F3F38D871E not found in local keyring, downloading from keystore...
-INFO:    Container is signed
-Data integrity checked, authentic and signed by:
-	Sylabs Admin <support@sylabs.io>, Fingerprint 8883491F4268F173C6E5DC49EDECE4F3F38D871E
-WARNING: no local key matching entity
+WARNING: Container might not be trusted; run 'singularity verify ubuntu_18.04.sif' to show who signed it
 INFO:    Download complete: ubuntu_18.04.sif
 ```
 {: .output}
@@ -280,12 +272,12 @@ ubuntu_18.04.sif
 Then you can use this image file simply by:
 
 ```
-$ singularity exec ./ubuntu_18.04.sif echo "Hello World!"
+$ singularity exec ./ubuntu_18.04.sif echo "Hello World"
 ```
 {: .bash}
 
 ```
-Hello World!
+Hello World
 ```
 {: .output}
 
@@ -314,14 +306,14 @@ ubuntu_18.04.sif
 
 
 > ## Organise your local container images
-> 
+>
 > Being able to specify download locations for the container images allows you to keep your local set of images organised and tidy, by making use of a directory tree. It also allows for easy sharing of images within your team in a shared resource.
 {: .callout}
 
 
 ### Configure cache and pull directory locations
 
-Lots of Singularity settings can be configured by means of environment variables. 
+Lots of Singularity settings can be configured by means of environment variables.
 
 The default directory location for the image cache is `$HOME/.singularity/cache`. This location can be inconvenient in shared resources such as HPC centres, where often the disk quota for the home directory is limited. You can redefine the path to the cache dir by setting the variable `SINGULARITY_CACHEDIR`.
 
@@ -333,7 +325,7 @@ Similarly, if you have a preferred location to pull images into you can avoid us
 If you are running out of disk space, you can inspect the cache:
 
 ```
-$ singularity cache list
+$ singularity cache list -v
 ```
 {: .bash}
 
@@ -348,16 +340,16 @@ Total space used: 117.83 MB
 ```
 {: .output}
 
-and then clean it up, *e.g.* to wipe everything use the `-a` flag:
+and then clean it up, *e.g.* to wipe everything use the `-f` flag:
 
 ```
-$ singularity cache clean -a
+$ singularity cache clean -f
 ```
 {: .bash}
 
 
 > ## Contextual help on Singularity commands
-> 
+>
 > Use `singularity help`, optionally followed by a command name, to print help information on features and options.
 {: .callout}
 
@@ -372,27 +364,27 @@ Nvidia maintains the [Nvidia GPU Cloud (NGC)](https://ngc.nvidia.com), hosting a
 
 
 > ## Pull and run a Python container ##
-> 
+>
 > How would you pull the following container image from Docker Hub, `python:3-slim`?
-> 
+>
 > Once you've pulled it, enquire the Python version inside the container by running `python --version`.
-> 
+>
 > > ## Solution
-> > 
-> > Pull: 
-> > 
+> >
+> > Pull:
+> >
 > > ```
 > > $ singularity pull docker://python:3-slim
 > > ```
 > > {: .bash}
-> > 
+> >
 > > Get Python version:
-> > 
+> >
 > > ```
 > > $ singularity exec ./python_3-slim.sif python --version
 > > ```
 > > {: .bash}
-> > 
+> >
 > > ```
 > > Python 3.8.0
 > > ```
