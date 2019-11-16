@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Gloabl settings
-aeg_numberOfSubdomains="2" # must equal $SLURM_NTASKS in the main run below
+aeg_numberOfSubdomains="2" # must equal $SLURM_NTASKS in the main run
 aeg_simpleCoeffs="2 1 1" # product must equal numberOfSubdomains above
 # Applying global settings
 sed -i -e "s,^ *numberOfSubdomains.*,numberOfSubdomains  $aeg_numberOfSubdomains;," \
@@ -20,3 +20,7 @@ sed -i -e "s,^ *startFrom.*,startFrom    $aeg_startFrom;," \
        -e "s,^ *writeInterval.*,writeInterval    $aeg_writeInterval;," \
        -e "s,^ *purgeWrite.*,purgeWrite    $aeg_purgeWrite;," system/controlDict
 
+# Editing SLURM scripts as well
+sed -i -e "s/ntasks=.*/ntasks=$aeg_numberOfSubdomains/" -e "s/ntasks\-per\-node=.*/ntasks\-per\-node=$aeg_numberOfSubdomains/" mpi_pawsey.sh
+sed -i -e "s/ntasks=.*/ntasks=$aeg_numberOfSubdomains/" -e "s/ntasks\-per\-node=.*/ntasks\-per\-node=$aeg_numberOfSubdomains/" mpi_sc19.sh
+sed -i "s/NTASKS=.*/NTASKS=\"$aeg_numberOfSubdomains\"/" mpi_mpirun.sh

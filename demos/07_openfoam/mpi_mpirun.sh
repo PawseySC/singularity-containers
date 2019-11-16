@@ -1,5 +1,6 @@
 #!/bin/bash
 
+NTASKS="2"
 
 # this configuration depends on the host
 export SINGULARITY_BINDPATH="/opt/mpich/mpich-3.1.4/apps"
@@ -18,7 +19,7 @@ singularity exec $SIFPATH/openfoam_v1812.sif \
 
 
 # run OpenFoam with MPI
-mpirun -n 2 \
+mpirun -n $NTASKS \
   singularity exec $SIFPATH/openfoam_v1812.sif \
   simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
 

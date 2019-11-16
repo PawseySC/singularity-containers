@@ -27,7 +27,7 @@ srun -n 1 \
 
 
 # run OpenFoam with MPI
-srun -n 2 \
+srun -n $SLURM_NTASKS \
   singularity exec $SIFPATH/openfoam_v1812.sif \
   simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
 
