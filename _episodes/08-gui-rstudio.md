@@ -26,11 +26,11 @@ $ cd $SC19/demos/08_rstudio
 
 
 > ## Pull the container
-> 
+>
 > We want to use a [Tidyverse](https://www.tidyverse.org) container image (contains R, RStudio, data science packages). Can you pull the  `rocker/> tidyverse:3.6.1` from Docker Hub?
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity pull docker://rocker/tidyverse:3.6.1
 > > ```
@@ -80,17 +80,17 @@ Here, we're saying we want the web server to listen to port 8787 on any IP addre
 
 
 > ## Communication ports
-> 
+>
 > In order to be able to use the web server, you need to ensure that the machine you are running Singularity from has opened the communication port you're using, in this case `8787`.  
 > In cloud virtual machines this will typically involve some setup in the system dashboard.  
 > The machines we provided for this workshop are ready to go in this regard.
 {: .callout}
 
 
-Do we need more? Yes, we need to ensure we know the username and password for authenticating; *rserver* will configure them based on the values of the environment variables `USER` and `PASSWORD`; let us pick a random string for the latter, and print both:
+Do we need more? Yes, we need to ensure we know the username and password for authenticating; *rserver* will configure them based on the values of the environment variables `USER` and `PASSWORD`; normally we would pick a random string for the latter. Today we'll use 'password'.
 
 ```
-$ export PASSWORD=$(openssl rand -base64 15) && echo $PASSWORD
+$ export PASSWORD=PASSWORD
 $ echo $USER && echo $PASSWORD
 ```
 {: .bash}
@@ -106,7 +106,7 @@ $ export R_USER=$USER && [ "$(id -u)" == "1000" ] && export R_USER=rstudio
 Now we have everything we need to put together the Singularity idiomatic way to launch an interactive RStudio web server:
 
 ```
-$ export PASSWORD=$(openssl rand -base64 15) && echo $PASSWORD
+$ export PASSWORD=password
 $ echo $USER && echo $PASSWORD
 $ export R_USER=$USER && [ "$(id -u)" == "1000" ] && export R_USER=rstudio
 
@@ -165,11 +165,11 @@ Basically, we're starting from the `tidyverse` Docker image we used above, and t
 
 
 > ## Build an image to run a RStudio instance
-> 
+>
 > How would you build an image called `tidyverse_long.sif`, starting from this def file?
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ sudo singularity build tidyverse_long.sif tidyverse_long.def
 > > ```
@@ -180,7 +180,7 @@ Basically, we're starting from the `tidyverse` Docker image we used above, and t
 Once the container image is build, let's use it to start an instance via `singularity instance start`. Note how the other options are the same as in the interactive session above; the only addition is the specification of a name for the instance, `myserver` in this case, that has to follow the image name:
 
 ```
-$ export PASSWORD=$(openssl rand -base64 15)
+$ export PASSWORD=password
 $ echo $USER && echo $PASSWORD
 $ export R_USER=$USER && [ "$(id -u)" == "1000" ] && export R_USER=rstudio
 
@@ -193,7 +193,7 @@ INFO:    instance started successfully
 ```
 {: .output}
 
-We can check on the running instances with 
+We can check on the running instances with
 
 ```
 $ singularity instance list

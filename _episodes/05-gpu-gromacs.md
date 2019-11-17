@@ -21,7 +21,7 @@ keypoints:
 
 We've got a seperate cluster up for our GPU example.  Use your existing username/password and ssh into the GPU cluster;
 ```
-ssh username@34.239.187.63
+ssh username@18.208.172.208
 ```
 {: .bash}
 
@@ -29,8 +29,6 @@ Then repeat a bit of setup
 ```
 $ git clone https://github.com/PawseySC/sc19-containers
 $ cd sc19-containers
-$ export SC19=$(pwd)
-$ export SIFPATH=/scratch/singularity_images
 ```
 {: .bash}
 

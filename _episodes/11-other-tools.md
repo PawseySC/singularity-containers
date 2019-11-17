@@ -65,7 +65,7 @@ More information on HPCCM can be found in the [HPCCM docs](https://github.com/NV
 * runs daemon-less, making it simpler to deploy;
 * can be used in root-less mode (with some [limitations](https://github.com/containers/libpod/blob/master/rootless.md)), making it a bit friendlier for HPC.
 
-Like Docker, it still doesn't provide support for MPI, schedulers, GPU.
+Like Docker, it still doesn't provide support for MPI, schedulers, GPU (natively).
 
 One reason to consider it is for building container images in rootless mode, right within a HPC system. On the other hand, for HPC runtime it lacks relevant features when compared to Singularity, Shifter and Sarus. Notably, at the time of writing it is still a bit buggy.
 
@@ -79,7 +79,7 @@ $ alias docker=podman
 
 ### NERSC Shifter
 
-[NERSC Shifter](https://docs.nersc.gov/programming/shifter/overview/) is a container engine developed by NERSC for HPC. 
+[NERSC Shifter](https://docs.nersc.gov/programming/shifter/overview/) is a container engine developed by NERSC for HPC.
 
 It complies with HPC security requirements by design, and features native support for MPI and schedulers; interestingly, it cannot run GPU applications. It cannot be used to build images, just to run them.
 
@@ -88,16 +88,16 @@ At the time of writing, its development seems a bit stalled, for which reason we
 
 ### CSCS Shifter (or Shifter-NG)
 
-[CSCS Shifter](https://user.cscs.ch/tools/containers/shifter/) is a fork of NERSC Shifter by CSCS. 
+[CSCS Shifter](https://user.cscs.ch/tools/containers/shifter/) is a fork of NERSC Shifter by CSCS.
 
-Most notably, it adds GPU support to the runtime engine. 
+Most notably, it adds GPU support to the runtime engine.
 
 It is being deprecated by CSCS, as they have evolved the project into Sarus, see below.
 
 
 ### Sarus
 
-[Sarus](https://user.cscs.ch/tools/containers/sarus/) is the latest incarnation of a container runtime engine by CSCS. 
+[Sarus](https://user.cscs.ch/tools/containers/sarus/) is the latest incarnation of a container runtime engine by CSCS.
 
 It is fully compliant with the Docker image format (whereas it cannot run Singularity images), natively supports schedulers, MPI, and GPU applications. Then in terms of runtime features it is mostly equivalent to Singularity (although at the moment it doesn't offer a feature comparable to OverlayFS). However, to build container images, it relies on the users being able to run Docker somewhere else. Also, uptake at the moment is quite limited compared to Singularity.
 

@@ -36,8 +36,6 @@ If it does not exist already, download the following Github repo. Then `cd` into
 ```
 $ git clone https://github.com/PawseySC/sc19-containers
 $ cd sc19-containers
-$ export SC19=$(pwd)
-$ export SIFPATH=/scratch/singularity_images
 $ cd demos/02_singularity
 ```
 {: .bash}
@@ -45,16 +43,16 @@ $ cd demos/02_singularity
 One more thing: much of this work will be performed interactively on our slurm cluster, so we need to request a small allocation
 
 ```
-salloc --nodes=1 --ntasks-per-node=4
+$ salloc --nodes=1 --ntasks-per-node=4
 ```
 {: .bash}
 ```
-alloc: Granted job allocation 11
+salloc: Granted job allocation 11
 ```
 {: .output}
 
 >## Caching the Images
->For the SC 19 tutorial We have prepared the images to be downloaded in the $SIFPATH. Normally downloading the required images will take up to an hour.
+>For the SC 19 tutorial we have prepared the images to be downloaded in the $SIFPATH. Normally downloading the required images will take up to an hour.
 {: .callout}
 
 <!---
@@ -209,7 +207,7 @@ Rather than just downloading a SIF file, now there's more work for Singularity, 
 
 Note that, to point Singularity to Docker Hub, the prefix `docker://` is required.
 
-Also note how Docker Hub organises images only by users (also called *repositories*), not by collections.
+Also note how Docker Hub organises images only by users (also called *registries*), not by collections.
 
 
 > ## What is the *latest* Ubuntu image from the Sylabs Cloud?
@@ -371,7 +369,7 @@ $ singularity cache clean -f
 {: .callout}
 
 
-### Popular image libraries
+### Popular registries
 
 At the time of writing, Docker Hub hosts a much wider selection of container images than Sylabs Cloud. This includes Linux distributions, Python and R deployments, as well as a big variety of applications.
 
