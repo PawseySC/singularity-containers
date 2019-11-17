@@ -42,6 +42,17 @@ $ cd demos/02_singularity
 ```
 {: .bash}
 
+One more thing: much of this work will be performed interactively on our slurm cluster, so we need to request a small allocation
+
+```
+salloc --nodes=1 --ntasks-per-node=4
+```
+{: .bash}
+```
+alloc: Granted job allocation 11
+```
+{: .output}
+
 >## Caching the Images
 >For the SC 19 tutorial We have prepared the images to be downloaded in the $SIFPATH. Normally downloading the required images will take up to an hour.
 {: .callout}
