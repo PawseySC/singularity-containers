@@ -70,7 +70,7 @@ From: ubuntu:18.04
 Let us build the image and run it first, then we'll comment on the contents of the def file. To this end we're using `sudo singularity build`, followed by the filename we decide to attribute to the container image, and then by the filename of the def file to be used:
 
 ```
-$ sudo singularity build lolcow.sif lowcow.def
+$ sudo singularity build lolcow.sif lolcow.def
 ```
 {: .bash}
 
@@ -178,24 +178,24 @@ This can be useful to provide a description of the container, or even instructio
 Finally, note how the def file used to generate the image can be displayed using
 
 ```
-$ singularity inspect --deffile lolcow.sif 
+$ singularity inspect --deffile lolcow.sif
 ```
 {: .bash}
 
 
 > ## Use the newly created container
-> 
+>
 > You can use this new container using the same Singularity syntax we introduced earlier on in this tutorial.
-> 
+>
 > For instance, how would you run the command `fortune` from inside this container?
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec lolcow.sif fortune
 > > ```
 > > {: .bash}
-> > 
+> >
 > > ```
 > > Whenever you find that you are on the side of the majority, it is time
 > > to reform.
@@ -203,21 +203,21 @@ $ singularity inspect --deffile lolcow.sif
 > > ```
 > > {: .output}
 > {: .solution}
-> 
+>
 > Or, how would you open an interactive shell to explore the container?
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
-> > $ singularity shell lolcow.sif 
+> > $ singularity shell lolcow.sif
 > > ```
 > > {: .bash}
-> > 
+> >
 > > ```
-> > Singularity lolcow.sif:/some/dir> 
+> > Singularity lolcow.sif:/some/dir>
 > > ```
 > > {: .output}
-> > 
+> >
 > > Remember to close this session with `exit` or `Ctrl-D`.
 > {: .solution}
 {: .challenge}
@@ -267,7 +267,7 @@ $ singularity run -B $SC19/_episodes lolcow.sif
 
 ### Share your container image
 
-Now that you've built your container image, you might want to run it on other systems, or share it with collaborators. 
+Now that you've built your container image, you might want to run it on other systems, or share it with collaborators.
 
 The simplest way to achieve this is to remember that a SIF image is just a file, so .. you can transfer it across systems using Linux command line utilities like `scp` or `rsync`, or even graphical applications such as `Filezilla`.  
 Just remember that images can be quite large, typically ranging from tens of MBs up to several GBs. For instance the *lolcow* image we created is about 70 MB.
@@ -283,7 +283,7 @@ $ singularity remote login
 
 ```
 Generate an API Key at https://cloud.sylabs.io/auth/tokens, and paste here:
-API Key: 
+API Key:
 ```
 {: .output}
 
@@ -333,7 +333,7 @@ What if you need to build an image from a system where you don't have admin priv
 Singularity offers the option to run build remotely, using the **Sylabs Remote Builder**; once again you will need a Sylabs account and a token to use this feature. If this is the case, just use `singularity build -r` to proceed with the remote build. Once finished, the image will be downloaded so that it's ready to use:
 
 ```
-$ singularity build -r lolcow_remote.sif lolcow.def 
+$ singularity build -r lolcow_remote.sif lolcow.def
 ```
 {: .bash}
 
