@@ -8,11 +8,19 @@ The main requirement for this workshop is a personal computer with a web browser
 These will allow you to follow the online materials and to login to a facility with the required software stack.
 
 
-> ## SC19 Workshop Attendees: READ THIS
-> 
-> You will will need username and password to access the training VMs, which will be provided by the instructors.  
-> You don't need to read further.
-{: .callout}
+### SC19 Workshop Attendee Instructions
+
+You will will need username and password to access the training VMs, which will be provided by the instructors.  
+
+You will find a green and pink postit note at your spot.  On the green note is a 3 digit number.  Your login details today follow a pattern of
+
+### username: userXXX
+
+### password: tutorialXXX
+
+where XXX is your 3 digit number
+
+You don't need to read further for today.
 
 
 ### Regular users of this tutorial: read here
@@ -25,7 +33,7 @@ These will allow you to follow the online materials and to login to a facility w
 
   * Essential (core of the tutorial)
     - Singularity : [script]({{ page.root }}/files/install-singularity.sh) \| [docs](https://sylabs.io/guides/3.3/user-guide/installation.html)
-  
+
   * Desirable (to run all Singularity examples)
     - MPICH library : [script]({{ page.root }}/files/install-mpich.sh) \| [docs](https://www.mpich.org/documentation/guides/)
     - Nvidia GPU driver (GPU card required)

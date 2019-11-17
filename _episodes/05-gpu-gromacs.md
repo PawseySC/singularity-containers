@@ -17,14 +17,22 @@ keypoints:
 > There are examples for both using and not using the Slurm scheduler.
 {: .callout}
 
+### Let's login to a GPU node
 
-### Nvidia GPU Cloud
+We've got a seperate cluster up for our GPU example.  Use your existing username/password and ssh into the GPU cluster;
+```
+ssh username@34.239.187.63
+```
+{: .bash}
 
-The GPU manufacturer *Nvidia* has a dedicated web registry for container images, shipping GPU optimised applications: <https://ngc.nvidia.com>.
-
-To browse this registry, you'll need a free account. Go to <https://ngc.nvidia.com>, complete the procedure to **Create an account**, then **Sign in** (currently both options are available on the top right corner of the page).
-
-You can browse the available containerised packages through the various category boxes. E.g. click on the **High Performance Computing** box, then click on the **Gromacs** one. The page will briefly discuss the code, with instructions on how to pull and run the container.
+Then repeat a bit of setup
+```
+$ git clone https://github.com/PawseySC/sc19-containers
+$ cd sc19-containers
+$ export SC19=$(pwd)
+$ export SIFPATH=/scratch/singularity_images
+```
+{: .bash}
 
 
 ### Run a molecular dynamics simulation on a GPU with containers
@@ -101,7 +109,7 @@ $ sbatch gpu.sh
 ```
 {: .bash}
 
-
+<!---
 > ## Running at Pawsey
 >
 > If you try and run this on *Zeus* at Pawsey,
@@ -111,4 +119,15 @@ $ sbatch gpu.sh
 > $ sbatch --account=<your-pawsey-project> --partition=gpuq gpu.sh
 > ```
 > {: .bash}
+{: .callout}
+-->
+
+
+> ## Nvidia GPU Cloud, a useful resource
+>
+>The GPU manufacturer *Nvidia* has a dedicated web registry for container images, shipping GPU optimised applications: <https://ngc.nvidia.com>.
+>
+>To browse this registry, you'll need a free account. Go to <https://ngc.nvidia.com>, complete the procedure to **Create an account**, then **Sign in** (currently both >options are available on the top right corner of the page).
+>
+>You can browse the available containerised packages through the various category boxes. E.g. click on the **High Performance Computing** box, then click on the >**Gromacs** one.
 {: .callout}

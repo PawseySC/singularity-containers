@@ -12,6 +12,15 @@ keypoints:
 - Download a container image in a selected location with `singularity pull`
 ---
 
+### Let's login
+
+If your user number is odd, then login to
+
+#### ssh userXXX@18.234.39.151
+
+If your user number is even, then login to
+
+#### ssh userXXX@13.57.28.164
 
 ### Get ready for the hands-on
 
@@ -33,11 +42,9 @@ $ cd demos/02_singularity
 ```
 {: .bash}
 
-## Caching the Images
-> We have prepared the images to be downloaded in the $SIFPATH
->
+>## Caching the Images
+>For the SC 19 tutorial We have prepared the images to be downloaded in the $SIFPATH. Normally downloading the required images will take up to an hour.
 {: .callout}
-
 
 <!---
 > ## Regular users of this tutorial: read this
