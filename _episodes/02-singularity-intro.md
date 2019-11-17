@@ -106,7 +106,6 @@ Note that Singularity versions prior to 3.0 used a slightly different image form
 Running a command is done by means of `singularity exec`:
 
 ```
-$ salloc --nodes=1 --ntasks-per-node=4
 $ singularity exec library://library/default/ubuntu:18.04 cat /etc/os-release
 ```
 {: .bash}
