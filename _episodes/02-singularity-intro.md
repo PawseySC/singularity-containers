@@ -12,15 +12,13 @@ keypoints:
 - Download a container image in a selected location with `singularity pull`
 ---
 
+
 ### Let's login
 
-If your user number is odd, then login to
+If your user number is odd, then login to: `ssh userXXX@18.234.39.151`
 
-#### ssh userXXX@18.234.39.151
+If your user number is even, then login to: `ssh userXXX@13.57.28.164`
 
-If your user number is even, then login to
-
-#### ssh userXXX@13.57.28.164
 
 ### Get ready for the hands-on
 
@@ -207,7 +205,7 @@ Rather than just downloading a SIF file, now there's more work for Singularity, 
 
 Note that, to point Singularity to Docker Hub, the prefix `docker://` is required.
 
-Also note how Docker Hub organises images only by users (also called *registries*), not by collections.
+Also note how Docker Hub organises images only by users (also called *repositories*), not by collections.
 
 
 > ## What is the *latest* Ubuntu image from the Sylabs Cloud?
@@ -259,7 +257,7 @@ All examples so far have identified container images using their registry name s
 
 An alternative option to handle images is to download them to a known location, and then refer to their SIF file names.
 
-Let's use `singularity pull` to save the image to a specified path:
+Let's use `singularity pull` to save the image to a specified path (output might differ depending on the Singularity version you use):
 
 ```
 $ singularity pull library://ubuntu:18.04
@@ -267,7 +265,11 @@ $ singularity pull library://ubuntu:18.04
 {: .bash}
 
 ```
-WARNING: Container might not be trusted; run 'singularity verify ubuntu_18.04.sif' to show who signed it
+INFO:    Key with ID EDECE4F3F38D871E not found in local keyring, downloading from keystore...
+INFO:    Container is signed
+Data integrity checked, authentic and signed by:
+    Sylabs Admin <support@sylabs.io>, Fingerprint 8883491F4268F173C6E5DC49EDECE4F3F38D871E
+WARNING: no local key matching entity
 INFO:    Download complete: ubuntu_18.04.sif
 ```
 {: .output}
@@ -337,10 +339,10 @@ Similarly, if you have a preferred location to pull images into you can avoid us
 
 ### Reclaim cache space
 
-If you are running out of disk space, you can inspect the cache:
+If you are running out of disk space, you can inspect the cache with this command (add `-v` from Singularity version 3.4 on):
 
 ```
-$ singularity cache list -v
+$ singularity cache list
 ```
 {: .bash}
 
@@ -355,10 +357,10 @@ Total space used: 117.83 MB
 ```
 {: .output}
 
-and then clean it up, *e.g.* to wipe everything use the `-f` flag:
+and then clean it up, *e.g.* to wipe everything use the `-a` flag (use `-f` instead from Singularity version 3.4 on):
 
 ```
-$ singularity cache clean -f
+$ singularity cache clean -a
 ```
 {: .bash}
 
@@ -369,7 +371,7 @@ $ singularity cache clean -f
 {: .callout}
 
 
-### Popular registries
+### Popular registries (*aka* image libraries)
 
 At the time of writing, Docker Hub hosts a much wider selection of container images than Sylabs Cloud. This includes Linux distributions, Python and R deployments, as well as a big variety of applications.
 
