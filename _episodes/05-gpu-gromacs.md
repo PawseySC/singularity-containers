@@ -112,7 +112,7 @@ $ sbatch gpu.sh
 {: .bash}
 
 
-> ## Running at Pawsey
+> ## Running this example at Pawsey
 >
 > If you try and run this on *Zeus* at Pawsey,
 > you might want to add `module load singularity` after the `#SBATCH` lines in the script.
