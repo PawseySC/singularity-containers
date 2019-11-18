@@ -90,7 +90,7 @@ Here, we're saying we want the web server to listen to port 8787 on any IP addre
 Do we need more? Yes, we need to ensure we know the username and password for authenticating; *rserver* will configure them based on the values of the environment variables `USER` and `PASSWORD`; normally we would pick a random string for the latter. Today we'll use 'password'.
 
 ```
-$ export PASSWORD=PASSWORD
+$ export PASSWORD=password
 $ echo $USER && echo $PASSWORD
 ```
 {: .bash}
