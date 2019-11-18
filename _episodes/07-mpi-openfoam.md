@@ -29,12 +29,13 @@ First, let us cd into the demo directory,, ensure that `$SIFPATH` is defined, an
 
 ```
 $ cd $SC19/demos/07_openfoam
+$ export SIFPATH=$SC19/demos/sif
 $ ls $SIFPATH/openfoam_v1812.sif
 ```
 {: .bash}
 
 ```
-/scratch/singularity_images/openfoam_v1812.sif
+/home/ubuntu/sc19-containers/demos/sif/openfoam_v1812.sif
 ```
 {: .output}
 
@@ -218,7 +219,7 @@ The second variable ensures that at runtime the container's `LD_LIBRARY_PATH` ha
 > $ module load singularity
 > ```
 > {: .bash}
-{: .callout}x`  
+{: .callout}
 
 
 ### MPI performance: container *vs* bare metal
