@@ -13,11 +13,12 @@ keypoints:
 ---
 
 
-### Let's login
-
-If your user number is odd, then login to: `ssh userXXX@18.234.39.151`
-
-If your user number is even, then login to: `ssh userXXX@13.57.28.164`
+> ## SC19 attendees only: let's login
+>
+> If your user number is odd, then login to: `ssh userXXX@18.234.39.151`
+>
+> If your user number is even, then login to: `ssh userXXX@13.57.28.164`
+{: .callout}
 
 
 ### Get ready for the hands-on
@@ -34,40 +35,62 @@ If it does not exist already, download the following Github repo. Then `cd` into
 ```
 $ git clone https://github.com/PawseySC/sc19-containers
 $ cd sc19-containers
+$ export SC19=$(pwd)
 $ cd demos/02_singularity
 ```
 {: .bash}
 
-One more thing: much of this work will be performed interactively on our slurm cluster, so we need to request a small allocation
 
-```
-$ salloc --nodes=1 --ntasks-per-node=4
-```
-{: .bash}
-```
-salloc: Granted job allocation 11
-```
-{: .output}
-
->## Caching the Images
->For the SC 19 tutorial we have prepared the images to be downloaded in the $SIFPATH. Normally downloading the required images will take up to an hour.
+> ## SC19 attendees only: cached images
+>
+> For the SC19 tutorial we have prepared the images to be downloaded in a specific directory. Create the following symbolic link to be able to use them. Normally downloading the required images will take up to an hour.
+>
+> ```
+> $ export SIFPATH=$SC19/demos/sif
+> $ ln -s /scratch/singularity_images $SIFPATH
+> ```
+> {:. bash}
+>
+> One more thing: much of this work will be performed interactively on our Slurm cluster, so we need to request a small allocation:
+>
+> ```
+> $ salloc --nodes=1 --ntasks-per-node=4
+> ```
+> {: .bash}
+> ```
+> salloc: Granted job allocation 11
+> ```
+> {: .output}
 {: .callout}
 
-<!---
-> ## Regular users of this tutorial: read this
+
+> ## Regular users of this tutorial: read this instead
 >
 > Open a second terminal in the machine where you're running the tutorial, then run the script `pull_big_images.sh` to start downloading a few images that you'll require later:
 >
 > ```
-> $ export SC19=~/sc19-containers
 > $ export SIFPATH=$SC19/demos/sif
 > $ bash $SC19/demos/pull_big_images.sh
 > ```
 > {: .bash}
 >
 > This will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
+>
+> One more thing: if you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node. You can get this setup by using an interactive scheduler allocation, for instance on Zeus with Slurm:
+>
+> ```
+> $ salloc -n 1 -t 4:00:00
+> ```
+> {: .bash}
+>
+> ```
+> salloc: Granted job allocation 3453895
+> salloc: Waiting for resource configuration
+> salloc: Nodes z052 are ready for job
+> ```
+> {: .output}
 {: .callout}
--->
+
 
 ### Singularity: a container engine for HPC
 
