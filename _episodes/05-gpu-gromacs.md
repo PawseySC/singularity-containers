@@ -17,20 +17,23 @@ keypoints:
 > There are examples for both using and not using the Slurm scheduler.
 {: .callout}
 
-### Let's login to a GPU node
-
-We've got a seperate cluster up for our GPU example.  Use your existing username/password and ssh into the GPU cluster;
-```
-ssh username@18.208.172.208
-```
-{: .bash}
-
-Then repeat a bit of setup
-```
-$ git clone https://github.com/PawseySC/sc19-containers
-$ cd sc19-containers
-```
-{: .bash}
+> ## SC19 attendees only: let's login to a GPU node
+> 
+> We've got a separate cluster up for our GPU example.  Use your existing username/password and ssh into the GPU cluster;
+> ```
+> ssh username@18.208.172.208
+> ```
+> {: .bash}
+>
+> Then repeat a bit of setup
+>
+> ```
+> $ git clone https://github.com/PawseySC/sc19-containers
+> $ cd sc19-containers
+> $ export SC19=$(pwd)
+> ```
+> {: .bash}
+{: .callout}
 
 
 ### Run a molecular dynamics simulation on a GPU with containers
@@ -41,6 +44,7 @@ First, let us cd into `demos/05_gromacs`, and ensure that `$SIFPATH` is defined:
 
 ```
 $ cd $SC19/demos/05_gromacs
+$ export SIFPATH=$SC19/demos/sif
 ```
 {: .bash}
 
@@ -52,7 +56,7 @@ $ ls $SIFPATH/gromacs*
 {: .bash}
 
 ```
-/scratch/singularity_images/gromacs_2018.2.sif
+/home/ubuntu/sc19-containers/demos/sif/gromacs_2018.2.sif
 ```
 {: .output}
 
@@ -107,7 +111,7 @@ $ sbatch gpu.sh
 ```
 {: .bash}
 
-<!---
+
 > ## Running at Pawsey
 >
 > If you try and run this on *Zeus* at Pawsey,
@@ -118,7 +122,6 @@ $ sbatch gpu.sh
 > ```
 > {: .bash}
 {: .callout}
--->
 
 
 > ## Nvidia GPU Cloud, a useful resource
