@@ -247,7 +247,7 @@ $ gunzip zebrafish.1.protein.faa.gz
 > > {: .bash}
 > > ```
 > > Building a new DB, current time: 11/16/2019 19:14:43
-> > New DB name:   /home/user000/sc19-containers/demos/03_blast_db/zebrafish.1.protein.faa
+> > New DB name:   /home/ubuntu/sc19-containers/demos/03_blast_db/zebrafish.1.protein.faa
 > > New DB title:  zebrafish.1.protein.faa
 > > Sequence type: Protein
 > > Keep Linkouts: T
