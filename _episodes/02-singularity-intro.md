@@ -30,12 +30,13 @@ $ cd ~
 ```
 {: .bash}
 
-If it does not exist already, download the following Github repo. Then `cd` into it, assign its path to a handy variable, *e.g.* `SC19`, and finally `cd` into `demos/02_singularity`:
+If it does not exist already, download the following Github repo. Then `cd` into it, define a couple of handy variables (see below), and finally `cd` into `demos/02_singularity`:
 
 ```
 $ git clone https://github.com/PawseySC/sc19-containers
 $ cd sc19-containers
 $ export SC19=$(pwd)
+$ export SIFPATH=$SC19/demos/sif
 $ cd demos/02_singularity
 ```
 {: .bash}
@@ -46,10 +47,9 @@ $ cd demos/02_singularity
 > For the SC19 tutorial we have prepared the images to be downloaded in a specific directory. Create the following symbolic link to be able to use them. Normally downloading the required images will take up to an hour.
 >
 > ```
-> $ export SIFPATH=$SC19/demos/sif
 > $ ln -s /scratch/singularity_images $SIFPATH
 > ```
-> {:. bash}
+> {: .bash}
 >
 > One more thing: much of this work will be performed interactively on our Slurm cluster, so we need to request a small allocation:
 >
@@ -69,6 +69,7 @@ $ cd demos/02_singularity
 > Open a second terminal in the machine where you're running the tutorial, then run the script `pull_big_images.sh` to start downloading a few images that you'll require later:
 >
 > ```
+> $ export SC19=~/sc19-containers
 > $ export SIFPATH=$SC19/demos/sif
 > $ bash $SC19/demos/pull_big_images.sh
 > ```

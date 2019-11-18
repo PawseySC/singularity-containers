@@ -220,7 +220,7 @@ WORKDIR /data
 
 CMD fortune | cowsay | lolcat
 ```
-{:. source}
+{: .source}
 
 The directory where the the Dockerfile is stored is the so called the Docker **build context**. Docker will include files in this directory in the build process and in the final image. As a by-product, this will make the build process longer and the image larger, so that we want to include only those strictly required for the build, even none if possible.
 
