@@ -214,9 +214,9 @@ $ singularity inspect --deffile lolcow.sif
 > > {: .bash}
 > >
 > > ```
-> > Singularity lolcow.sif:/some/dir> ls
+> > Singularity lolcow.sif:/home/ubuntu/sc19-containers/demos/06_lolcow> ls
 > > lolcow.def  lolcow.sif
-> > Singularity lolcow.sif:/some/dir>
+> > Singularity lolcow.sif:/home/ubuntu/sc19-containers/demos/06_lolcow>
 > > ```
 > > {: .output}
 > >

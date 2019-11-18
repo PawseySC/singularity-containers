@@ -246,7 +246,7 @@ $ singularity shell library://ubuntu:18.04
 {: .bash}
 
 ```
-Singularity ubuntu_18.04.sif:/some/dir>
+Singularity ubuntu_18.04.sif:/home/ubuntu/sc19-containers/demos/02_singularity>
 ```
 {: .output}
 
