@@ -121,12 +121,13 @@ $ exit
 {: .challenge}
 
 
-Note how the newly created directories and files are persistent, therefore can be re-accessed and re-used in future runs, even by containers instantiated from different images. All we have to do is to mount the filesystem image `my_overlay`. We have some more explanation in our powerpoint slides.
+Note how the newly created directories and files are persistent, therefore can be re-accessed and re-used in future runs, even by containers instantiated from different images. All we have to do is to mount the filesystem image `my_overlay`.
+<!--We have some more explanation in our powerpoint slides.-->
 
 
 ### Run a Trinity genome assembly from inside the container
 
-A subdirectory in the directory we are in, `trinity_test_data/` contains sample inputs for a genome assembly, coming from the `Docker/test_data/` subset in the [Trinity Github repo](https://github.com/trinityrnaseq/trinityrnaseq).
+A subdirectory in the directory we are in, `trinity_test_data/`, contains sample inputs for a genome assembly, coming from the `Docker/test_data/` subset in the [Trinity Github repo](https://github.com/trinityrnaseq/trinityrnaseq).
 
 
 > ## Create the output directory within an OverlayFS
@@ -144,15 +145,16 @@ A subdirectory in the directory we are in, `trinity_test_data/` contains sample 
 {: .challenge}
 
 
-Now, let's verify that the Trinity image from Docker hub, `trinityrnaseq/trinityrnaseq:2.8.6`, has been correctly downloaded into `$SIFPATH`:
+Now, let's ensure that `$SIFPATH` is defined, and that the Trinity image from Docker hub, `trinityrnaseq/trinityrnaseq:2.8.6`, has been correctly downloaded:
 
 ```
+$ export SIFPATH=$SC19/demos/sif
 $ ls $SIFPATH/trinity*
 ```
 {: .bash}
 
 ```
-/scratch/singularity_images/trinityrnaseq_2.8.6.sif
+/home/ubuntu/sc19-containers/demos/sif/trinityrnaseq_2.8.6.sif
 ```
 {: .output}
 
