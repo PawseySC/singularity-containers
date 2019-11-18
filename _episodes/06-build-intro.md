@@ -214,9 +214,10 @@ $ singularity inspect --deffile lolcow.sif
 > > {: .bash}
 > >
 > > ```
-> > Singularity lolcow.sif:~/sc19-containers/demos/06_lolcow> ls
+> > Singularity lolcow.sif:/some/dir> ls
 > > lolcow.def  lolcow.sif
-> > Singularity lolcow.sif:~/sc19-containers/demos/06_lolcow>> > ```
+> > Singularity lolcow.sif:/some/dir>
+> > ```
 > > {: .output}
 > >
 > > Remember to close this session with `exit` or `Ctrl-D`.
