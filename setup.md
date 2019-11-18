@@ -8,19 +8,17 @@ The main requirement for this workshop is a personal computer with a web browser
 These will allow you to follow the online materials and to login to a facility with the required software stack.
 
 
-### SC19 Workshop Attendee Instructions
-
-You will will need username and password to access the training VMs, which will be provided by the instructors.  
-
-You will find a green and pink postit note at your spot.  On the green note is a 3 digit number.  Your login details today follow a pattern of
-
-### username: userXXX
-
-### password: tutorialXXX
-
-where XXX is your 3 digit number
-
-You don't need to read further for today.
+> ## SC19 Workshop Attendee Instructions
+> 
+> You will will need username and password to access the training VMs, which will be provided by the instructors.
+> 
+> You will find a green and pink post-it note at your spot.  On the green note is a 3 digit number ("XXX" below).  Your login details today follow a pattern of:
+> 
+> **username**: userXXX  
+> **password**: tutorialXXX
+> 
+> You don't need to read further for today.
+{: .callout}
 
 
 ### Regular users of this tutorial: read here
