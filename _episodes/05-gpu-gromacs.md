@@ -18,7 +18,7 @@ keypoints:
 {: .callout}
 
 > ## SC19 attendees only: let's login to a GPU node
-> 
+>
 > We've got a separate cluster up for our GPU example.  Use your existing username/password and ssh into the GPU cluster;
 > ```
 > ssh username@18.208.172.208

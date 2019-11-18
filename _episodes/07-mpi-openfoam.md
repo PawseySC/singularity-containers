@@ -25,12 +25,12 @@ We're going to start this episode with actually running a practical example, and
 We're using OpenFoam, a widely popular package for Computational Fluid Dynamics simulations, which is able to massively scale in parallel architectures up to thousands of processes, by leveraging an MPI library.  
 The sample inputs come straight from the OpenFoam installation tree, namely `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicHill/steadyState/`.
 
-First, let us cd into the demo directory,, ensure that `$SIFPATH` is defined, and verify that the OpenFoam container image has been downloaded:
+First, let us cd into the demo directory, ensure that `$SIFPATH` is defined, and verify that the OpenFoam container image has been downloaded:
 
 ```
 $ cd $SC19/demos/07_openfoam
 $ export SIFPATH=$SC19/demos/sif
-$ ls $SIFPATH/openfoam_v1812.sif
+$ ls $SIFPATH/openfoam*.sif
 ```
 {: .bash}
 
