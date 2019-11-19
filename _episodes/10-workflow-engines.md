@@ -89,7 +89,7 @@ However, the key question here is: how could the sole flag `-profile singularity
     singularity.autoMounts = true
   }
 ```
-{: .output}
+{: .source}
 
 The image name is specified using the `process.container` keyword. Also, `singularity.autoMounts` is required to have the directory paths with the input files automatically bind mounted in the container. Finally, `singularity.enabled` triggers the use of Singularity.
 
