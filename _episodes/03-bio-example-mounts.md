@@ -137,8 +137,8 @@ $ singularity exec -B $SC19/_episodes library://ubuntu:18.04 ls $SC19/_episodes
 {: .bash}
 
 ```
-01-containers-intro.md    03-bio-example-mounts.md  05-gpu-gromacs.md         07-mpi-openfoam.md        09-ml-python.md           11-other-tools.md
-02-singularity-intro.md   04-writable-containers.md 06-build-intro.md         08-gui-rstudio.md         10-docker.md
+01-containers-intro.md    03-bio-example-mounts.md  05-gpu-gromacs.md         07-mpi-openfoam.md        09-ml-python.md           12-other-tools.md
+02-singularity-intro.md   04-writable-containers.md 06-build-intro.md         08-gui-rstudio.md         11-docker.md
 ```
 {: .output}
 

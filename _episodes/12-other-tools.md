@@ -35,7 +35,7 @@ Stage0 += label(metadata={'Version': 'v0.0.1'})
 You can cd into the demo directory:
 
 ```
-$ cd $SC19/demos/11_lolcow_hpccm
+$ cd $SC19/demos/12_lolcow_hpccm
 ```
 {: .bash}
 

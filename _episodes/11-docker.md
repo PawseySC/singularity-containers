@@ -43,7 +43,7 @@ To get a more detailed introduction on Docker containers, see this other worksho
 Let's cd into the relevant demo directory:
 
 ```
-$ cd $SC19/demos/10_lolcow_docker
+$ cd $SC19/demos/11_lolcow_docker
 ```
 {: .bash}
 
