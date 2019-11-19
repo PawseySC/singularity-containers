@@ -323,7 +323,7 @@ Scientific workflow engines are particularly useful for data-intensive domains i
 Let's try and use Singularity and Nextflow to run a demo RNA sequencing pipeline based on [RNAseq-NF](https://github.com/nextflow-io/rnaseq-nf).
 
 First, if it's not already on your system, you'll need to install Nextflow.  
-You'll need to install a Java runtime and download the Nextflow executable. It will take a few minutes to download all of the required dependencies, but the process is fairly automated. This is a template install [script]{ page.root }}/files/install-nextflow.sh) for a Linux box.  
+You'll need to install a Java runtime and download the Nextflow executable. It will take a few minutes to download all of the required dependencies, but the process is fairly automated. This is a template install [script]({ page.root }}/files/install-nextflow.sh) for a Linux box.  
 If you're running at Pawsey *e.g.* on Zeus, all you need is to `module load nextflow`.
 
 Then, let's `cd` into the appropriate directory:
