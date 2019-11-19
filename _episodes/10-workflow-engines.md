@@ -22,8 +22,7 @@ Now, let's try and use Singularity and Nextflow to run a demo RNA sequencing pip
 
 ### Install Nextflow
 
-First, if it's not already on your system, you'll need to install Nextflow.  
-You'll need to install a Java runtime and download the Nextflow executable. It will take a few minutes to download all of the required dependencies, but the process is fairly automated. This is a template install [script]({{ page.root }}/files/install-nextflow.sh) for a Linux box.
+First, if it's not already on your system, you'll need to install Nextflow. You'll need to install a Java runtime and download the Nextflow executable. It will take a few minutes to download all of the required dependencies, but the process is fairly automated. This is a template install [script]({{ page.root }}/files/install-nextflow.sh) for a Linux box.
 
 If you're running on the Pawsey Nimbus cloud, just run the above script via: `bash $SC19/files/install-nextflow.sh`.
 
@@ -39,8 +38,7 @@ $ cd $SC19/demos/10_nextflow
 ```
 {: .bash}
 
-For convenience, the content of the pipeline [RNAseq-NF](https://github.com/nextflow-io/rnaseq-nf) is already made available in this directory.  
-There are two critical files in here, namely `main.nf`, that contains the translation of the scientific pipeline in the Nextflow language, and `nextflow.config`, that contains several profiles for running with different software/hardware setups. Here we are going to use the profile called `singularity`.
+For convenience, the content of the pipeline [RNAseq-NF](https://github.com/nextflow-io/rnaseq-nf) is already made available in this directory. There are two critical files in here, namely `main.nf`, that contains the translation of the scientific pipeline in the Nextflow language, and `nextflow.config`, that contains several profiles for running with different software/hardware setups. Here we are going to use the profile called `singularity`.
 
 It's time to launch the pipeline with Nextflow:
 
@@ -82,9 +80,7 @@ Done! Open the following report in your browser --> results/multiqc_report.html
 
 The final output of this pipeline is an HTML report of a quality control task, which you might eventually want to download and open up in your browser.  
 
-However, the key question here is: how could the sole flag `-profile singularity` trigger the containerised execution?
-
-This is the relevant snippet from the `nextflow.config` file:
+However, the key question here is: how could the sole flag `-profile singularity` trigger the containerised execution? This is the relevant snippet from the `nextflow.config` file:
 
 ```
   singularity {
@@ -97,5 +93,6 @@ This is the relevant snippet from the `nextflow.config` file:
 
 The image name is specified using the `process.container` keyword. Also, `singularity.autoMounts` is required to have the directory paths with the input files automatically bind mounted in the container. Finally, `singularity.enabled` triggers the use of Singularity.
 
-Based on this configuration file, Nextflow is able to handle all of the relevant Singularity commands by itself, *i.e.* `pull` and `exec` with the appropriate flags, such as `-B` for bind mounting host directories. In this case, users do not need to know in detail the Singularity syntax!  
-More infos can be found at [Nextflow and Singularity containers](https://www.nextflow.io/docs/latest/singularity.html)).
+Based on this configuration file, Nextflow is able to handle all of the relevant Singularity commands by itself, *i.e.* `pull` and `exec` with the appropriate flags, such as `-B` for bind mounting host directories. In this case, as a user you don't need to know in detail the Singularity syntax, but just the name of the container!
+
+More information on configuring Nextflow to run Singularity containers can be found at [Singularity containers](https://www.nextflow.io/docs/latest/singularity.html).
