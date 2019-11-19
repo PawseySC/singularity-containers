@@ -12,7 +12,7 @@ keypoints:
 ---
 
 
-### Why can Python be Awful?
+### Why can Python be awful?
 
 Python is a great language for doing all kinds of work, but sometimes it can present issues...
 
@@ -161,7 +161,7 @@ $ singularity exec plotly.sif python ./logreg.py
 As a result you should now have a plot saved as a `.png` file.
 
 
-### Bonus: another Machine Learning Example
+### Bonus: another machine learning example
 
 **If time allows**, let's try another ML example. We'll build another container image that uses Jupyter. For this this example, change directory to:
 
