@@ -32,7 +32,7 @@ and then discuss how to use the Linux tools `dd` and `mkfs.ext3` to create and f
 ```
 $ singularity exec library://ubuntu:18.04 bash -c " \
   mkdir -p overlay_tmp/upper && \
-  dd if=/dev/zero of=my_overlay count=204800 bs=1024 && \
+  dd if=/dev/zero of=my_overlay count=200 bs=1M && \
   mkfs.ext3 -d overlay_tmp my_overlay && \
   rm -rf overlay_tmp \
   "
@@ -40,19 +40,19 @@ $ singularity exec library://ubuntu:18.04 bash -c " \
 {: .bash}
 
 ```
-204800+0 records in
-204800+0 records out
-209715200 bytes (210 MB, 200 MiB) copied, 0.876716 s, 239 MB/s
+200+0 records in
+200+0 records out
+209715200 bytes (210 MB, 200 MiB) copied, 0.362418 s, 579 MB/s
 mke2fs 1.44.1 (24-Mar-2018)
 ext2fs_check_if_mount: Can't check if filesystem is mounted due to missing mtab file while determining whether my_overlay is mounted.
-Discarding device blocks: done                            
+Discarding device blocks: done
 Creating filesystem with 204800 1k blocks and 51200 inodes
-Filesystem UUID: 6f1c227f-3c24-4f25-a180-5e65cab14303
+Filesystem UUID: b14f9b2a-188d-4c19-8e6d-38a568f6efe1
 Superblock backups stored on blocks:
 	8193, 24577, 40961, 57345, 73729
 
-Allocating group tables: done                            
-Writing inode tables: done                            
+Allocating group tables: done
+Writing inode tables: done
 Creating journal (4096 blocks): done
 Copying files into the device: done
 Writing superblocks and filesystem accounting information: done
@@ -62,7 +62,7 @@ Writing superblocks and filesystem accounting information: done
 
 Here we have wrapped four commands into a single bash call from a container, just for the convenience of running it once. What are the single commands doing?  
 We are creating (and then deleting at the end) a service directory, `overlay_tmp/upper`, that will be used by the command `mkfs.ext3`.  
-The `dd` command creates a file named `my_overlay`, made up of blocks of zeros, namely with `count` blocks of size `bs` (the unit here is *bytes*); the product `count*bs` gives the total file size in bytes, in this case corresponding to *200 MB*.  
+The `dd` command creates a file named `my_overlay`, made up of blocks of zeros, namely with `count` blocks of size `bs` (the unit here is *megabytes*); the product `count*bs` gives the total file size in bytes, in this case corresponding to *200 MB*.
 The command `mkfs.ext3` is then used to format the file as a *ext3* filesystem image, that will be usable by Singularity. Here we are using the service directory we created, `my_overlay`, with the flag `-d`, to tell `mkfs` we want the filesystem to be owned by the same owner of this directory, *i.e.* by the current user. If we skipped this option, we would end up with a filesystem that is writable only by *root*, not very useful.
 
 
