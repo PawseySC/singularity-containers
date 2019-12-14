@@ -7,7 +7,7 @@ objectives:
 - Get an overview of other tools of interest for containers on HPC
 keypoints:
 - HPCCM can be useful to write image recipes that are compatible both with Docker and Singularity
-- Other than Singularity, at the moment Sarus seems to only other active project in terms of container engines for HPC
+- Other than Singularity, at the moment other interesting container engines for HPC are Sarus and Charliecloud
 ---
 
 
@@ -75,6 +75,13 @@ Interestingly, the API is mostly identical to that of Docker, so that in princip
 $ alias docker=podman
 ```
 {: .bash}
+
+
+### Charliecloud
+
+[Charliecloud](https://hpc.github.io/charliecloud/) is a promising container engine developed by LANL for HPC.
+
+More information about it will be added to this tutorial in the near future.
 
 
 ### NERSC Shifter

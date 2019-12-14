@@ -71,4 +71,6 @@ A number of tools are available to create, deploy and run containerised applicat
 
 * **Shifter/Sarus**: a Docker-compatible container engine, suitable for HPC. Can run containers, cannot build them.
 
+* **Charliecloud**: a Docker-compatible tool for lightweight, user-defined software stacks for high-performance computing.
+
 * **Podman**: a root-less alternative to Docker. Misses on some features for HPC.
