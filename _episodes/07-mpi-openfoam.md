@@ -110,19 +110,19 @@ srun -n 1 \
 
 srun -n 1 \
   singularity exec $SIFPATH/openfoam_v1812.sif \
-  decomposePar -fileHandler uncollated | tee log.decomposePar
+  decomposePar -fileHandler collated | tee log.decomposePar
 
 
 # run OpenFoam with MPI
 srun -n $SLURM_NTASKS \
   singularity exec $SIFPATH/openfoam_v1812.sif \
-  simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
+  simpleFoam -fileHandler collated -parallel | tee log.simpleFoam
 
 
 # post-processing
 srun -n 1 \
   singularity exec $SIFPATH/openfoam_v1812.sif \
-  reconstructPar -latestTime -fileHandler uncollated | tee log.reconstructPar
+  reconstructPar -latestTime -fileHandler collated | tee log.reconstructPar
 ```
 {: .bash}
 
