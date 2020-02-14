@@ -231,7 +231,7 @@ $ ls -l Trinity.fasta*
 
 In some situations, you might need your container to be writable not to store persistent output files, but just to write temporary service files.  
 *E.g.* this can happen with applications that want to write a dot-file in your home, such as a Python package, or containerised Jupyter notebooks that need to write runtime information under `/run`.  
-In this context, a persistent overlay filesystem might more work than is desired. There are alternative, simpler ways to set this up.
+In this context, a persistent overlay filesystem might require more work than is desired. There are alternative, simpler ways to set this up.
 
 Singularity has a flag for rendering containers from SIF image files ephemerally writable. `--writable-tmpfs` will allocate a small amount of RAM for this purpose (configured by the sys admins, by default just a bunch of MB), e.g.:
 
@@ -252,6 +252,7 @@ ls: /home/ubuntu/write-to-home: No such file or directory
 ```
 {: .output}
 
+There are situations where `--writable-tmpfs` is not usable, in particular if you are trying to write to a directory owned by *root*, such as `/run`.  
 In this case, the solution is to create a host directory and bind mount it as the path you need to write into, *e.g.*:
 
 ```
