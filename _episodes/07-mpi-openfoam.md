@@ -16,7 +16,7 @@ keypoints:
 >
 > To run exercises from this episode on your own, you'll need a machine with MPICH libraries and Slurm scheduler installed.  
 > If you only have MPICH but not Slurm, you can achieve the same outcomes below by executing `./mpi_mpirun.sh` in substitution for `sbatch mpi_sc19.sh`.
-> {: .callout}
+{: .callout}
 
 
 ### Let's run OpenFoam in a container!
