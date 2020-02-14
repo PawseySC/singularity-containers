@@ -50,7 +50,7 @@ There is an executable script called `helloworld.py`.
 {: .challenge}
 
 
-### Build and run a Python container for machine learning
+### Build a Python/Jupyter container for machine learning
 
 We want to be able to leverage other Python modules to do some actual work, so we need to build Python containers that use tools like `pip` and `conda`.
 
@@ -100,6 +100,8 @@ $ cd $SC19/demos/09_python/logistic-regression
 > {: .solution}
 {: .challenge}
 
+
+### Run an interactive machine learning session with Jupyter in the container
 
 In the same directory we have both a Jupyter notebook (`LogisticRegression.ipynb`) and source code (`logreg.py`) that we're going to use.
 
