@@ -27,7 +27,7 @@ $ cd $SC19/demos/08_rstudio
 
 > ## Pull the container
 >
-> We want to use a [Tidyverse](https://www.tidyverse.org) container image (contains R, RStudio, data science packages). Can you pull the  `rocker/> tidyverse:3.6.1` from Docker Hub?
+> We want to use a [Tidyverse](https://www.tidyverse.org) container image (contains R, RStudio, data science packages). Can you pull the  `rocker/tidyverse:3.6.1` from Docker Hub?
 >
 > > ## Solution
 > >
