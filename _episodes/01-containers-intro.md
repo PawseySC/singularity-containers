@@ -5,7 +5,6 @@ exercises: 0
 questions:
 objectives:
 - Learn what are containers and how they are beneficial to HPC & Cloud computing
-start = true
 ---
 
 

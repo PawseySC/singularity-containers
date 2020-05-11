@@ -8,7 +8,6 @@ objectives:
 keypoints:
 - Some workflow engines offer transparent APIs for running containerised applications
 - If you need to run data analysis pipelines, the combination of containers and workflow engines can really make your life easier!
-start = true
 ---
 
 

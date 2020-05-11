@@ -10,7 +10,6 @@ keypoints:
 - Use linux tool from a Ubuntu container to create a filesystem image file
 - Mount a filesystem image using the flag `--overlay`
 - Make a SIF container ephemerally writable with the flag `--writable-tmpfs`
-start = true
 ---
 
 
