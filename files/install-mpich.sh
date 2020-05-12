@@ -26,7 +26,7 @@ cd mpich-${MPICH_VERSION}
 
 ./configure ${MPICH_CONFIGURE_OPTIONS}
 make ${MPICH_MAKE_OPTIONS}
-sudo make install
+make install
 
 echo "export PATH=\"$MPICH_DIR/bin:\$PATH\"" >> $(eval echo ~${USERID})/.bashrc
 echo "export CPATH=\"$MPICH_DIR/include:\$CPATH\"" >> $(eval echo ~${USERID})/.bashrc
