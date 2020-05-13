@@ -38,7 +38,7 @@ This example is adapted from this well crafted [Singularity Tutorial](https://gi
 Let us cd into the appropriate directory:
 
 ```
-$ cd $SC19/demos/06_lolcow
+$ cd $TUTO/demos/06_lolcow
 ```
 {: .bash}
 
@@ -214,9 +214,9 @@ $ singularity inspect --deffile lolcow.sif
 > > {: .bash}
 > >
 > > ```
-> > Singularity lolcow.sif:/home/ubuntu/sc19-containers/demos/06_lolcow> ls
+> > Singularity lolcow.sif:/home/ubuntu/singularity-containers/demos/06_lolcow> ls
 > > lolcow.def  lolcow.sif
-> > Singularity lolcow.sif:/home/ubuntu/sc19-containers/demos/06_lolcow>
+> > Singularity lolcow.sif:/home/ubuntu/singularity-containers/demos/06_lolcow>
 > > ```
 > > {: .output}
 > >
@@ -250,7 +250,7 @@ $ ./lolcow.sif
 Or, if you need to specify Singularity runtime flags, *e.g.*:
 
 ```
-$ singularity run -B $SC19/_episodes lolcow.sif
+$ singularity run -B $TUTO/_episodes lolcow.sif
 ```
 {: .bash}
 

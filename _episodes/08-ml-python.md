@@ -24,7 +24,7 @@ Python is a great language for doing all kinds of work, but sometimes it can pre
 Let's start by running a very simple hello world example with a basic Python container.  To start, cd into the demo directory:
 
 ```
-$ cd $SC19/demos/09_python
+$ cd $TUTO/demos/09_python
 ```
 {: .bash}
 
@@ -82,7 +82,7 @@ Note that we need the full path to the `conda` executable when using the base im
 Now, change directory to `logistic-regression`:
 
 ```
-$ cd $SC19/demos/09_python/logistic-regression
+$ cd $TUTO/demos/09_python/logistic-regression
 ```
 {: .bash}
 
@@ -168,7 +168,7 @@ As a result you should now have a plot saved as a `.png` file.
 **If time allows**, let's try another ML example. We'll build another container image that uses Jupyter. For this this example, change directory to:
 
 ```
-$ cd $SC19/demos/09_python/image-classification
+$ cd $TUTO/demos/09_python/image-classification
 ```
 {: .bash}
 

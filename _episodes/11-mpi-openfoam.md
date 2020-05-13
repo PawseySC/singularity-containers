@@ -28,14 +28,14 @@ The sample inputs come straight from the OpenFoam installation tree, namely `$FO
 First, let us cd into the demo directory, ensure that `$SIFPATH` is defined, and verify that the OpenFoam container image has been downloaded:
 
 ```
-$ cd $SC19/demos/07_openfoam
-$ export SIFPATH=$SC19/demos/sif
+$ cd $TUTO/demos/07_openfoam
+$ export SIFPATH=$TUTO/demos/sif
 $ ls $SIFPATH/openfoam*.sif
 ```
 {: .bash}
 
 ```
-/home/ubuntu/sc19-containers/demos/sif/openfoam_v1812.sif
+/home/ubuntu/singularity-containers/demos/sif/openfoam_v1812.sif
 ```
 {: .output}
 

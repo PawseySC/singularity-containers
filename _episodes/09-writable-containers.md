@@ -23,7 +23,7 @@ Singularity offers a feature to achieve this, called *OverlayFS*.
 Let us cd into `demos/04_trinity`:
 
 ```
-$ cd $SC19/demos/04_trinity
+$ cd $TUTO/demos/04_trinity
 ```
 {: .bash}
 
@@ -148,13 +148,13 @@ A subdirectory in the directory we are in, `trinity_test_data/`, contains sample
 Now, let's ensure that `$SIFPATH` is defined, and that the Trinity image from Docker hub, `trinityrnaseq/trinityrnaseq:2.8.6`, has been correctly downloaded:
 
 ```
-$ export SIFPATH=$SC19/demos/sif
+$ export SIFPATH=$TUTO/demos/sif
 $ ls $SIFPATH/trinity*
 ```
 {: .bash}
 
 ```
-/home/ubuntu/sc19-containers/demos/sif/trinityrnaseq_2.8.6.sif
+/home/ubuntu/singularity-containers/demos/sif/trinityrnaseq_2.8.6.sif
 ```
 {: .output}
 

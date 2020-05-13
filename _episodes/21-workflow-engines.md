@@ -24,7 +24,7 @@ Now, let's try and use Singularity and Nextflow to run a demo RNA sequencing pip
 
 First, if it's not already on your system, you'll need to install Nextflow. You'll need to install a Java runtime and download the Nextflow executable. It will take a few minutes to download all of the required dependencies, but the process is fairly automated. This is a template install [script]({{ page.root }}/files/install-nextflow.sh) for a Linux box.
 
-If you're running on the Pawsey Nimbus cloud, just run the above script via: `bash $SC19/files/install-nextflow.sh`.
+If you're running on the Pawsey Nimbus cloud, just run the above script via: `bash $TUTO/files/install-nextflow.sh`.
 
 If you're running at Pawsey *e.g.* on Zeus, all you need is to `module load nextflow`.
 
@@ -34,7 +34,7 @@ If you're running at Pawsey *e.g.* on Zeus, all you need is to `module load next
 Let's `cd` into the appropriate directory:
 
 ```
-$ cd $SC19/demos/10_nextflow
+$ cd $TUTO/demos/10_nextflow
 ```
 {: .bash}
 
@@ -60,8 +60,8 @@ Launching `marcodelapierre/rnaseq-nf` [hopeful_almeida] - revision: 91dd162c00 [
  reads        : /data/work/.nextflow/assets/marcodelapierre/rnaseq-nf/data/ggal/ggal_gut_{1,2}.fq
  outdir       : results
 
-WARN: Singularity cache directory has not been defined -- Remote image will be stored in the path: /data/work/sc19-test/nxf/work/singularity
-Pulling Singularity image docker://nextflow/rnaseq-nf:latest [cache /data/work/sc19-test/nxf/work/singularity/nextflow-rnaseq-nf-latest.img]
+WARN: Singularity cache directory has not been defined -- Remote image will be stored in the path: /data/work/singularity-test/nxf/work/singularity
+Pulling Singularity image docker://nextflow/rnaseq-nf:latest [cache /data/work/singularity-test/nxf/work/singularity/nextflow-rnaseq-nf-latest.img]
 ```
 {: .output}
 

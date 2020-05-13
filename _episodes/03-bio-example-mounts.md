@@ -17,7 +17,7 @@ keypoints:
 Let's start and `cd` into the root demo directory:
 
 ```
-$ cd $SC19/demos
+$ cd $TUTO/demos
 ```
 {: .bash}
 
@@ -58,7 +58,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > {: .bash}
 >
 > ```
-> /home/ubuntu/sc19-containers/demos
+> /home/ubuntu/singularity-containers/demos
 > ```
 > {: .output}
 >
@@ -71,7 +71,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ```
 > > {: .bash}
 > > ```
-> > /home/ubuntu/sc19-containers/demos
+> > /home/ubuntu/singularity-containers/demos
 > > ```
 > > {: .output}
 > >
@@ -103,17 +103,17 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 
 > ## How about other directories in the host?
 >
-> For instance, let us inspect `$SC19/_episodes`.
+> For instance, let us inspect `$TUTO/_episodes`.
 >
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec library://ubuntu:18.04 ls $SC19/_episodes
+> > $ singularity exec library://ubuntu:18.04 ls $TUTO/_episodes
 > > ```
 > > {: .bash}
 > >
 > > ```
-> > ls: cannot access '/home/ubuntu/sc19-containers/_episodes': No such file or directory
+> > ls: cannot access '/home/ubuntu/singularity-containers/_episodes': No such file or directory
 > > ```
 > > {: .output}
 > >
@@ -129,10 +129,10 @@ Singularity has the runtime flag `--bind`, `-B` in short, to mount host director
 The long syntax allows to map the host dir onto a container dir with a different name/path, `-B hostdir:containerdir`.  
 The short syntax just mounts the dir using the same name and path: `-B hostdir`.
 
-Let's use the latter syntax to mount `$SC19/_episodes` into the container and re-run `ls`.
+Let's use the latter syntax to mount `$TUTO/_episodes` into the container and re-run `ls`.
 
 ```
-$ singularity exec -B $SC19/_episodes library://ubuntu:18.04 ls $SC19/_episodes
+$ singularity exec -B $TUTO/_episodes library://ubuntu:18.04 ls $TUTO/_episodes
 ```
 {: .bash}
 
@@ -191,7 +191,7 @@ $ ls $SIFPATH/blast*
 {: .bash}
 
 ```
-/home/ubuntu/sc19-containers/demos/sif/blast_v2.2.31_cv2.sif
+/home/ubuntu/singularity-containers/demos/sif/blast_v2.2.31_cv2.sif
 ```
 {: .output}
 
@@ -222,7 +222,7 @@ $ ls $SIFPATH/blast*
 Now, the `demos/03_blast` demo directory contains a human prion FASTA sequence, `P04156.fasta`, whereas another directory, `demos/03_blast_db`, contains a gzipped reference database to blast against, `zebrafish.1.protein.faa.gz`. Let us `cd` to the latter directory and uncompress the database:
 
 ```
-$ cd $SC19/demos/03_blast_db
+$ cd $TUTO/demos/03_blast_db
 $ gunzip zebrafish.1.protein.faa.gz
 ```
 {: .bash}
@@ -247,7 +247,7 @@ $ gunzip zebrafish.1.protein.faa.gz
 > > {: .bash}
 > > ```
 > > Building a new DB, current time: 11/16/2019 19:14:43
-> > New DB name:   /home/ubuntu/sc19-containers/demos/03_blast_db/zebrafish.1.protein.faa
+> > New DB name:   /home/ubuntu/singularity-containers/demos/03_blast_db/zebrafish.1.protein.faa
 > > New DB title:  zebrafish.1.protein.faa
 > > Sequence type: Protein
 > > Keep Linkouts: T
@@ -274,7 +274,7 @@ $ cd ../03_blast
 > and then adapt the following command to run into the container:
 >
 > ```
-> $ blastp -query P04156.fasta -db $SC19/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
+> $ blastp -query P04156.fasta -db $TUTO/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
 > ```
 > {: .bash}
 >
@@ -283,7 +283,7 @@ $ cd ../03_blast
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec -B $SC19/demos/03_blast_db $SIFPATH/blast_v2.2.31_cv2.sif blastp -query P04156.fasta -db $SC19/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
+> > $ singularity exec -B $TUTO/demos/03_blast_db $SIFPATH/blast_v2.2.31_cv2.sif blastp -query P04156.fasta -db $TUTO/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
 > > ```
 > > {: .bash}
 > {: .solution}
