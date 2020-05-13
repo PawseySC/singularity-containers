@@ -17,24 +17,20 @@ keypoints:
 
 Before we start, let us ensure we have got the required files to run the tutorials.
 
+If you haven't done it already, download the following Github repo.  Then `cd` into it, define a couple of handy variables (see below), and finally `cd` into `demos/singularity`:
+
 ```
 $ cd ~
-```
-{: .bash}
-
-If it does not exist already, download the following Github repo. Then `cd` into it, define a couple of handy variables (see below), and finally `cd` into `demos/singularity`:
-
-```
 $ git clone https://github.com/PawseySC/singularity-containers
 $ cd singularity-containers
 $ export TUTO=$(pwd)
 $ export SIFPATH=$TUTO/demos/sif
-$ cd demos/02_singularity
+$ cd demos/singularity
 ```
 {: .bash}
 
 
-> ## Regular users of this tutorial: read this instead
+> ## Want to save time later in the tutorial?  Read this
 >
 > Open a second terminal in the machine where you're running the tutorial, then run the script `pull_big_images.sh` to start downloading a few images that you'll require later:
 >
@@ -47,7 +43,7 @@ $ cd demos/02_singularity
 >
 > This will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
 >
-> One more thing: if you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node. You can get this setup by using an interactive scheduler allocation, for instance on Zeus with Slurm:
+> One more thing: if you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node.  You can get this setup by using an interactive scheduler allocation, for instance on Zeus with Slurm:
 >
 > ```
 > $ salloc -n 1 -t 4:00:00
