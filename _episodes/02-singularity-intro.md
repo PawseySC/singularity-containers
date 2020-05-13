@@ -61,13 +61,15 @@ $ cd demos/singularity
 
 ### Singularity: a container engine for HPC
 
-[Singularity](https://sylabs.io/singularity/) is developed and maintained by [Sylabs](https://sylabs.io), and was designed from scratch as a container engine for HPC applications, and this is clearly reflected in some of its main features:
+[Singularity](https://sylabs.io/singularity/) is developed and maintained by [Sylabs](https://sylabs.io), and was designed from scratch as a container engine for HPC applications, which is clearly reflected in some of its main features:
 
-* *unprivileged* runtime: Singularity containers do not require the user to hold root privileges to run;
+* *unprivileged* runtime: Singularity containers do not require the user to hold root privileges to run (the Singularity executable needs to be installed and owned by *root*, though);
 
 * *root* privileges are required to build container images: users can build images on their personal laptops or workstations, on the cloud, or via a Remote Build service;
 
-* *integration*, rather than *isolation*, by default: same user as host, current directory bind mounted, communication ports available; as a result, launching a container requires a much simpler syntax than Docker;
+* *integration*, rather than *isolation*, by default: same user as host, same shell variables inherited by host, current directory bind mounted, communication ports available; as a result, launching a container requires a much simpler syntax than Docker;
+
+* ability to run MPI enabled containers using host libraries;
 
 * native execution of GPU enabled containers.
 
@@ -78,13 +80,13 @@ This tutorial assumes Singularity version 3.0 or higher. Version **3.3.0** or hi
 
 One of the differences between Docker and Singularity is the adopted format to store container images.
 
-Docker adopts a layered format compliant with the *Open Containers Initiative* (OCI). Each build command in the recipe file results in the creation of a distinct image layer. These layers are cached during the build process, making them quite useful for development. In fact, repeated build attempts that make use of the same layers will exploit the cache, thus reducing the overall build time. On the other hand, shipping a container image is not straightforward, and requires either relying on a public registry, or compressing the image in a *tar* archive.
+Docker adopts a layered format compliant with the *Open Containers Initiative* (OCI).  Each build command in the recipe file results in the creation of a distinct image layer.  These layers are cached during the build process, making them quite useful for development.  In fact, repeated build attempts that make use of the same layers will exploit the cache, thus reducing the overall build time.  On the other hand, shipping a container image is not straightforward, and requires either relying on a public registry, or compressing the image in a *tar* archive.
 
-Since version 3.0, Singularity has developed the *Singularity Image Format* (*SIF*), a single file layout for container images. Among the benefits, an image is simply a very large file, and thus can be transferred and shipped as any other file. Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption. A drawback of this approach is that during build time a progressive, incremental approach is not possible.
+Since version 3.0, Singularity has developed the *Singularity Image Format* (SIF), a single file layout for container images.  Among the benefits, an image is simply a very large file, and thus can be transferred and shipped as any other file.  Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption.  A drawback of this approach is that during build time a progressive, incremental approach is not possible.
 
 Interestingly, Singularity is able to download and run both types of images.
 
-Note that Singularity versions prior to 3.0 used a slightly different image format, characterised by the extension `.simg`. You can still find these around in the web; newer Singularity versions are still able to run them.
+Note that Singularity versions prior to 3.0 used a slightly different image format, characterised by the extension `.simg`.  You can still find these around in the web; newer Singularity versions are still able to run them.
 
 
 ### Executing a simple command in a Singularity container
