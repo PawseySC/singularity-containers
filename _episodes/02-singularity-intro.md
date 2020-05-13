@@ -13,14 +13,6 @@ keypoints:
 ---
 
 
-> ## SC19 attendees only: let's login
->
-> If your user number is odd, then login to: `ssh userXXX@18.234.39.151`
->
-> If your user number is even, then login to: `ssh userXXX@13.57.28.164`
-{: .callout}
-
-
 ### Get ready for the hands-on
 
 Before we start, let us ensure we have got the required files to run the tutorials.
@@ -30,7 +22,7 @@ $ cd ~
 ```
 {: .bash}
 
-If it does not exist already, download the following Github repo. Then `cd` into it, define a couple of handy variables (see below), and finally `cd` into `demos/02_singularity`:
+If it does not exist already, download the following Github repo. Then `cd` into it, define a couple of handy variables (see below), and finally `cd` into `demos/singularity`:
 
 ```
 $ git clone https://github.com/PawseySC/sc19-containers
