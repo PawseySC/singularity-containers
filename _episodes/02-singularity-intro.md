@@ -73,7 +73,7 @@ $ cd demos/singularity
 
 * native execution of GPU enabled containers.
 
-This tutorial assumes Singularity version 3.0 or higher. Version **3.3.0** or higher is recommended as it offers a smoother, more bug-free experience.
+This tutorial assumes Singularity version 3.0 or higher. Version **3.3.0 or higher** is recommended as it offers a smoother, more bug-free experience.
 
 
 ### Container image formats
@@ -82,11 +82,11 @@ One of the differences between Docker and Singularity is the adopted format to s
 
 Docker adopts a layered format compliant with the *Open Containers Initiative* (OCI).  Each build command in the recipe file results in the creation of a distinct image layer.  These layers are cached during the build process, making them quite useful for development.  In fact, repeated build attempts that make use of the same layers will exploit the cache, thus reducing the overall build time.  On the other hand, shipping a container image is not straightforward, and requires either relying on a public registry, or compressing the image in a *tar* archive.
 
-Since version 3.0, Singularity has developed the *Singularity Image Format* (SIF), a single file layout for container images.  Among the benefits, an image is simply a very large file, and thus can be transferred and shipped as any other file.  Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption.  A drawback of this approach is that during build time a progressive, incremental approach is not possible.
+Since version 3.0, Singularity has developed the *Singularity Image Format* (SIF), a single file layout for container images, with extension `.sif`.  Among the benefits, an image is simply a very large file, and thus can be transferred and shipped as any other file.  Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption.  A drawback of this approach is that during build time a progressive, incremental approach is not possible.
 
 Interestingly, Singularity is able to download and run both types of images.
 
-Note that Singularity versions prior to 3.0 used a slightly different image format, characterised by the extension `.simg`.  You can still find these around in the web; newer Singularity versions are still able to run them.
+Note that Singularity versions prior to 3.0 used different image formats, characterised by the extensions `.simg` or `.sqsh`.  You can still find these around in the web; newer Singularity versions are still able to run them.
 
 
 ### Executing a simple command in a Singularity container
@@ -94,7 +94,7 @@ Note that Singularity versions prior to 3.0 used a slightly different image form
 Running a command is done by means of `singularity exec`:
 
 ```
-$ singularity exec library://library/default/ubuntu:18.04 cat /etc/os-release
+$ singularity exec library://ubuntu:18.04 cat /etc/os-release
 ```
 {: .bash}
 
@@ -118,24 +118,25 @@ UBUNTU_CODENAME=bionic
 
 Here is what Singularity has just done:
 
-* downloaded a Ubuntu image from the Cloud Library (this wouldn't happen if the image had been downloaded previously);
+* downloaded a Ubuntu image from the Cloud Library (this would be skipped if the image had been downloaded previously);
 * stored it into the default cache directory;
 * instantiated a container from that image;
 * executed the command `cat /etc/os-release`.
 
-Container images have a **name** and a **tag**, in this case `ubuntu` and `18.04`. The tag can be omitted, in which case Singularity will default to a tag named `latest`.
+Container images have a **name** and a **tag**, in this case `ubuntu` and `18.04`.  The tag can be omitted, in which case Singularity will default to a tag named `latest`.
 
 
 > ## Using the *latest* tag
 >
-> The practice of using the `latest` tag can be handy for quick typing, but is dangerous when it comes to reproducibility of your workflow, as under the hood the *latest* image could change over time.
+> The practice of using the `latest` tag can be handy for quick typing, but is dangerous when it comes to reproducibility of your workflow, as the *latest* image could change over time under the hood in the registry.
 {: .callout}
 
 
-The prefix `library://` makes Singularity pull the image from the default registry, that is the [**Sylabs Cloud Library**](https://cloud.sylabs.io). Images in there are organised in terms of **users** (`library` in this case) and **user collections** (optional, `default` in the example above). Note that in the particular case of `library/default/`, this specification could be skipped, for instance:
+Here Singularity pulled the image from an online image registry, as represented in this example by the prefix `library://`, that corresponds to the [**Sylabs Cloud Library**](https://cloud.sylabs.io).  Images in there are organised as: `<user>/<user collection>/<name>:<tag>`.  
+In the example above we didn't we specify the **user**, `library`, and the **user collection**, `default`.  Why?  Because the specific case of `library/default/` can be omitted.  The full specification is used in the next example:
 
 ```
-$ singularity exec library://ubuntu:18.04 echo "Hello World"
+$ singularity exec library://library/default/ubuntu:18.04 echo "Hello World"
 ```
 {: .bash}
 
@@ -152,7 +153,7 @@ Here we are also experiencing image caching in action: the output has no more me
 Now let's try and download a Ubuntu container from the [**Docker Hub**](https://hub.docker.com), *i.e.* the main registry for Docker containers:
 
 ```
-$ singularity exec docker://library/ubuntu:18.04 cat /etc/os-release
+$ singularity exec docker://ubuntu:18.04 cat /etc/os-release
 ```
 {: .bash}
 
@@ -197,29 +198,29 @@ Rather than just downloading a SIF file, now there's more work for Singularity, 
 
 Note that, to point Singularity to Docker Hub, the prefix `docker://` is required.
 
-Also note how Docker Hub organises images only by users (also called *repositories*), not by collections.
+Docker Hub organises images only by users (also called *repositories*), not by collections: `<reposityory>/<name>:<tag>`.  In the case of the Ubuntu image, the repository was `library` and could be omitted.
 
 
-> ## What is the *latest* Ubuntu image from the Sylabs Cloud?
+> ## What is the *latest* Ubuntu image from Docker Hub?
 >
-> Write down a Singularity command that prints the OS version through the *latest* Ubuntu image from Sylabs Cloud Library.
+> Write down a Singularity command that prints the OS version through the *latest* Ubuntu image from Docker Hub.
 >
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec library://ubuntu cat /etc/os-release
+> > $ singularity exec docker://ubuntu cat /etc/os-release
 > > ```
 > > {: .bash}
 > >
 > > ```
 > > [..]
 > > NAME="Ubuntu"
-> > VERSION="18.10 (Cosmic Cuttlefish)"
+> > VERSION="20.04 LTS (Focal Fossa)"
 > > [..]
 > > ```
 > > {: .output}
 > >
-> > It's version 18.10.
+> > It's version 20.04.
 > {: .solution}
 {: .challenge}
 
@@ -231,12 +232,12 @@ Sometimes it can be useful to open a shell inside a container, rather than to ex
 Achieve this by using `singularity shell`:
 
 ```
-$ singularity shell library://ubuntu:18.04
+$ singularity shell docker://ubuntu:18.04
 ```
 {: .bash}
 
 ```
-Singularity ubuntu_18.04.sif:/home/ubuntu/singularity-containers/demos/02_singularity>
+Singularity ubuntu_18.04.sif:/home/ubuntu/singularity-containers/demos/singularity>
 ```
 {: .output}
 
@@ -245,26 +246,16 @@ Remember to type `exit`, or hit `Ctrl-D`, when you're done!
 
 ### Download and use images via SIF file names
 
-All examples so far have identified container images using their registry name specification, *e.g.* `library/default/ubuntu:18.04` or similar.
+All examples so far have identified container images using their registry name specification, *e.g.* `docker://ubuntu:18.04` or similar.
 
-An alternative option to handle images is to download them to a known location, and then refer to their SIF file names.
+An alternative option to handle images is to download them to a known location, and then refer to their full directory path and file name.
 
 Let's use `singularity pull` to save the image to a specified path (output might differ depending on the Singularity version you use):
 
 ```
-$ singularity pull library://ubuntu:18.04
+$ singularity pull docker://ubuntu:18.04
 ```
 {: .bash}
-
-```
-INFO:    Key with ID EDECE4F3F38D871E not found in local keyring, downloading from keystore...
-INFO:    Container is signed
-Data integrity checked, authentic and signed by:
-    Sylabs Admin <support@sylabs.io>, Fingerprint 8883491F4268F173C6E5DC49EDECE4F3F38D871E
-WARNING: no local key matching entity
-INFO:    Download complete: ubuntu_18.04.sif
-```
-{: .output}
 
 By default, the image is saved in the current directory:
 
@@ -278,7 +269,7 @@ ubuntu_18.04.sif
 ```
 {: .output}
 
-Then you can use this image file simply by:
+Then you can use this image file by:
 
 ```
 $ singularity exec ./ubuntu_18.04.sif echo "Hello World"
@@ -294,67 +285,75 @@ You can specify the storage location with:
 
 ```
 $ mkdir -p sif_lib
-$ singularity pull --dir sif_lib docker://library/ubuntu:18.04
+$ singularity pull --dir ~/path/to/sif/lib docker://library/ubuntu:18.04
+```
+{: .bash}
+
+Being able to specify download locations allows you to keep the local set of images organised and tidy, by making use of a directory tree.  It also allows for easy sharing of images within your team in a shared resource.  In general, you will need to specify the location of the image upon execution:
+
+```
+$ singularity exec ~/path/to/sif/lib/ubuntu_18.04.sif echo "Hello Again"
 ```
 {: .bash}
 
 ```
-INFO:    Using cached image
-```
-{: .output}
-
-```
-$ ls sif_lib
-```
-{: .bash}
-
-```
-ubuntu_18.04.sif
+Hello Again
 ```
 {: .output}
 
 
-> ## Organise your local container images
->
-> Being able to specify download locations for the container images allows you to keep your local set of images organised and tidy, by making use of a directory tree. It also allows for easy sharing of images within your team in a shared resource.
-{: .callout}
+### Manage the image cache
 
+When pulling images, Singularity stores images and blobs in a cache directory.
 
-### Configure cache and pull directory locations
+The default directory location for the image cache is `$HOME/.singularity/cache`.  This location can be inconvenient in shared resources such as HPC centres, where often the disk quota for the home directory is limited.  You can redefine the path to the cache dir by setting the variable `SINGULARITY_CACHEDIR`.
 
-Lots of Singularity settings can be configured by means of environment variables.
-
-The default directory location for the image cache is `$HOME/.singularity/cache`. This location can be inconvenient in shared resources such as HPC centres, where often the disk quota for the home directory is limited. You can redefine the path to the cache dir by setting the variable `SINGULARITY_CACHEDIR`.
-
-Similarly, if you have a preferred location to pull images into you can avoid using the flag `--dir` at runtime, and instead define the variable `SINGULARITY_PULLFOLDER`.
-
-
-### Reclaim cache space
-
-If you are running out of disk space, you can inspect the cache with this command (add `-v` from Singularity version 3.4 on):
+If you are running out of disk space, you can inspect the cache with this command (omit `-v` before Singularity version 3.4):
 
 ```
-$ singularity cache list
+$ singularity cache list -v
 ```
 {: .bash}
 
 ```
 NAME                     DATE CREATED           SIZE             TYPE
-ubuntu_latest.sif        2019-10-21 13:19:50    28.11 MB         library
-ubuntu_18.04.sif         2019-10-21 13:19:04    37.10 MB         library
-ubuntu_18.04.sif         2019-10-21 13:19:40    25.89 MB         oci
+ubuntu_18.04.sif         2020-05-14 08:30:05    54.62 MB         library
+ubuntu_18.04.sif         2020-05-14 08:31:46    25.89 MB         oci
+ubuntu_latest.sif        2020-05-14 08:32:35    27.77 MB         oci
+23884877105a7ff84a9108   2020-05-14 08:31:36    26.69 MB         blob
+2910811b6c4227c2f42aae   2020-05-14 08:31:38    0.85 kB          blob
+357debb1f5fbc903e8d1e2   2020-05-14 08:31:42    0.81 kB          blob
+36505266dcc64eeb1010bd   2020-05-14 08:31:40    0.16 kB          blob
+6154df8ff9882934dc5bf2   2020-05-14 08:32:26    0.85 kB          blob
+95c3f3755f37380edb2f8f   2020-05-14 08:32:29    2.48 kB          blob
+96878229af8adf91bcbf11   2020-05-14 08:32:29    0.81 kB          blob
+a0a91ba64d5bae825e23f0   2020-05-14 08:31:41    2.48 kB          blob
+bc38caa0f5b94141276220   2020-05-14 08:31:37    35.37 kB         blob
+d51af753c3d3a984351448   2020-05-14 08:32:24    28.56 MB         blob
+fc878cd0a91c7bece56f66   2020-05-14 08:32:25    32.30 kB         blob
+fee5db0ff82f7aa5ace634   2020-05-14 08:32:27    0.16 kB          blob
 
-There 3 containers using: 91.10 MB, 6 oci blob file(s) using 26.73 MB of space.
-Total space used: 117.83 MB
+There are 3 container file(s) using 108.28 MB and 12 oci blob file(s) using 55.32 MB of space
+Total space used: 163.60 MB
 ```
 {: .output}
 
-and then clean it up, *e.g.* to wipe everything use the `-a` flag (use `-f` instead from Singularity version 3.4 on):
+and then clean it up, *e.g.* to wipe everything use the `-f` flag (before Singularity version 3.4, use `-a` instead):
 
 ```
-$ singularity cache clean -a
+$ singularity cache clean -f
 ```
 {: .bash}
+
+```
+Removing /home/ubuntu/.singularity/cache/library
+Removing /home/ubuntu/.singularity/cache/oci-tmp
+Removing /home/ubuntu/.singularity/cache/shub
+Removing /home/ubuntu/.singularity/cache/oci
+Removing /home/ubuntu/.singularity/cache/net
+Removing /home/ubuntu/.singularity/cache/oras
+```
+{: .output}
 
 
 > ## Contextual help on Singularity commands
@@ -365,11 +364,13 @@ $ singularity cache clean -a
 
 ### Popular registries (*aka* image libraries)
 
-At the time of writing, Docker Hub hosts a much wider selection of container images than Sylabs Cloud. This includes Linux distributions, Python and R deployments, as well as a big variety of applications.
+At the time of writing, Docker Hub hosts a much wider selection of container images than Sylabs Cloud.  This includes Linux distributions, Python and R deployments, as well as a big variety of applications.
 
-Bioinformaticians should keep in mind another container registry, [Quay](https://quay.io) by Red Hat, that hosts thousands of applications in this domain of science. These mostly come out of the [Biocontainers](https://biocontainers.pro) project, that aims to provide automated container builds of all of the packages made available through [Bioconda](https://bioconda.github.io).
+Bioinformaticians should keep in mind another container registry, [Quay](https://quay.io) by Red Hat, that hosts thousands of applications in this domain of science.  These mostly come out of the [Biocontainers](https://biocontainers.pro) project, that aims to provide automated container builds of all of the packages made available through [Bioconda](https://bioconda.github.io).
 
 Nvidia maintains the [Nvidia GPU Cloud (NGC)](https://ngc.nvidia.com), hosting an increasing number of containerised applications optimised to run on GPUs.
+
+Right now, the Sylabs Cloud Library does not contain a large number of images.  Still, it can turn useful for storing container images requiring features that are specific to Singularity (we will see some in the next episodes).
 
 
 > ## Pull and run a Python container ##
