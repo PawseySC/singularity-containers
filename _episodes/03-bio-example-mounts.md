@@ -23,7 +23,7 @@ $ cd $TUTO/demos
 
 What directories can we access from the container?
 
-First, let us assess what the content of the root directory `/` looks like outside *vs* inside the container, to highlight the fact that a container runs on his own filesystem:
+First, let us assess what the content of the root directory `/` looks like from outside *vs* inside the container, to highlight the fact that a container runs on his own filesystem:
 
 ```
 $ ls /
@@ -37,8 +37,9 @@ bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  s
 
 
 Now let's look at the root directory when we're in the container
+
 ```
-$ singularity exec library://ubuntu:18.04 ls /
+$ singularity exec docker://ubuntu:18.04 ls /
 ```
 {: .bash}
 
@@ -67,9 +68,10 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec library://ubuntu:18.04 pwd
+> > $ singularity exec docker://ubuntu:18.04 pwd
 > > ```
 > > {: .bash}
+> >
 > > ```
 > > /home/ubuntu/singularity-containers/demos
 > > ```
@@ -87,12 +89,12 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec library://ubuntu:18.04 ls
+> > $ singularity exec docker://ubuntu:18.04 ls
 > > ```
 > > {: .bash}
 > >
 > > ```
-> > 03_blast    03_blast_db 04_trinity  05_gromacs  06_openfoam 07_lolcow   08_rstudio  09_python
+> > blast  blast_db  gromacs  lolcow  lolcow_docker  lolcow_hpccm  nextflow  openfoam  pull_big_images.sh  python  rstudio	singularity  trinity
 > > ```
 > > {: .output}
 > >
@@ -108,7 +110,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec library://ubuntu:18.04 ls $TUTO/_episodes
+> > $ singularity exec docker://ubuntu:18.04 ls $TUTO/_episodes
 > > ```
 > > {: .bash}
 > >
@@ -117,7 +119,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ```
 > > {: .output}
 > >
-> > Host directories external to the current directory are not visible! How can we fix this? Read on...
+> > Host directories external to the current directory are not visible!  How can we fix this?  Read on...
 > {: .solution}
 {: .challenge}
 
@@ -126,13 +128,13 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 
 Singularity has the runtime flag `--bind`, `-B` in short, to mount host directories.
 
-The long syntax allows to map the host dir onto a container dir with a different name/path, `-B hostdir:containerdir`.  
-The short syntax just mounts the dir using the same name and path: `-B hostdir`.
+There is a long syntax, which allows to map the host dir onto a container dir with a different name/path, `-B hostdir:containerdir`.  
+There is also a short syntax, that just mounts the dir using the same name and path: `-B hostdir`.
 
-Let's use the latter syntax to mount `$TUTO/_episodes` into the container and re-run `ls`.
+Let's use the latter syntax to mount `$TUTO` into the container and re-run `ls`.
 
 ```
-$ singularity exec -B $TUTO/_episodes library://ubuntu:18.04 ls $TUTO/_episodes
+$ singularity exec -B $TUTO docker://ubuntu:18.04 ls $TUTO/_episodes
 ```
 {: .bash}
 
@@ -145,36 +147,40 @@ $ singularity exec -B $TUTO/_episodes library://ubuntu:18.04 ls $TUTO/_episodes
 Now we are talking!
 
 If you need to mount multiple directories, you can either repeat the `-B` flag multiple times, or use a comma-separated list of paths, *i.e.*
+
 ```
 -B dir1,dir2,dir3
 ```
 {: .bash}
 
-Also, if you want to keep the runtime command compact, you can equivalently specify directories to be bind mounting using an environment variable:
+Also, if you want to keep the runtime command compact, you can equivalently specify directories to be bind mounted using the environment variable `SINGULARITY_BINDPATH`:
+
 ```
-$ export SINGULARITY_BINBPATH="dir1,dir2,dir3"
+$ export SINGULARITY_BINDPATH="dir1,dir2,dir3"
 ```
 {: .bash}
 
 
 > ## Mounting $HOME
 >
-> Depending on the site configuration of Singularity,
-> user home directories might or might not be mounted into containers by default.
-> We do recommend avoid mounting home whenever possible,
-> to avoid sharing potentially sensitive data, such as SSH keys, with the container,
-> especially if exposing it to the public through a web service.
+> Depending on the site configuration of Singularity, user home directories might or might not be mounted into containers by default.  
+> We do recommend avoid mounting home whenever possible, to avoid sharing potentially sensitive data, such as SSH keys, with the container, especially if exposing it to the public through a web service.
 >
 > If you need to share data inside the container home, you might just mount that specific file/directory, *e.g.*
+>
 > ```
 > -B $HOME/.local
 > ```
 > {: .bash}
 >
 > Or, if you want a full fledged home, you might define an alternative host directory to act as your container home, as in
+>
 > ```
 > -B /path/to/fake/home:$HOME
 > ```
+> {: .bash}
+>
+> Finally, note that if you run a container while sitting on your host home, this will be bind mounted as it is the current working directory.  You should avoid this situation whenever possible.
 {: .callout}
 
 
