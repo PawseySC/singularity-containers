@@ -186,25 +186,21 @@ $ export SINGULARITY_BINDPATH="dir1,dir2,dir3"
 
 ### Running BLAST from a container
 
-We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro). BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics tools.  
+We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro).  BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics packages.  
 This example is adapted from the [BioContainers documentation](http://biocontainers-edu.biocontainers.pro/en/latest/running_example.html).
 
-We're going to use the BLAST image `biocontainers/blast:v2.2.31_cv2`, which we previously downloaded in `$SIFPATH`. Let's verify it's there:
+We're going to use the BLAST image `biocontainers/blast:v2.2.31_cv2`.  First, we'll pull the image in the path `$SIFPATH`.  This might take up to about 10 minutes (unless you had pulled the image in advance):
 
 ```
-$ ls $SIFPATH/blast*
+$ singularity pull --dir $SIFPATH docker://biocontainers/blast:v2.2.31_cv2
 ```
 {: .bash}
 
-```
-/home/ubuntu/singularity-containers/demos/sif/blast_v2.2.31_cv2.sif
-```
-{: .output}
 
 > ## Run a test command
 >
-> To begin, let us run a simple command using the downloaded image `$SIFPATH/blast_v2.2.31_cv2.sif`,
-> for instance `blastp -help`, to verify that it actually works:
+> Let us run a simple command using the image we just pulled, for instance `blastp -help`, to verify that it actually works.
+> **Hint**: the image path is `$SIFPATH/blast_v2.2.31_cv2.sif`.
 >
 > > ## Solution
 > >
@@ -216,7 +212,9 @@ $ ls $SIFPATH/blast*
 > > ```
 > > USAGE
 > >   blastp [-h] [-help] [-import_search_strategy filename]
+> >
 > > [..]
+> >
 > >  -use_sw_tback
 > >    Compute locally optimal Smith-Waterman alignments?
 > > ```
@@ -225,10 +223,10 @@ $ ls $SIFPATH/blast*
 {: .challenge}
 
 
-Now, the `demos/03_blast` demo directory contains a human prion FASTA sequence, `P04156.fasta`, whereas another directory, `demos/03_blast_db`, contains a gzipped reference database to blast against, `zebrafish.1.protein.faa.gz`. Let us `cd` to the latter directory and uncompress the database:
+Now, the demo directory `demos/blast` contains a human prion FASTA sequence, `P04156.fasta`, whereas another directory, `demos/blast_db`, contains a gzipped reference database to blast against, `zebrafish.1.protein.faa.gz`.  Let us `cd` to the latter directory and uncompress the database:
 
 ```
-$ cd $TUTO/demos/03_blast_db
+$ cd $TUTO/demos/blast_db
 $ gunzip zebrafish.1.protein.faa.gz
 ```
 {: .bash}
@@ -253,7 +251,7 @@ $ gunzip zebrafish.1.protein.faa.gz
 > > {: .bash}
 > > ```
 > > Building a new DB, current time: 11/16/2019 19:14:43
-> > New DB name:   /home/ubuntu/singularity-containers/demos/03_blast_db/zebrafish.1.protein.faa
+> > New DB name:   /home/ubuntu/singularity-containers/demos/blast_db/zebrafish.1.protein.faa
 > > New DB title:  zebrafish.1.protein.faa
 > > Sequence type: Protein
 > > Keep Linkouts: T
@@ -267,20 +265,20 @@ $ gunzip zebrafish.1.protein.faa.gz
 
 
 After the container has terminated, you should see several new files in the current directory (try `ls`).  
-Now let's proceed to the final alignment step using `blastp`. We need to cd into `demos/03_blast`:
+Now let's proceed to the final alignment step using `blastp`. We need to cd into `demos/blast`:
 
 ```
-$ cd ../03_blast
+$ cd ../blast
 ```
 {: .bash}
 
 
 > ## Run the alignment
 >
-> and then adapt the following command to run into the container:
+> Adapt the following command to run into the container:
 >
 > ```
-> $ blastp -query P04156.fasta -db $TUTO/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
+> $ blastp -query P04156.fasta -db $TUTO/demos/blast_db/zebrafish.1.protein.faa -out results.txt
 > ```
 > {: .bash}
 >
@@ -289,7 +287,7 @@ $ cd ../03_blast
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec -B $TUTO/demos/03_blast_db $SIFPATH/blast_v2.2.31_cv2.sif blastp -query P04156.fasta -db $TUTO/demos/03_blast_db/zebrafish.1.protein.faa -out results.txt
+> > $ singularity exec -B $TUTO/demos/blast_db $SIFPATH/blast_v2.2.31_cv2.sif blastp -query P04156.fasta -db $TUTO/demos/blast_db/zebrafish.1.protein.faa -out results.txt
 > > ```
 > > {: .bash}
 > {: .solution}
@@ -316,5 +314,3 @@ Sequences producing significant alignments:                          (Bits)  Val
 [..]
 ```
 {: .output}
-
-We can see that several proteins in the zebrafish genome match those in the human prion (interesting?).
