@@ -144,7 +144,7 @@ Here, `srun` is the Slurm wrapper for the MPI launcher, *i.e.* the tool that is 
 Note how `singularity` can be executed through the launcher as any other application would.
 
 Under the hood, the MPI process outside of the container (spawned by `srun`) will work in tandem with the containerized MPI code to instantiate the job.  
-There are a few implications here..
+There are a few implications here...
 
 
 ### Requirements for the MPI + container combo
@@ -225,7 +225,7 @@ The second variable ensures that at runtime the container's `LD_LIBRARY_PATH` ha
 ### MPI performance: container *vs* bare metal
 
 What's the performance overhead in running an MPI application through containers?  
-Well, the benchmark figures just below reveal it's quite small..good news!
+Well, the benchmark figures just below reveal it's quite small...good news!
 
 ![OSU bandwidth test]({{ page.root }}/fig/OSU_Bandwidth.png)
 
