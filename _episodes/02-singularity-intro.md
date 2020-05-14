@@ -37,7 +37,8 @@ $ cd demos/singularity
 > ```
 > $ export TUTO=~/singularity-containers
 > $ export SIFPATH=$TUTO/demos/sif
-> $ bash $TUTO/demos/pull_big_images.sh
+> $ cd $TUTO/demos
+> $ nohup bash ./pull_big_images.sh &
 > ```
 > {: .bash}
 >
