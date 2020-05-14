@@ -54,7 +54,9 @@ $ singularity exec tidyverse_3.6.1.sif Rscript readings-density.R --mean inflamm
 5.45
 5.425
 6.1
+
 [..]
+
 6.875
 6.025
 6.9

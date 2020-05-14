@@ -277,7 +277,9 @@ Removing intermediate container 91c109dfd5ba
  ---> 361490204a2c
 Step 3/7 : RUN apt-get -y update &&   apt-get -y install fortune cowsay lolcat
  ---> Running in 4543b6bb99f1
+
 [..]
+
 Removing intermediate container 4543b6bb99f1
  ---> 7958a569068f
 Step 4/7 : ENV PATH=/usr/games:$PATH
