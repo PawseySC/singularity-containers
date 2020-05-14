@@ -282,7 +282,7 @@ $ cd ../blast
 > ```
 > {: .bash}
 >
-> Note how we put the database files in a separate directory on purpose, so that you will need to bind mount its path with Singularity. Give it a go with building the syntax to run the `blastp` command.
+> Note how we put the database files in a separate directory on purpose, so that you will need to bind mount its path with Singularity.  Give it a go with building the syntax to run the `blastp` command.
 >
 > > ## Solution
 > >
