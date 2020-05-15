@@ -1,12 +1,12 @@
 ---
 title: "Overview of Docker"
-teaching: 10
-exercises: 10
+teaching: 15
+exercises: 15
 questions:
 objectives:
 - "Be aware of the pros and cons compared to Singularity"
 - "Get started with Docker: download and run container images"
-- "Learn how to build an image with Docker"
+- "Learn how to build and share an image with Docker"
 keypoints:
 - Use `docker pull` to download container images
 - Use `docker run` to execute commands in containers
@@ -200,6 +200,8 @@ Deleted: sha256:cc967c529ced563b7746b663d98248bc571afdb3c012019d7f54d6c092793b8b
 
 
 ### A Dockerfile recipe
+
+**Note**: the following sections on building and sharing container images with Docker are the same than in the dedicated episode.
 
 It can be interesting to have an idea of how to build images with Docker. In fact, as we mentioned earlier on, the layered image format of Docker can sometimes help in reducing image development time. In addition, Docker images are quite universally compatible, as they can be run by Singularity, too.
 
