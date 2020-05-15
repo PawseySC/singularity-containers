@@ -1,7 +1,7 @@
 ---
 title: "Share files with the host: BLAST, a bioinformatics example"
-teaching: 10
-exercises: 10
+teaching: 5
+exercises: 15
 questions:
 objectives:
 - Learn how to mount host directories in a container
