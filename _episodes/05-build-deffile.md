@@ -1,17 +1,15 @@
 ---
-title: "Build your own container image"
-teaching: 20
-exercises: 20
+title: "Inside a build definition file"
+teaching: 15
+exercises: 5
 questions:
 objectives:
-- Learn what is a definition file (def file) and its basic syntax
-- Learn how to build a container image and share it with others
+- Learn what is a def file and its basic syntax
 - Learn the pros&cons of building with Singularity vs Docker
 keypoints:
-- Build images using `sudo singularity build`
-- Use the remote builder with the flag `-r`, if you need to build images from a machine where you don't have sudo rights
-- You can share you Singularity Image File with others, as you would do with any other (big) file
-- Upload images to a web registry with `singularity push` (Sylabs account required)
+- Use `Bootstrap` and `From` to specify the build starting point
+- The `%post` section contains the list of commands needed to install and setup packages in the image
+- The `%environment` section allows to specify shell variable definitions that are required at runtime
 ---
 
 
@@ -22,20 +20,9 @@ It is basically a collection of the standard shell commands you would use to bui
 Although there is no mandatory naming convention for def files, they are often characterised by the suffix `.def`.
 
 
-### *Sudo* privileges with Singularity
+### Core syntax of a definition file
 
-Singularity does not allow for privileges escalation.  
-In other words, if you are a standard user and you run `singularity`, any command inside the container will be run with the privileges of the standard user, *i.e.* without admin powers.  If you try and `sudo` from inside the container you will get an error.  
-On the other hand, if your user can run with *sudo*, and if you then decide to run Singularity as `sudo singularity`, then you will run any command from inside the container with admin powers.  
-This design contributes to making Singularity safe to run on HPC: users without admin rights are unable to escalate their privileges from inside the containers.
-
-However, when building a container image you might need to install software using commands that require admin rights, *e.g.* `apt get` in Ubuntu/Debian or `yum` in Centos.  To achieve this, you need to run `sudo singularity build`, implying that you need to carry out your build in a machine where you DO have admin rights.  
-Ruling out HPC systems, suitable platforms to build container images can be your laptop, an office workstation, or a virtual machine on the cloud.
-
-
-### Building a basic container
-
-Singularity can build container images in different formats.  Let's focus on the Singularity Image Format, *i.e.* the one typically adopted to ship production-ready containers.  
+We're going to have a closer look at the def file that was used in the introductory episode on building images.  If you've already gone through that episode, you'll be able to use the newly created image to test some new Singularity commands.  
 This example is adapted from this well crafted [Singularity Tutorial](https://github.com/ArangoGutierrez/Singularity-tutorial).
 
 Let us cd into the appropriate directory:
@@ -45,7 +32,7 @@ $ cd $TUTO/demos/lolcow
 ```
 {: .bash}
 
-Then, here is the def file we're going to use, `lolcow.def`:
+How does `lolcow.def` look like?
 
 ```
 BootStrap: docker
@@ -70,55 +57,8 @@ From: ubuntu:18.04
 ```
 {: .source}
 
-Let us build the image and run it first, then we'll comment on the contents of the def file.  To this end we're using `sudo singularity build`, followed by the filename we decide to attribute to the container image, and then by the filename of the def file to be used:
 
-```
-$ sudo singularity build lolcow.sif lolcow.def
-```
-{: .bash}
-
-```
-INFO:    Starting build...
-[..]
-INFO:    Running post scriptlet
-[..]
-INFO:    Adding help info
-INFO:    Adding labels
-INFO:    Adding environment to container
-INFO:    Adding runscript
-INFO:    Creating SIF file...
-INFO:    Build complete: lolcow.sif
-```
-{: .output}
-
-Now, let us try and use the container simply as an executable:
-
-```
-$ ./lolcow.sif
-```
-{: .bash}
-
-You will get something similar to this, hopefully just more colourful:
-
-```
- _______________________________________
-/ Have a place for everything and keep  \
-| the thing somewhere else; this is not |
-| advice, it is merely custom.          |
-|                                       |
-\ -- Mark Twain                         /
- ---------------------------------------
-        \   ^__^
-         \  (oo)\_______
-            (__)\       )\/\
-                ||----w |
-                ||     ||
-```
-{: .output}
-
-Great, we've just containerised a cow that cites novelists!  How did we achieve this?
-
-The first line is `BootStrap: docker`.  
+The first line in the *def file* is `BootStrap: docker`.  
 This tells Singularity how the image has to be initialised. `docker` means that we are going to start with a base image from Docker Hub.  Another common way to bootstrap is using `library`, which will grab an image from the Sylabs Cloud.  The image is specified in the next line, in this case `From: ubuntu:18.04`.  
 Note how we started from Ubuntu 18.04 in Docker Hub, not Sylabs Cloud, as the former version has got a bit of a richer, more useful configuration.
 
@@ -126,7 +66,7 @@ Next is a section that start with the header `%post`.  This is basically a seque
 
 The section `%environment` sets up environment variables that need to be defined at runtime rather than at build time.  Here the `PATH` needs to be updated to reflect the location of the three utilities that we installed in the `%post` section.
 
-Another section that is often useful can be defined by the header `%files`, like in:
+Although we are not using it in this *def file*, another section that is often useful can be defined by the header `%files`, like in:
 
 ```
 %files
@@ -186,48 +126,6 @@ $ singularity inspect -d lolcow.sif
 {: .bash}
 
 
-> ## Use the newly created container
->
-> You can use this new container using the same Singularity syntax we introduced earlier on in this tutorial.
->
-> For instance, how would you run the command `fortune` from inside this container?
->
-> > ## Solution
-> >
-> > ```
-> > $ singularity exec lolcow.sif fortune
-> > ```
-> > {: .bash}
-> >
-> > ```
-> > Whenever you find that you are on the side of the majority, it is time
-> > to reform.
-> > 		-- Mark Twain
-> > ```
-> > {: .output}
-> {: .solution}
->
-> Or, how would you open an interactive shell to explore the container?
->
-> > ## Solution
-> >
-> > ```
-> > $ singularity shell lolcow.sif
-> > ```
-> > {: .bash}
-> >
-> > ```
-> > Singularity lolcow.sif:/home/ubuntu/singularity-containers/demos/lolcow> ls
-> > lolcow.def  lolcow.sif
-> > Singularity lolcow.sif:/home/ubuntu/singularity-containers/demos/lolcow>
-> > ```
-> > {: .output}
-> >
-> > Remember to close this session with `exit` or `Ctrl-D`.
-> {: .solution}
-{: .challenge}
-
-
 ### Run a container as an application
 
 There's one section of the def file we haven't commented on yet.  `%runscript` allows you to define a default command for the image. This command can then be used if you run the container as an executable:
@@ -268,104 +166,6 @@ $ singularity run -B $TUTO/_episodes lolcow.sif
                 ||     ||
 ```
 {: .output}
-
-
-### Share your container image
-
-Now that you've built your container image, you might want to run it on other systems, or share it with collaborators.
-
-The simplest way to achieve this is to remember that a SIF image is just a file, so... you can transfer it across systems using Linux command line utilities like `scp` or `rsync`, or even graphical applications such as `Filezilla`.  
-Just remember that images can be quite large, typically ranging from tens of MBs up to several GBs.  The *lolcow* image we created is about 70 MB, but for instance a typical *RStudio* image is well above 1 GB.
-
-If you want to keep the images publicly available, as they are just files you can store them in a server that is accessible through HTTP or FTP, or design a setup based upon open source image registry solutions such as [Harbor]{https://goharbor.io}.
-
-Sylabs offer their own image hosting platform, the [**Sylabs Cloud Library**](https://cloud.sylabs.io), which is currently free upon signup.  Let's see how this works.  If you don't want to signup, just skip the hands-on and follow the demo.  
-Once you create an account, you'll need to click on your account name on the top right of the page, select `Access Tokens`, then create a token, and copy it to the clipboard.  
-Then you can configure the machine you're using for building container images, so that you can also push them to the Cloud Library:
-
-```
-$ singularity remote login
-```
-{: .bash}
-
-```
-Generate an API Key at https://cloud.sylabs.io/auth/tokens, and paste here:
-API Key:
-```
-{: .output}
-
-Now paste the token you had copied to the clipboard end press `Enter`:
-
-```
-INFO:    API Key Verified!
-```
-{: .output}
-
-You are now ready to push your image to the Cloud Library, *e.g.* via `singularity push`:
-
-```
-$ export MY_SYLABS_USER=
-$ singularity push -U lolcow.sif library://$MY_SYLABS_USER/default/lolcow:30oct19
-```
-{: .bash}
-
-```
-WARNING: Skipping container verifying
- 67.08 MiB / 67.08 MiB [==================================================================================================================================] 100.00% 6.37 MiB/s 10s
-```
-{: .output}
-
-Note the use of the flag `-U` to allow pushing unsigned containers (see further down).  
-Also note once again the format for the registry: <user>/<user-collection>/<name>:<tag>.
-
-Finally, you (or other peers) are now able to pull your image from the Cloud Library:
-
-```
-$ singularity pull -U library://$MY_SYLABS_USER/default/lolcow:30oct19
-```
-{: .bash}
-
-```
-INFO:    Downloading library image
- 67.07 MiB / 67.07 MiB [===================================================================================================================================] 100.00% 8.10 MiB/s 8s
-WARNING: Skipping container verification
-INFO:    Download complete: lolcow_30oct19.sif
-```
-{: .output}
-
-
-### Remote build
-
-What if you need to build an image from a system where you don't have admin privileges, *i.e.* you can't run commands with *sudo*?
-
-Singularity offers the option to run a build remotely, using the **Sylabs Remote Builder**; once again you will need a Sylabs account and a token to use this feature.  If this is the case, just use `singularity build -r` to proceed with the remote build.  Once finished, the image will be downloaded so that it's ready to use:
-
-```
-$ singularity build -r lolcow_remote.sif lolcow.def
-```
-{: .bash}
-
-```
-INFO:    Remote "default" added.
-INFO:    Authenticating with remote: default
-INFO:    API Key Verified!
-INFO:    Remote "default" now in use.
-INFO:    Starting build...
-[..]
-INFO:    Running post scriptlet
-[..]
-INFO:    Adding help info
-INFO:    Adding labels
-INFO:    Adding environment to container
-INFO:    Adding runscript
-INFO:    Creating SIF file...
-INFO:    Build complete: /tmp/image-699539270
-WARNING: Skipping container verifying
- 67.07 MiB / 67.07 MiB  100.00% 14.18 MiB/s 4s
-```
-{: .output}
-
-At the time of writing, when using the Remote Builder you won't be able to use the `%files` header in the def file, to copy host files into the image.
 
 
 ### Advanced build options
