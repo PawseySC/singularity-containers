@@ -1,18 +1,29 @@
 ---
-title: "Overview of Docker"
+title: "Building images with Docker"
 teaching: 10
 exercises: 10
 questions:
 objectives:
-- "Be aware of the pros and cons compared to Singularity"
-- "Get started with Docker: download and run container images"
-- "Learn how to build an image with Docker"
+- Learn the pros&cons of building with Singularity vs Docker
+- Learn how to build and share an image with Docker
 keypoints:
-- Use `docker pull` to download container images
-- Use `docker run` to execute commands in containers
 - Build images starting from a `Dockerfile` recipe with `docker build`
 - Push images to a web registry with `docker push`
 ---
+
+
+### Singularity *vs* Docker builds
+
+We'll discuss how to build an image with Docker in a dedicated episode.  For now, let's just point out some of the advantages when building with one or the other tool.  This will hopefully inform on which tool is best suited for you, depending on your specific context.
+
+#### Singularity
+* Single file image, can be handled as any other file
+* Ability to sign/verify images
+* Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on GUI applications)
+
+#### Docker
+* Compatibility: image format can be run by all existing container engines
+* Quick development: layered image format allows caching, for reduced build time during repeated builds
 
 
 ### What's the deal with Docker?
@@ -200,6 +211,13 @@ Deleted: sha256:cc967c529ced563b7746b663d98248bc571afdb3c012019d7f54d6c092793b8b
 
 
 ### A Dockerfile recipe
+
+Let's cd into the relevant demo directory:
+
+```
+$ cd $TUTO/demos/11_lolcow_docker
+```
+{: .bash}
 
 It can be interesting to have an idea of how to build images with Docker. In fact, as we mentioned earlier on, the layered image format of Docker can sometimes help in reducing image development time. In addition, Docker images are quite universally compatible, as they can be run by Singularity, too.
 

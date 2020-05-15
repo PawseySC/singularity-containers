@@ -4,8 +4,8 @@ teaching: 15
 exercises: 5
 questions:
 objectives:
-- Learn what is a def file and its basic syntax
-- Learn the pros&cons of building with Singularity vs Docker
+- Learn what is a def file
+- Learn the basic syntax of a def file
 keypoints:
 - Use `Bootstrap` and `From` to specify the build starting point
 - The `%post` section contains the list of commands needed to install and setup packages in the image
@@ -193,20 +193,6 @@ The def file specification has a number of other interesting features.  To know 
 
 3. One last notable feature is the ability to use PGP keys to **sign and verify** container images.  In this way, users of 3rd party containers can double check that the image they're running is bit-by-bit equivalent to the one that the author originally built, largely reducing the possibility of running containers infected by malware.  
     You can find more on this topic at the [Sylabs docs on signing and verifying containers](https://sylabs.io/guides/3.3/user-guide/signNverify.html).
-
-
-### Singularity *vs* Docker builds
-
-We'll discuss how to build an image with Docker in a dedicated episode.  For now, let's just point out some of the advantages when building with one or the other tool.  This will hopefully inform on which tool is best suited for you, depending on your specific context.
-
-#### Singularity
-* Single file image, can be handled as any other file
-* Ability to sign/verify images
-* Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on GUI applications)
-
-#### Docker
-* Compatibility: image format can be run by all existing container engines
-* Quick development: layered image format allows caching, for reduced build time during repeated builds
 
 
 ### Useful base images
