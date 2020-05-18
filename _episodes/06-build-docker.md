@@ -12,27 +12,25 @@ keypoints:
 ---
 
 
-TEMP: WHY DOCKER BUILDS?
+### Why using Docker for container builds?
 
-[Docker](https://hub.docker.com/search/?type=edition&offering=community) has been the first container engine to get widespread popularity. 
+Over the whole of this tutorial we're proposing Singularity as the principal tool to handle and run containerised applications in HPC.  Do we really need to extend our toolkit to include [Docker](https://hub.docker.com/search/?type=edition&offering=community)?
 
-build with root privileges
-
-* layered image format allows for caching of container building steps during build time, reducing development time.
-
-
-### Singularity *vs* Docker builds
-
-We'll discuss how to build an image with Docker in a dedicated episode.  For now, let's just point out some of the advantages when building with one or the other tool.  This will hopefully inform on which tool is best suited for you, depending on your specific context.
+To better inform an answer to this question, here are some of the advantages when building with one or the other tool.
 
 #### Singularity
-* Single file image, can be handled as any other file
-* Ability to sign/verify images
+* Single file image, can be handled as any other file and shared easily
 * Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on GUI applications)
+* Ability to sign/verify images for improved security
 
 #### Docker
 * Compatibility: image format can be run by all existing container engines
 * Quick development: layered image format allows caching, for reduced build time during repeated builds
+
+Note how, at present, both tools require root privileges for building, implying that this step cannot be performed on HPC, and requires a dedicated machine instead.
+
+Although Singularity builds offer some interesting advantages, there's a single item that right now makes using Docker preferred in most situations.  
+It's **compatibility**.  Build with Docker, and you'll know the resulting image can be run from every container engine anywhere in the world.
 
 
 ### A Dockerfile recipe
