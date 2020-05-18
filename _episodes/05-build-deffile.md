@@ -225,6 +225,8 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 
 > ## All-unix container with MPI
 > 
+> > ## Dockerfile
+> >
 > > ```
 > > FROM ubuntu:18.04
 > > 
@@ -282,8 +284,10 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 {: .challenge}
 
 
-## R container for bioinformatics
-
+> ## R container for bioinformatics
+> 
+> > ## Dockerfile
+> >
 > > ```
 > > FROM rocker/tidyverse:latest
 > > 
@@ -333,8 +337,10 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 {: .challenge}
 
 
-## A simple Python container
-
+> ## A simple Python container
+> 
+> > ## Dockerfile
+> >
 > > ```
 > > FROM continuumio/miniconda3:4.5.11
 > > 
