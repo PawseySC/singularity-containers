@@ -339,14 +339,15 @@ Total space used: 163.60 MB
 ```
 {: .output}
 
-and then clean it up, *e.g.* to wipe everything use the `-f` flag (before Singularity version 3.4, use `-a` instead):
+we are not going to clean the cache in this tutorial, as cached images will turn out useful later on.  Let us just perform a dry-run using the `-n` option:
 
 ```
-$ singularity cache clean -f
+$ singularity cache clean -n
 ```
 {: .bash}
 
 ```
+User requested a dry run. Not actually deleting any data!
 Removing /home/ubuntu/.singularity/cache/library
 Removing /home/ubuntu/.singularity/cache/oci-tmp
 Removing /home/ubuntu/.singularity/cache/shub
@@ -355,6 +356,8 @@ Removing /home/ubuntu/.singularity/cache/net
 Removing /home/ubuntu/.singularity/cache/oras
 ```
 {: .output}
+
+If we really wanted to wipe the cache, we would need to use the `-f` flag instead (or, before Singularity version 3.4, the `-a` flag).
 
 
 > ## Contextual help on Singularity commands
