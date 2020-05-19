@@ -38,7 +38,7 @@ It's **compatibility**.  Build with Docker, and you'll know the resulting image 
 Let's cd into the relevant demo directory:
 
 ```
-$ cd $TUTO/demos/11_lolcow_docker
+$ cd $TUTO/demos/lolcow_docker
 ```
 {: .bash}
 
