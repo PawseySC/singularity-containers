@@ -24,7 +24,6 @@ $ cd ~
 $ git clone https://github.com/PawseySC/singularity-containers
 $ cd singularity-containers
 $ export TUTO=$(pwd)
-$ export SIFPATH=$TUTO/demos/sif
 $ cd demos/singularity
 ```
 {: .bash}
@@ -36,7 +35,6 @@ $ cd demos/singularity
 >
 > ```
 > $ export TUTO=~/singularity-containers
-> $ export SIFPATH=$TUTO/demos/sif
 > $ cd $TUTO/demos
 > $ nohup bash ./pull_big_images.sh &
 > ```

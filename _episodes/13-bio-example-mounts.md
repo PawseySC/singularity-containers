@@ -189,10 +189,10 @@ $ export SINGULARITY_BINDPATH="dir1,dir2,dir3"
 We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro).  BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics packages.  
 This example is adapted from the [BioContainers documentation](http://biocontainers-edu.biocontainers.pro/en/latest/running_example.html).
 
-We're going to use the BLAST image `biocontainers/blast:v2.2.31_cv2`.  First, we'll pull the image in the path `$SIFPATH`.  This might take up to about 10 minutes (unless you had pulled the image in advance):
+We're going to use the BLAST image `biocontainers/blast:v2.2.31_cv2`.  First, we'll pull the image.  This might take up to about 10 minutes (unless you had pulled the image in advance):
 
 ```
-$ singularity pull --dir $SIFPATH docker://biocontainers/blast:v2.2.31_cv2
+$ singularity pull docker://biocontainers/blast:v2.2.31_cv2
 ```
 {: .bash}
 
@@ -200,12 +200,11 @@ $ singularity pull --dir $SIFPATH docker://biocontainers/blast:v2.2.31_cv2
 > ## Run a test command
 >
 > Let us run a simple command using the image we just pulled, for instance `blastp -help`, to verify that it actually works.
-> **Hint**: the image path is `$SIFPATH/blast_v2.2.31_cv2.sif`.
 >
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec $SIFPATH/blast_v2.2.31_cv2.sif blastp -help
+> > $ singularity exec blast_v2.2.31_cv2.sif blastp -help
 > > ```
 > > {: .bash}
 > >
@@ -246,7 +245,7 @@ $ gunzip zebrafish.1.protein.faa.gz
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec $SIFPATH/blast_v2.2.31_cv2.sif makeblastdb -in zebrafish.1.protein.faa -dbtype prot
+> > $ singularity exec blast_v2.2.31_cv2.sif makeblastdb -in zebrafish.1.protein.faa -dbtype prot
 > > ```
 > > {: .bash}
 > > ```
@@ -287,7 +286,7 @@ $ cd ../blast
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec -B $TUTO/demos/blast_db $SIFPATH/blast_v2.2.31_cv2.sif blastp -query P04156.fasta -db $TUTO/demos/blast_db/zebrafish.1.protein.faa -out results.txt
+> > $ singularity exec -B $TUTO/demos/blast_db blast_v2.2.31_cv2.sif blastp -query P04156.fasta -db $TUTO/demos/blast_db/zebrafish.1.protein.faa -out results.txt
 > > ```
 > > {: .bash}
 > {: .solution}

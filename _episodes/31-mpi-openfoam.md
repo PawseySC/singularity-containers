@@ -25,19 +25,13 @@ We're going to start this episode with actually running a practical example, and
 We're using OpenFoam, a widely popular package for Computational Fluid Dynamics simulations, which is able to massively scale in parallel architectures up to thousands of processes, by leveraging an MPI library.  
 The sample inputs come straight from the OpenFoam installation tree, namely `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicHill/steadyState/`.
 
-First, let us cd into the demo directory, ensure that `$SIFPATH` is defined, and verify that the OpenFoam container image has been downloaded:
+First, let us cd into the demo directory and download the OpenFoam container image:
 
 ```
 $ cd $TUTO/demos/07_openfoam
-$ export SIFPATH=$TUTO/demos/sif
-$ ls $SIFPATH/openfoam*.sif
+$ singularity pull library://marcodelapierre/beta/openfoam:v1812
 ```
 {: .bash}
-
-```
-/home/ubuntu/singularity-containers/demos/sif/openfoam_v1812.sif
-```
-{: .output}
 
 Now, let us use the Slurm scheduler to submit the job script `mpi_sc19.sh`, that will run the sample simulation:
 
@@ -101,27 +95,27 @@ export SINGULARITYENV_LD_LIBRARY_PATH="/opt/mpich/mpich-3.1.4/apps/lib"
 
 # pre-processing
 srun -n 1 \
-  singularity exec $SIFPATH/openfoam_v1812.sif \
+  singularity exec openfoam_v1812.sif \
   blockMesh | tee log.blockMesh
 
 srun -n 1 \
-  singularity exec $SIFPATH/openfoam_v1812.sif \
+  singularity exec openfoam_v1812.sif \
   topoSet | tee log.topoSet
 
 srun -n 1 \
-  singularity exec $SIFPATH/openfoam_v1812.sif \
+  singularity exec openfoam_v1812.sif \
   decomposePar -fileHandler collated | tee log.decomposePar
 
 
 # run OpenFoam with MPI
 srun -n $SLURM_NTASKS \
-  singularity exec $SIFPATH/openfoam_v1812.sif \
+  singularity exec openfoam_v1812.sif \
   simpleFoam -fileHandler collated -parallel | tee log.simpleFoam
 
 
 # post-processing
 srun -n 1 \
-  singularity exec $SIFPATH/openfoam_v1812.sif \
+  singularity exec openfoam_v1812.sif \
   reconstructPar -latestTime -fileHandler collated | tee log.reconstructPar
 ```
 {: .bash}
