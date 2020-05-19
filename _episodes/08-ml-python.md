@@ -24,7 +24,7 @@ Python is a great language for doing all kinds of work, but sometimes it can pre
 Let's start by running a very simple hello world example with a basic Python container.  To start, cd into the demo directory:
 
 ```
-$ cd $TUTO/demos/09_python
+$ cd $TUTO/demos/python
 ```
 {: .bash}
 
@@ -33,7 +33,7 @@ There is an executable script called `helloworld.py`.
 
 > ## Use a Python container
 > 
-> Can you use Singularity to run `helloworld.py` using the container `python:3-slim`?
+> Can you use Singularity to run `helloworld.py` using the container `python:3-slim` from Docker Hub?
 > 
 > > ## Solution
 > > 
@@ -54,17 +54,17 @@ There is an executable script called `helloworld.py`.
 
 We want to be able to leverage other Python modules to do some actual work, so we need to build Python containers that use tools like `pip` and `conda`.
 
-For this example we'll try installing some ML packages to run a logistic regression model. 
+For this example we'll try installing some machine learning (ML) packages to run a logistic regression model. 
 
 
-> ## Design the def file
+> ## Design the definition file
 > 
-> Think of how you would write a def file that 
+> Think of how you would write a minimal def file that:
 > * uses `jupyter/datascience-notebook:latest` from Docker Hub as base image 
 > * installs the *Plotly* package via `/opt/conda/bin/conda install plotly=3.10`
 > * we'll use this image as an interactive session, so do not care about `%startscript`
 > 
-> > ## When you are done check this solution
+> > ## Solution
 > > 
 > > ```
 > > Bootstrap: docker
@@ -77,19 +77,20 @@ For this example we'll try installing some ML packages to run a logistic regress
 > {: .solution}
 {: .challenge}
 
-Note that we need the full path to the `conda` executable when using the base image from `jupyter/`. Because of the way the Docker image was built, without the full path the binary would not be found.
+Note that we need the full path to the `conda` executable when using base images from `jupyter/`.  Because of the way the Docker image was built, without the full path the binary would not be found.
 
 Now, change directory to `logistic-regression`:
 
 ```
-$ cd $TUTO/demos/09_python/logistic-regression
+$ cd logistic-regression
 ```
 {: .bash}
 
 
 > ## Build the container image 
 > 
-> The def file above is present as `plotly.def`. Use it to build an image called `plotly.sif`. **Hint**: remember to use `sudo`!
+> The def file above is present as `plotly.def`. Use it to build an image called `plotly.sif`.  
+> **Hint**: remember to use `sudo`!
 > 
 > > ## Solution
 > > 
@@ -105,21 +106,20 @@ $ cd $TUTO/demos/09_python/logistic-regression
 
 In the same directory we have both a Jupyter notebook (`LogisticRegression.ipynb`) and source code (`logreg.py`) that we're going to use.
 
-After you've built your image we'll start up the container and log into our Jupyter notebook server (note the idiomatic expression for Jupyter Notebooks with Singularity):
+After we've built our image we'll start up the container and log into our Jupyter notebook server (note the idiomatic expression for Jupyter Notebooks with Singularity):
 
 ```
 $ singularity exec -C -B $(pwd):$HOME plotly.sif jupyter notebook --no-browser --port=8888 --ip 0.0.0.0 --notebook-dir=$HOME
 ```
 {: .bash}
 
-Here the `-C` flag is to completely insulate the container from the host, including the use of a volatile `/run` directory instead of the host one.
+Here the `-C` flag is to completely insulate the container from the host, including the use of a volatile `/run` directory instead of the host one.  We're almost bind mounting our current directory as the container `$HOME`.
 
 
 > ## Communication ports
 > 
 > In order to be able to use the web server, you need to ensure that the machine you are running Singularity from has opened the communication port you're using, in this case `8888`.  
-> In cloud virtual machines this will typically involve some setup in the system dashboard.  
-> The machines we provided for this workshop are ready to go in this regard.
+> On cloud platforms, such as Nimbus at Pawsey, this will typically involve some setup in the system dashboard.  
 {: .callout}
 
 
@@ -144,10 +144,11 @@ The output on the terminal will look like:
 {: .output}
 
 Now, locate the last line in the output, and copy in the clipboard the alphanumeric string that follows after `token=`.  
-Open your web browser, and type as URL `<Singularity machine IP Address>:8888`. Paste the clipboard content in the *Token* field and click on *Login*.  
+Open your web browser, and type as URL `<Singularity machine IP Address>:8888`.  The `IP` can be replaced with `localhost` if you're running locally on your laptop or workstation.  
+Paste the clipboard content in the `Token` field and click on `Login`.  
 
 We're in the Jupyter Notebook!  
-From the list of files & directories, click on `LogisticRegression.ipynb`, and we'll go through the notebook.
+From the list of files and directories, click on `LogisticRegression.ipynb`, and we'll go through the notebook.
 
 When we're done, press twice `Ctrl-C` to kill the Notebook.
 
@@ -165,10 +166,10 @@ As a result you should now have a plot saved as a `.png` file.
 
 ### Bonus: another machine learning example
 
-**If time allows**, let's try another ML example. We'll build another container image that uses Jupyter. For this this example, change directory to:
+**If time allows**, let's try another ML example.  We'll build another container image that uses Jupyter.  For this this example, change directory to:
 
 ```
-$ cd $TUTO/demos/09_python/image-classification
+$ cd ../image-classification
 ```
 {: .bash}
 
@@ -228,8 +229,9 @@ In here we have some image data (`dataset/`), the Jupyter notebook `FlowerClassi
 
 
 Now, locate the last line in the output, and copy in the clipboard the alphanumeric string that follows after `token=`.  
-Open your web browser, and type as URL `<Singularity machine IP Address>:8888`. Paste the clipboard content in the *Token* field and click on *Login*.  
+Open your web browser, and type as URL `<Singularity machine IP Address>:8888`.  The `IP` can be replaced with `localhost` if you're running locally on your laptop or workstation.  
+Paste the clipboard content in the `Token` field and click on `Login`.  
  
-From the list of files & directories, click on `FlowerClassification.ipynb`, and we'll go through the notebook.
+From the list of files and directories, click on `FlowerClassification.ipynb`, and we'll go through the notebook.
 
 When we're done, press twice `Ctrl-C` to kill the Notebook.
