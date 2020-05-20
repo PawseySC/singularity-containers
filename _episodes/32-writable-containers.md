@@ -106,6 +106,8 @@ $ exit
 >
 > Now try and look for `/australia` from inside a Ubuntu container, **without** mounting the overlay.
 >
+> > ## Solution
+> >
 > > ```
 > > $ singularity exec docker://ubuntu:18.04 ls /australia
 > > ```
