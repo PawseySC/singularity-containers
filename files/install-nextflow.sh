@@ -10,3 +10,4 @@ sudo wget https://github.com/nextflow-io/nextflow/releases/download/v${NEXTFLOW_
 sudo chmod a+rx nextflow
 cd ~
 ${NEXTFLOW_DIR}/nextflow info
+

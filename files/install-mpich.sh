@@ -33,3 +33,4 @@ echo "export CPATH=\"$MPICH_DIR/include:\$CPATH\"" >> $(eval echo ~${USERID})/.b
 echo "export LD_LIBRARY_PATH=\"$MPICH_DIR/lib:\$LD_LIBRARY_PATH\"" >> $(eval echo ~${USERID})/.bashrc
 echo "export LIBRARY_PATH=\"$MPICH_DIR/lib:\$LIBRARY_PATH\"" >> $(eval echo ~${USERID})/.bashrc
 echo "export MANPATH=\"$MPICH_DIR/share/man:\$MANPATH\"" >> $(eval echo ~${USERID})/.bashrc
+

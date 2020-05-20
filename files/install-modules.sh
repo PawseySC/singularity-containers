@@ -8,4 +8,3 @@ cd /usr/bin
 # assuming version 8.6 here
 sudo ln -s tclsh8.6 tclsh
 
-cd -
