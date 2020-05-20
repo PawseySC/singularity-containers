@@ -33,7 +33,7 @@ $ ./mpi_mpirun.sh
 ```
 {: .bash}
 
-**In alternative**, if you're running this example on Pawsey systems (Magnus or Zeus), achieve the same result by using the Slurm scheduler to submit the job script `mpi_pawsey.sh`:
+**In alternative**, if you're running this example on Pawsey systems (*e.g.* Magnus or Zeus), achieve the same result by using the Slurm scheduler to submit the job script `mpi_pawsey.sh`:
 
 ```
 $ sbatch mpi_pawsey.sh
