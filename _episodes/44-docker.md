@@ -231,7 +231,7 @@ Let's comment on the Docker instructions that appear in this Dockerfile.
 * `MAINTAINER`: details of the person who wrote the Dockerfile, optional;
 * `RUN`: this is the most used instruction, that allows to run most shell commands during the build.  Multiple `RUN` instructions are often found in a single Dockerfile;
 * `ENV`: set environment variables that will persist at runtime in the container; **DO NOT** use `RUN export <..>` to this end, as the variable will be lost after the `RUN` step is completed;
-* `VOLUME`: creates a mount point ready to be used for mounting external (e.g. host) volumes; creates the corresponding directory if not existing;
+* `VOLUME`: creates a mount point ready to be used for mounting external (*e.g.* host) volumes; creates the corresponding directory if not existing;
 * `WORKDIR`: changes directory to the specified path; the last current directory in the build will be the working directory in the running container.  
   **Note**: if you use instead `RUN cd <..>`, the changed directory will only persist within that `RUN` instruction, and then be lost in subsequent build steps;
 * `CMD`: specifies the default command to be executed with the container, in case no other command is provided.
@@ -257,7 +257,7 @@ $ sudo docker build -t lolcow:1Nov19 .
 ```
 {: .bash}
 
-In the command above, `.` is the location of the build context (i.e. the directory for the Dockerfile).  
+In the command above, `.` is the location of the build context (*i.e.* the directory for the Dockerfile).  
 The `-t` flag is used to specify the image name (compulsory) and tag (optional).
 
 Any lowercase alphanumeric string can be used as image name; here we've used `lolcow`.  The image tag (following the colon) can be optionally used to maintain a set of different image versions on Docker Hub, and is a key feature in enabling reproducibility of your computations through containers; here we've used `1Nov19`.

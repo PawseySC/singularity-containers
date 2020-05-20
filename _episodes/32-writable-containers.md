@@ -227,7 +227,7 @@ In some situations, you might need your container to be writable not to store pe
 *E.g.* this can happen with applications that want to write a dot-file in your home, such as a Python package, or containerised Jupyter notebooks that need to write runtime information under `/run`.  
 In this context, a persistent overlay filesystem might require more work than is desired. There are alternative, simpler ways to set this up.
 
-Singularity has a flag for rendering containers from SIF image files ephemerally writable. `--writable-tmpfs` will allocate a small amount of RAM for this purpose (configured by the sys admins, by default just a bunch of MB), e.g.:
+Singularity has a flag for rendering containers from SIF image files ephemerally writable. `--writable-tmpfs` will allocate a small amount of RAM for this purpose (configured by the sys admins, by default just a bunch of MB), *e.g.*:
 
 ```
 $ singularity exec --writable-tmpfs library://ubuntu:18.04 touch ~/write-to-home
