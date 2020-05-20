@@ -7,7 +7,7 @@ objectives:
 - Learn how to create and mount a writable overlay filesystem
 - Learn how to make a container temporarily writable
 keypoints:
-- Use linux tool from a Ubuntu container to create a filesystem image file
+- Use linux tools from a Ubuntu container to create a filesystem image file
 - Mount a filesystem image using the flag `--overlay`
 - Make a SIF container ephemerally writable with the flag `--writable-tmpfs`
 ---
@@ -20,10 +20,10 @@ A practical user case is when using a host parallel filesystem such as *Lustre* 
 
 Singularity offers a feature to achieve this, called *OverlayFS*.
 
-Let us cd into `demos/04_trinity`:
+Let us cd into `demos/trinity`:
 
 ```
-$ cd $TUTO/demos/04_trinity
+$ cd $TUTO/demos/trinity
 ```
 {: .bash}
 
