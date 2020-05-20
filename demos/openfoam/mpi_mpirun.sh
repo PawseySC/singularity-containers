@@ -3,8 +3,10 @@
 NTASKS="2"
 
 # this configuration depends on the host
-export SINGULARITY_BINDPATH="/opt/mpich/mpich-3.1.4/apps"
-export SINGULARITYENV_LD_LIBRARY_PATH="/opt/mpich/mpich-3.1.4/apps/lib"
+export MPICH_ROOT="/opt/mpich/mpich-3.1.4/apps"
+
+export SINGULARITY_BINDPATH="$MPICH_ROOT"
+export SINGULARITYENV_LD_LIBRARY_PATH="$MPICH_ROOT/lib"
 
 
 # pre-processing

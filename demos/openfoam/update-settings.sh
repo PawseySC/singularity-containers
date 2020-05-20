@@ -22,5 +22,4 @@ sed -i -e "s,^ *startFrom.*,startFrom    $aeg_startFrom;," \
 
 # Editing SLURM scripts as well
 sed -i -e "s/ntasks=.*/ntasks=$aeg_numberOfSubdomains/" -e "s/ntasks\-per\-node=.*/ntasks\-per\-node=$aeg_numberOfSubdomains/" mpi_pawsey.sh
-sed -i -e "s/ntasks=.*/ntasks=$aeg_numberOfSubdomains/" -e "s/ntasks\-per\-node=.*/ntasks\-per\-node=$aeg_numberOfSubdomains/" mpi_sc19.sh
 sed -i "s/NTASKS=.*/NTASKS=\"$aeg_numberOfSubdomains\"/" mpi_mpirun.sh
