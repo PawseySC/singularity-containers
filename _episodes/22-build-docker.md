@@ -148,7 +148,7 @@ Well, each `RUN` creates a distinct **layer** in the final image, increasing its
 | Task            | Singularity      | Docker            |
 | :-------------- | :--------------: | :---------------: |
 | Starting image  | BootStrap + From | FROM              |
-| Unix commands   | %post            | RUN               |
+| Linux commands  | %post            | RUN               |
 | Shell variables | %environment     | ENV               |
 | Copying files   | %files           | COPY, ADD         |
 | Metadata        | %labels, %help   | MAINTAINER, LABEL |

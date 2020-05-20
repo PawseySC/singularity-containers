@@ -223,7 +223,7 @@ Other more basic images are [rocker/r-ver](https://hub.docker.com/r/rocker/r-ver
 Have a look at these, just to get a taste of what a production Dockerfile might look like.
 
 
-> ## All-unix container with MPI
+> ## All-Linux container with MPI
 > 
 > > ## Dockerfile
 > >
