@@ -104,7 +104,7 @@ $ exit
 > > {: .output}
 > {: .solution}
 >
-> Now try and look for `/australia` from inside a Ubuntu container, **without** mounting the overlay.
+> Now try and look for `/australia` from inside a Ubuntu container, *without* mounting the overlay.
 >
 > > ## Solution
 > >
