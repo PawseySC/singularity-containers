@@ -1,6 +1,5 @@
 #!/bin/bash -l
 
-#SBATCH --account=<your-pawsey-project>
 #SBATCH --job-name=mpi
 #SBATCH --ntasks=2
 #SBATCH --ntasks-per-node=2
