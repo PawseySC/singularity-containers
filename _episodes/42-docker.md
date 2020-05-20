@@ -17,21 +17,20 @@ keypoints:
 
 ### What's the deal with Docker?
 
-[Docker](https://hub.docker.com/search/?type=edition&offering=community) has been the first container engine to get widespread popularity. It has achieved this mostly in the world of IT companies, where it can be a very effective tool in the hands of system administrators, to deploy all sorts of micro-services. It can also be a useful engine for running containers in laptops, personal workstations, and cloud VMs. Among its advantages: 
+[Docker](https://hub.docker.com/search/?type=edition&offering=community) has been the first container engine to get widespread popularity.  It has achieved this mostly in the world of IT companies, where it can be a very effective tool in the hands of system administrators, to deploy all sorts of micro-services.  It can also be a useful engine for running containers in laptops, personal workstations, and cloud VMs.  Among its advantages: 
 
 * *root* execution allows for complete control and customisation;
-* *isolation* over *integration*: by default Docker runs containers in complete isolation compared to the host, with highest security. Users are in control of plugging in additional host features, such as directories/volumes, networks, communications ports
+* *isolation* over *integration*: by default Docker runs containers in complete isolation compared to the host, with highest security.  Users are in control of plugging in additional host features, such as directories/volumes, networks, communications ports;
 * *docker-compose* to define and run multi-container applications, allowing to manage complex workflows; *e.g.* this can make Docker convenient for deploying long running services including Jupyter and RStudio servers;
 * caching of exited containers, to eventually restart them;
 * layered image format allows for caching of container building steps during build time, reducing development time.
 
-On the other hand, some features make it not ideal for HPC. These include:
+On the other hand, some features make it not ideal for HPC.  These include:
 
 * users need *root* privileges to run it, which is not really a good idea in a shared system;
 * *isolation* over *integration* means users need to get used to a more articulated syntax to get things working with typical HPC applications;
 * no support offered to interface Docker with MPI runtime, or HPC schedulers;
 * usually requires an up-to-date kernel.
-
 
 As you might encounter Docker in your container journey, let's have a quick look at how the syntax looks like for the most basic operations.
 
@@ -43,7 +42,7 @@ To get a more detailed introduction on Docker containers, see this other worksho
 Let's cd into the relevant demo directory:
 
 ```
-$ cd $TUTO/demos/11_lolcow_docker
+$ cd $TUTO/demos/lolcow_docker
 ```
 {: .bash}
 
@@ -106,7 +105,7 @@ root@dd1ca993f4ad:/#
 Then type `exit`, or hit `Ctrl-D`, to leave the interactive shell.
 
 
-As we mentioned above, lots of Docker defaults are about privileged runtime and container isolation. Some extra syntax is required in order to achieve a container execution comparable to Singularity, *i.e.* with
+As we mentioned above, lots of Docker defaults are about privileged runtime and container isolation.  Some extra syntax is required in order to achieve a container execution comparable to Singularity, *i.e.* with
 * visibility of the host current working directory
 * container working directory same as host one
 * right user file ownership
@@ -136,7 +135,7 @@ What about the `--rm` flag? To respond to this, let's move on.
 
 ### Managing containers and images
 
-By default, when containers exit, they remain cached in the system for potential future restart. Have a look at a list of running and stopped containers with `docker ps -a` (remove `-a` to only list running ones):
+By default, when containers exit, they remain cached in the system for potential future restart.  Have a look at a list of running and stopped containers with `docker ps -a` (remove `-a` to only list running ones):
 
 ```
 $ sudo docker ps -a
@@ -167,7 +166,7 @@ $ sudo docker rm $(sudo docker ps -qa)
 If I know in advance I won't need to re-run a container after it exits, I can use the runtime flag `--rm`, as in `docker run --rm`, to clean it up automatically, as we did in the example above.
 
 
-Docker stores container images in a hidden directory under its own control. To get the list of downloaded images use `docker images`:
+Docker stores container images in a hidden directory under its own control.  To get the list of downloaded images use `docker images`:
 
 ```
 $ sudo docker images
@@ -203,9 +202,9 @@ Deleted: sha256:cc967c529ced563b7746b663d98248bc571afdb3c012019d7f54d6c092793b8b
 
 **Note**: the following sections on building and sharing container images with Docker are the same than in the dedicated episode.
 
-It can be interesting to have an idea of how to build images with Docker. In fact, as we mentioned earlier on, the layered image format of Docker can sometimes help in reducing image development time. In addition, Docker images are quite universally compatible, as they can be run by Singularity, too.
+It can be interesting to have an idea of how to build images with Docker.  In fact, as we mentioned earlier on, the layered image format of Docker can sometimes help in reducing image development time.  In addition, Docker images are quite universally compatible, as they can be run by Singularity, too.
 
-We're going to build a very similar image to the one we built with Singularity. The `Dockerfile` recipe file in the demo directory looks like:
+We're going to build a very similar image to the one we built with Singularity.  The `Dockerfile` recipe file in the demo directory looks like:
 
 ```
 FROM ubuntu:18.04
@@ -224,13 +223,13 @@ CMD fortune | cowsay | lolcat
 ```
 {: .source}
 
-The directory where the the Dockerfile is stored is the so called the Docker **build context**. Docker will include files in this directory in the build process and in the final image. As a by-product, this will make the build process longer and the image larger, so that we want to include only those strictly required for the build, even none if possible.
+The directory where the the Dockerfile is stored is the so called the Docker **build context**.  Docker will include files in this directory in the build process and in the final image.  As a by-product, this will make the build process longer and the image larger, so that we want to include only those strictly required for the build, even none if possible.
 
 Let's comment on the Docker instructions that appear in this Dockerfile.
 
 * `FROM`: compulsory, it provides the starting image we will use to build our customised one;
 * `MAINTAINER`: details of the person who wrote the Dockerfile, optional;
-* `RUN`: this is the most used instruction, that allows to run most shell commands during the build. Multiple `RUN` instructions are often found in a single Dockerfile;
+* `RUN`: this is the most used instruction, that allows to run most shell commands during the build.  Multiple `RUN` instructions are often found in a single Dockerfile;
 * `ENV`: set environment variables that will persist at runtime in the container; **DO NOT** use `RUN export <..>` to this end, as the variable will be lost after the `RUN` step is completed;
 * `VOLUME`: creates a mount point ready to be used for mounting external (e.g. host) volumes; creates the corresponding directory if not existing;
 * `WORKDIR`: changes directory to the specified path; the last current directory in the build will be the working directory in the running container.  
@@ -246,7 +245,7 @@ Note how the `RUN` instruction above is used to execute a sequence of commands t
 We have concatenated all these commands in one using the `&&` linux operator, and then the `\` symbol to break them into multiple lines for readability.
 
 We could have used one `RUN` instruction per command, so why concatenating instead?  
-Well, each `RUN` creates a distinct **layer** in the final image, increasing its size. It is a good practice to use as few layers, and thus `RUN` instructions, as possible, to keep the image size smaller.
+Well, each `RUN` creates a distinct **layer** in the final image, increasing its size.  It is a good practice to use as few layers, and thus `RUN` instructions, as possible, to keep the image size smaller.
 
 
 ### Building the container image
@@ -261,7 +260,7 @@ $ sudo docker build -t lolcow:1Nov19 .
 In the command above, `.` is the location of the build context (i.e. the directory for the Dockerfile).  
 The `-t` flag is used to specify the image name (compulsory) and tag (optional).
 
-Any lowercase alphanumeric string can be used as image name; here we've used `lolcow`. The image tag (following the colon) can be optionally used to maintain a set of different image versions on Docker Hub, and is a key feature in enabling reproducibility of your computations through containers; here we've used `1Nov19`.
+Any lowercase alphanumeric string can be used as image name; here we've used `lolcow`.  The image tag (following the colon) can be optionally used to maintain a set of different image versions on Docker Hub, and is a key feature in enabling reproducibility of your computations through containers; here we've used `1Nov19`.
 
 Adding the prefix `<Your Docker Hub account>/` to the image name is also optional and allows to push the built image to your Docker Hub registry (see below). 
 
@@ -350,7 +349,7 @@ $ sudo docker login
 
 You are now ready to push your newly created image to the Docker Hub web registry.
 
-First, let us create a second tag for the image, that includes your Docker Account. To this end we'll use `docker tag`:
+First, let us create a second tag for the image, that includes your Docker Account.  To this end we'll use `docker tag`:
 
 ```
 $ sudo docker tag lolcow:1Nov19 <your-dockerhub-account>/lolcow:1Nov19
