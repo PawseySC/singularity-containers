@@ -17,7 +17,7 @@ keypoints:
 
 The most interesting aspect is that recipes are written in a container engine agnostic format, and then HPCCM can translate them both in Dockerfiles and Singularity def files, allowing to simply produce container images in both formats.
 
-Another interesting feature is that HPCCM ships a set of so called `building blocks`, *i.e.* ready to use units that install common packages in containers in an optimised way.  For instance, these include compilers, MPI libraries, scientific libraries and a few applications.
+Another interesting feature is that HPCCM ships a set of so called *building blocks*, *i.e.* ready to use units that install common packages in containers in an optimised way.  For instance, these include compilers, MPI libraries, scientific libraries and a few applications.
 
 To give an idea of how a HPCCM recipe looks like, here is one for the `lolcow` example we have explored when building Singularity and Docker containers:
 
