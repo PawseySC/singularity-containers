@@ -11,7 +11,8 @@ sudo apt install -y \
   build-essential \
   make \
   git \
-  curl
+  curl \
+  unzip
 
 # create install dir
 export SPACK_ROOT="/opt/spack"
