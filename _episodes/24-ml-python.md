@@ -89,8 +89,7 @@ $ cd logistic-regression
 
 > ## Build the container image 
 > 
-> The def file above is present as `plotly.def`. Use it to build an image called `plotly.sif`.  
-> **Hint**: remember to use `sudo`!
+> The def file above is present as `plotly.def`.  Use it to build an image called `plotly.sif`.  (**Hint**: remember to use `sudo`!)
 > 
 > > ## Solution
 > > 

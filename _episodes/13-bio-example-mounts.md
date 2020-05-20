@@ -63,7 +63,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > ```
 > {: .output}
 >
-> Now inspect the container (HINT: you need to run `pwd` in the container)
+> Now inspect the container.  (**Hint**: you need to run `pwd` in the container)
 >
 > > ## Solution
 > >
