@@ -265,7 +265,8 @@ In this case, the solution is to create a host directory and bind mount it as th
 
 ```
 $ mkdir ~/my_run
-$ singularity exec -B ~/my_run:/run docker://ubuntu:18.04 touch /run/running-file
+$ SINGULARITY_BINDPATH="~/my_run:/run,$SINGULARITY_BINDPATH"
+$ singularity exec docker://ubuntu:18.04 touch /run/running-file
 ```
 {: .bash}
 

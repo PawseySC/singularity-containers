@@ -97,10 +97,10 @@ $ echo $USER && echo $PASSWORD
 {: .bash}
 
 Lastly, containers are read-only, but RStudio will want to be able to write configuration and temporary files in the home.  Let us bind mount the current work directory as the container home (we'll use the `-B` flag).  
-There's a little caveat here, in that the actual username in the RStudio server will be `rstudio` if the host user has ID equal to 1000 (first user in the system), and it will instead be the same as the host `$USER` otherwise.  We are required to define the home path accordingly.  Let us code these conditions as follows, using a bit of bash syntax:
+There's a little caveat here, due to the way the **Rocker** developers designed the container image in the recipe file.  The actual username in the RStudio server will be `rstudio` if your user has ID equal to *1000* (first user in the system), and it will instead be the same as your user, *i.e.* `$USER`, otherwise.  We are required to define the home path accordingly.  Let us code these conditions as follows, using a bit of bash syntax:
 
 ```
-$ export R_USER=$USER && [ "$(id -u)" == "1000" ] && export R_USER=rstudio
+$ export HOME_USER=$USER && [ "$(id -u)" == "1000" ] && export HOME_USER=rstudio
 ```
 {: .bash}
 
@@ -109,9 +109,9 @@ Now we have everything we need to put together the Singularity idiomatic way to 
 ```
 $ export PASSWORD=rstudiopassword
 $ echo $USER && echo $PASSWORD
-$ export R_USER=$USER && [ "$(id -u)" == "1000" ] && export R_USER=rstudio
+$ export HOME_USER=$USER && [ "$(id -u)" == "1000" ] && export HOME_USER=rstudio
 
-$ singularity exec -c -B $(pwd):/home/$R_USER tidyverse_3.6.1.sif rserver --www-port 8787 --www-address 0.0.0.0 --auth-none=0 --auth-pam-helper-path=pam-helper
+$ singularity exec -c -B $(pwd):/home/$HOME_USER tidyverse_3.6.1.sif rserver --www-port 8787 --www-address 0.0.0.0 --auth-none=0 --auth-pam-helper-path=pam-helper
 ```
 {: .bash}
 
@@ -183,9 +183,9 @@ Once the container image is built, let's use it to start an instance via `singul
 ```
 $ export PASSWORD=rstudiopassword
 $ echo $USER && echo $PASSWORD
-$ export R_USER=$USER && [ "$(id -u)" == "1000" ] && export R_USER=rstudio
+$ export HOME_USER=$USER && [ "$(id -u)" == "1000" ] && export HOME_USER=rstudio
 
-$ singularity instance start -c -B $(pwd):/home/$R_USER tidyverse_long.sif myserver
+$ singularity instance start -c -B $(pwd):/home/$HOME_USER tidyverse_long.sif myserver
 ```
 {: .bash}
 

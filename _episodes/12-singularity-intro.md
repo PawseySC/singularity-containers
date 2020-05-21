@@ -40,7 +40,16 @@ $ cd demos/singularity
 > ```
 > {: .bash}
 >
-> This will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
+> **In alternative**, if you are running at Pawsey, *e.g.* on Zeus, submit this other script with Slurm instead:
+>
+> ```
+> $ export TUTO=~/singularity-containers
+> $ cd $TUTO/demos
+> $ sbatch ./sbatch_pull_big_images.sh
+> ```
+> {: .bash}
+>
+> This pull process will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
 >
 > One more thing: if you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node.  You can get this setup by using an interactive scheduler allocation, for instance on Zeus with Slurm:
 >
