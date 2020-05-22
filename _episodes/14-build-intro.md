@@ -183,7 +183,7 @@ INFO:    API Key Verified!
 You are now ready to push your image to the Cloud Library, *e.g.* via `singularity push`:
 
 ```
-$ export MY_SYLABS_USER=
+$ export MY_SYLABS_USER="my_sylabs_user"
 $ singularity push -U lolcow.sif library://$MY_SYLABS_USER/default/lolcow:30oct19
 ```
 {: .bash}
