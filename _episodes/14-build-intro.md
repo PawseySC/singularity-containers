@@ -37,7 +37,7 @@ $ cd $TUTO/demos/lolcow
 ```
 {: .bash}
 
-To build an image we need a recipe, or *def file* in the Singularity language.  You'll learn more on how to write one in a dedicated episode.
+To build an image we need a recipe, or **definition file** in the Singularity language.  You'll learn more on how to write one in a dedicated episode.
 
 Here, let's use one, `lolcow.def`, to build our first image.  To this end we're using `sudo singularity build`, followed by the filename we decide to attribute to the container image, and then by the filename of the def file to be used:
 
