@@ -156,7 +156,7 @@ Now that you've built your container image, you might want to run it on other sy
 The simplest way to achieve this is to remember that a SIF image is just a file, so... you can transfer it across systems using Linux command line utilities like `scp` or `rsync`, or even graphical applications such as `Filezilla`.  
 Just remember that images can be quite large, typically ranging from tens of MBs up to several GBs.  The *lolcow* image we created is about 70 MB, but for instance a typical *RStudio* image is well above 1 GB.
 
-If you want to keep the images publicly available, as they are just files you can store them in a server that is accessible through HTTP or FTP, or design a setup based upon open source image registry solutions such as [Harbor]{https://goharbor.io}.
+If you want to keep the images publicly available, as they are just files you can store them in a server that is accessible through HTTP or FTP, or design a setup based upon open source image registry solutions such as [Harbor](https://goharbor.io).
 
 Sylabs offer their own image hosting platform, the [**Sylabs Cloud Library**](https://cloud.sylabs.io), which is currently free upon signup.  Let's see how this works.  If you don't want to signup, just skip the hands-on and follow the demo.  
 Once you create an account, you'll need to click on your account name on the top right of the page, select `Access Tokens`, then create a token, and copy it to the clipboard.  
