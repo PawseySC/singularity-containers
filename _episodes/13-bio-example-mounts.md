@@ -12,7 +12,7 @@ keypoints:
 ---
 
 
-### Access to host directories
+### Access to directories in the host machine
 
 Let's start and `cd` into the root demo directory:
 
@@ -84,7 +84,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 
 > ## Can we see the content of the current directory inside the container?
 >
-> Hopefully yes
+> Hopefully yes ...
 >
 > > ## Solution
 > >

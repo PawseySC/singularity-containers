@@ -207,7 +207,7 @@ Rather than just downloading a SIF file, now there's more work for Singularity, 
 
 Note that, to point Singularity to Docker Hub, the prefix `docker://` is required.
 
-Docker Hub organises images only by users (also called *repositories*), not by collections: `<reposityory>/<name>:<tag>`.  In the case of the Ubuntu image, the repository was `library` and could be omitted.
+Docker Hub organises images only by users (also called *repositories*), not by collections: `<repository>/<name>:<tag>`.  In the case of the Ubuntu image, the repository was `library` and could be omitted.
 
 
 > ## What is the *latest* Ubuntu image from Docker Hub?
