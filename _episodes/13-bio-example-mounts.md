@@ -164,7 +164,7 @@ $ export SINGULARITY_BINDPATH="dir1,dir2,dir3"
 > ## Mounting $HOME
 >
 > Depending on the site configuration of Singularity, user home directories might or might not be mounted into containers by default.  
-> We do recommend that you avoid mounting home whenever possible, to avoid sharing potentially sensitive data, such as SSH keys, with the container, especially if exposing it to the public through a web service.
+> We do recommend that you **avoid mounting home** whenever possible, to avoid sharing potentially sensitive data, such as SSH keys, with the container, especially if exposing it to the public through a web service.
 >
 > If you need to share data inside the container home, you might just mount that specific file/directory, *e.g.*
 >
@@ -180,7 +180,7 @@ $ export SINGULARITY_BINDPATH="dir1,dir2,dir3"
 > ```
 > {: .bash}
 >
-> Finally, note that if you run a container while sitting on your host home, this will be bind mounted as it is the current working directory.  You should avoid this situation whenever possible.
+> Finally, you should also **avoid running a container from your host home**, otherwise this will be bind mounted as it is the current working directory.
 {: .callout}
 
 
