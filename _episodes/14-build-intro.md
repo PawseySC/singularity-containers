@@ -81,7 +81,7 @@ This requirement implies that you must carry out your build in a machine where y
 
 What if you need to build an image from a system where you don't have admin privileges, *i.e.* you can't run commands with *sudo*?
 
-Singularity offers the option to run a build remotely, using the **Sylabs Remote Builder**; once again you will need a Sylabs account and a token to use this feature.  If this is the case, just use `singularity build -r` to proceed with the remote build.  Once finished, the image will be downloaded so that it's ready to use:
+Singularity offers the option to run a build remotely, using the **Sylabs Remote Builder**; once again (see below) you will need a Sylabs account and an `access token` to use this feature.  If this is the case, just use `singularity build -r` to proceed with the remote build.  Once finished, the image will be downloaded so that it's ready to use:
 
 ```
 $ singularity build -r lolcow_remote.sif lolcow.def
