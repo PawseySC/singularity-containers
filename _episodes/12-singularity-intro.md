@@ -77,13 +77,15 @@ $ export TUTO=$(pwd)
 
 * *unprivileged* runtime: Singularity containers do not require the user to hold root privileges to run (the Singularity executable needs to be installed and owned by *root*, though);
 
-* *root* privileges are required to build container images: users can build images on their personal laptops or workstations, on the cloud, or via a Remote Build service;
-
 * *integration*, rather than *isolation*, by default: same user as host, same shell variables inherited by host, current directory bind mounted, communication ports available; as a result, launching a container requires a much simpler syntax than Docker;
+
+* interface with job schedulers, such as *Slurm* or *PBS*;
 
 * ability to run MPI enabled containers using host libraries;
 
-* native execution of GPU enabled containers.
+* native execution of GPU enabled containers;
+
+* unfortunately, *root* privileges are required to build container images: users can build images on their personal laptops or workstations, on the cloud, or via a Remote Build service.
 
 This tutorial assumes Singularity version 3.0 or higher. Version **3.5.0 or higher** is recommended as it offers a smoother, more bug-free experience.
 
