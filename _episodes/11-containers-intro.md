@@ -13,7 +13,7 @@ objectives:
 If you have already used a Virtual Machine, or VM, you're actually already familiar with some of the concepts of a container. 
 
 <!-- ![Containers vs. VMs]({{ page.root }}/fig/container_vs_vm.png) -->
-<img src="{{ page.root }}/fig/container_vs_vm.png" alt="Containers vs. VMs" width="619" height="331"/>
+<img src="{{ page.root }}/fig/container_vs_vm.png" alt="Containers vs. VMs" width="716" height="298"/>
 
 The key difference here is that VMs virtualise **hardware** while containers virtualise **operating systems**.  There are other differences (and benefits):
 
