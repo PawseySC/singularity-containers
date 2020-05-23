@@ -140,7 +140,7 @@ It is being deprecated by CSCS, as they have evolved the project into Sarus, see
 
 ### Sarus
 
-[Sarus](https://user.cscs.ch/tools/containers/sarus/) is the latest incarnation of a container runtime engine by CSCS.
+[Sarus](https://sarus.readthedocs.io) is the latest incarnation of a container runtime engine by CSCS.
 
 It is fully compliant with the Docker image format (whereas it cannot run Singularity images), natively supports schedulers, MPI, and GPU applications.  Then in terms of runtime features it is mostly equivalent to Singularity (although at the moment it doesn't offer a feature comparable to OverlayFS).  However, to build container images, it relies on the users being able to run Docker somewhere else.  Also, uptake at the moment is quite limited compared to Singularity.
 
