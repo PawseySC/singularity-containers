@@ -9,14 +9,14 @@ objectives:
 keypoints:
 - Use `Bootstrap` and `From` to specify the build starting point
 - The `%post` section contains the list of commands needed to install and setup packages in the image
-- The `%environment` section allows to specify shell variable definitions that are required at runtime
+- The `%environment` section allows you to specify shell variable definitions that are required at runtime
 ---
 
 
 ### What is a def file?
 
 A *definition file*, or *def file*, is a recipe to build a container image with Singularity.  
-It is basically a collection of the standard shell commands you would use to build your software through prompt; in addition, it contains Singularity-specific header lines that handle the build process.  We will discuss these below with an example.  
+In practice, it is a collection of the standard shell commands you would use to build your software, plus Singularity-specific header lines that handle the build process.  We will discuss these below with an example.  
 Although there is no mandatory naming convention for def files, they are often characterised by the suffix `.def`.
 
 
@@ -62,7 +62,7 @@ The first line in the *def file* is `BootStrap: docker`.
 This tells Singularity how the image has to be initialised. `docker` means that we are going to start with a base image from Docker Hub.  Another common way to bootstrap is using `library`, which will grab an image from the Sylabs Cloud.  The image is specified in the next line, in this case `From: ubuntu:18.04`.  
 Note how we started from Ubuntu 18.04 in Docker Hub, not Sylabs Cloud, as the former version has got a bit of a richer, more useful configuration.
 
-Next is a section that start with the header `%post`.  This is basically a sequence of commands to be executed to install packages in the image, in essence the same commands you would use for installation in a Linux box.  Here we are ensuring we have an up-to-date list of packages, and then we are installing three Linux utilities.
+Next is a section that starts with the header `%post`.  This is basically a sequence of commands to be executed to install packages in the image, in essence the same commands you would use for installation in a Linux box.  Here we are ensuring we have an up-to-date list of packages, and then we are installing three Linux utilities.
 
 The section `%environment` sets up environment variables that need to be defined at runtime rather than at build time.  Here the `PATH` needs to be updated to reflect the location of the three utilities that we installed in the `%post` section.
 

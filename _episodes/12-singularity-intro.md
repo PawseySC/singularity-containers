@@ -141,7 +141,7 @@ Container images have a **name** and a **tag**, in this case `ubuntu` and `18.04
 
 
 Here Singularity pulled the image from an online image registry, as represented in this example by the prefix `library://`, that corresponds to the [**Sylabs Cloud Library**](https://cloud.sylabs.io).  Images in there are organised as: `<user>/<user collection>/<name>:<tag>`.  
-In the example above we didn't we specify the **user**, `library`, and the **user collection**, `default`.  Why?  Because the specific case of `library/default/` can be omitted.  The full specification is used in the next example:
+In the example above we didn't specify the **user**, `library`, and the **user collection**, `default`.  Why?  Because the specific case of `library/default/` can be omitted.  The full specification is used in the next example:
 
 ```
 $ singularity exec library://library/default/ubuntu:18.04 echo "Hello World"

@@ -7,7 +7,7 @@ objectives:
 - Learn how to mount host directories in a container
 - Run a real-world bioinformatics application in a container
 keypoints:
-- By default Singularity mounts the host current directory, and uses it as container working directory
+- By default Singularity mounts the host current directory, and uses it as the container working directory
 - Map additional host directories in the containers with the flag `-B`
 ---
 
@@ -164,7 +164,7 @@ $ export SINGULARITY_BINDPATH="dir1,dir2,dir3"
 > ## Mounting $HOME
 >
 > Depending on the site configuration of Singularity, user home directories might or might not be mounted into containers by default.  
-> We do recommend avoid mounting home whenever possible, to avoid sharing potentially sensitive data, such as SSH keys, with the container, especially if exposing it to the public through a web service.
+> We do recommend that you avoid mounting home whenever possible, to avoid sharing potentially sensitive data, such as SSH keys, with the container, especially if exposing it to the public through a web service.
 >
 > If you need to share data inside the container home, you might just mount that specific file/directory, *e.g.*
 >
