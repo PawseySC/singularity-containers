@@ -290,7 +290,7 @@ Hello World
 ```
 {: .output}
 
-You can specify the storage location with:
+You can specify the storage location with the `--dir` flag:
 
 ```
 $ mkdir -p sif_lib
@@ -298,10 +298,11 @@ $ singularity pull --dir ~/path/to/sif/lib docker://library/ubuntu:18.04
 ```
 {: .bash}
 
-Being able to specify download locations allows you to keep the local set of images organised and tidy, by making use of a directory tree.  It also allows for easy sharing of images within your team in a shared resource.  In general, you will need to specify the location of the image upon execution:
+Being able to specify download locations allows you to keep the local set of images organised and tidy, by making use of a directory tree.  It also allows for easy sharing of images within your team in a shared resource.  In general, you will need to specify the location of the image upon execution, *e.g.* by defining a dedicated variable:
 
 ```
-$ singularity exec ~/path/to/sif/lib/ubuntu_18.04.sif echo "Hello Again"
+$ export image="~/path/to/sif/lib/ubuntu_18.04.sif"
+$ singularity exec $image echo "Hello Again"
 ```
 {: .bash}
 
