@@ -49,21 +49,26 @@ $ export TUTO=$(pwd)
 > >
 > > This pull process will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
 > >
-> > One more thing: if you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node.  You can get this setup by using an interactive scheduler allocation, for instance on Zeus with Slurm:
-> >
-> > ```
-> > $ salloc -n 1 -t 4:00:00
-> > ```
-> > {: .bash}
-> >
-> > ```
-> > salloc: Granted job allocation 3453895
-> > salloc: Waiting for resource configuration
-> > salloc: Nodes z052 are ready for job
-> > ```
-> > {: .output}
 > {: .solution}
 {: .challenge}
+
+
+> ## Are you running on a shared HPC system?
+>
+> If you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node.  You can get this setup by using an interactive scheduler allocation, for instance on Zeus with Slurm:
+>
+> ```
+> $ salloc -n 1 -t 4:00:00
+> ```
+> {: .bash}
+>
+> ```
+> salloc: Granted job allocation 3453895
+> salloc: Waiting for resource configuration
+> salloc: Nodes z052 are ready for job
+> ```
+> {: .output}
+{: .callout}
 
 
 ### Singularity: a container engine for HPC
