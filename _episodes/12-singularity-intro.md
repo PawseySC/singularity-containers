@@ -17,54 +17,53 @@ keypoints:
 
 Before we start, let us ensure we have got the required files to run the tutorials.
 
-If you haven't done it already, download the following Github repo.  Then `cd` into it, define a couple of handy variables (see below), and finally `cd` into `demos/singularity`:
+If you haven't done it already, download the following Github repo.  Then `cd` into it, and save the current directory into a variable named `TUTO` for later use.
 
 ```
 $ cd ~
 $ git clone https://github.com/PawseySC/singularity-containers
 $ cd singularity-containers
 $ export TUTO=$(pwd)
-$ cd demos/singularity
 ```
 {: .bash}
 
 
-> ## Want to save time later in the tutorial?  Read this
+> ## Want to save time later in the tutorial?
 >
-> Open a second terminal in the machine where you're running the tutorial, then run the script `pull_big_images.sh` to start downloading a few images that you'll require later:
->
-> ```
-> $ export TUTO=~/singularity-containers
-> $ cd $TUTO/demos
-> $ nohup bash ./pull_big_images.sh &
-> ```
-> {: .bash}
->
-> **In alternative**, if you are running at Pawsey, *e.g.* on Zeus, submit this other script with Slurm instead:
->
-> ```
-> $ export TUTO=~/singularity-containers
-> $ cd $TUTO/demos
-> $ sbatch ./sbatch_pull_big_images.sh
-> ```
-> {: .bash}
->
-> This pull process will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
->
-> One more thing: if you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node.  You can get this setup by using an interactive scheduler allocation, for instance on Zeus with Slurm:
->
-> ```
-> $ salloc -n 1 -t 4:00:00
-> ```
-> {: .bash}
->
-> ```
-> salloc: Granted job allocation 3453895
-> salloc: Waiting for resource configuration
-> salloc: Nodes z052 are ready for job
-> ```
-> {: .output}
-{: .callout}
+> > ## Read this
+> > Open a second terminal in the machine where you're running the tutorial, then run the script `pull_big_images.sh` to start downloading a few images that you'll require later:
+> >
+> > ```
+> > $ cd $TUTO/demos
+> > $ nohup bash ./pull_big_images.sh &
+> > ```
+> > {: .bash}
+> >
+> > **In alternative**, if you are running at Pawsey, *e.g.* on Zeus, submit this other script with Slurm instead:
+> >
+> > ```
+> > $ cd $TUTO/demos
+> > $ sbatch ./sbatch_pull_big_images.sh
+> > ```
+> > {: .bash}
+> >
+> > This pull process will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
+> >
+> > One more thing: if you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node.  You can get this setup by using an interactive scheduler allocation, for instance on Zeus with Slurm:
+> >
+> > ```
+> > $ salloc -n 1 -t 4:00:00
+> > ```
+> > {: .bash}
+> >
+> > ```
+> > salloc: Granted job allocation 3453895
+> > salloc: Waiting for resource configuration
+> > salloc: Nodes z052 are ready for job
+> > ```
+> > {: .output}
+> {: .solution}
+{: .challenge}
 
 
 ### Singularity: a container engine for HPC
@@ -84,20 +83,14 @@ $ cd demos/singularity
 This tutorial assumes Singularity version 3.0 or higher. Version **3.3.0 or higher** is recommended as it offers a smoother, more bug-free experience.
 
 
-### Container image formats
-
-One of the differences between Docker and Singularity is the adopted format to store container images.
-
-Docker adopts a layered format compliant with the *Open Containers Initiative* (OCI).  Each build command in the recipe file results in the creation of a distinct image layer.  These layers are cached during the build process, making them quite useful for development.  In fact, repeated build attempts that make use of the same layers will exploit the cache, thus reducing the overall build time.  On the other hand, shipping a container image is not straightforward, and requires either relying on a public registry, or compressing the image in a *tar* archive.
-
-Since version 3.0, Singularity has developed the *Singularity Image Format* (SIF), a single file layout for container images, with extension `.sif`.  Among the benefits, an image is simply a very large file, and thus can be transferred and shipped as any other file.  Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption.  A drawback of this approach is that during build time a progressive, incremental approach is not possible.
-
-Interestingly, Singularity is able to download and run both types of images.
-
-Note that Singularity versions prior to 3.0 used different image formats, characterised by the extensions `.simg` or `.sqsh`.  You can still find these around in the web; newer Singularity versions are still able to run them.
-
-
 ### Executing a simple command in a Singularity container
+
+Within the tutorial directory, let us cd into `demos/singularity`:
+
+```
+$ cd $TUTO/demos/singularity
+```
+{: .bash}
 
 Running a command is done by means of `singularity exec`:
 
@@ -158,7 +151,8 @@ Here we are also experiencing image caching in action: the output has no more me
 
 ### Executing a command in a Docker container
 
-Now let's try and download a Ubuntu container from the [**Docker Hub**](https://hub.docker.com), *i.e.* the main registry for Docker containers:
+Interestingly, Singularity is able to download and run Docker images as well.  
+Let's try and download a Ubuntu container from the [**Docker Hub**](https://hub.docker.com), *i.e.* the main registry for Docker containers:
 
 ```
 $ singularity exec docker://ubuntu:18.04 cat /etc/os-release

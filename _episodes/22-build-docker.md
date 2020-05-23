@@ -12,6 +12,17 @@ keypoints:
 ---
 
 
+### Container image formats
+
+One of the differences between Docker and Singularity is the adopted format to store container images.
+
+Docker adopts a layered format compliant with the *Open Containers Initiative* (OCI).  Each build command in the recipe file results in the creation of a distinct image layer.  These layers are cached during the build process, making them quite useful for development.  In fact, repeated build attempts that make use of the same layers will exploit the cache, thus reducing the overall build time.  On the other hand, shipping a container image is not straightforward, and requires either relying on a public registry, or compressing the image in a *tar* archive.
+
+Since version 3.0, Singularity has developed the *Singularity Image Format* (SIF), a single file layout for container images, with extension `.sif`.  Among the benefits, an image is simply a very large file, and thus can be transferred and shipped as any other file.  Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption.  A drawback of this approach is that during build time a progressive, incremental approach is not possible.
+
+Note that Singularity versions prior to 3.0 used different image formats, characterised by the extensions `.simg` or `.sqsh`.  You can still find these around in the web; newer Singularity versions are still able to run them.
+
+
 ### Why using Docker for container builds?
 
 Over the whole of this tutorial we're proposing Singularity as the principal tool to handle and run containerised applications in HPC.  Do we really need to extend our toolkit to include [Docker](https://hub.docker.com/search/?type=edition&offering=community)?
