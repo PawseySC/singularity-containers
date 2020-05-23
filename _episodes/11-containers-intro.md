@@ -13,7 +13,7 @@ objectives:
 If you have already used a Virtual Machine, or VM, you're actually already familiar with some of the concepts of a container. 
 
 <!-- ![Containers vs. VMs]({{ page.root }}/fig/container_vs_vm.png) -->
-<img src="{{ page.root }}/fig/container_vs_vm.png" alt="Containers vs. VMs" width="716" height="298"/>
+<img src="{{ page.root }}/fig/container_vs_vm.png" alt="Containers vs. VMs" width="619" height="331"/>
 
 The key difference here is that VMs virtualise **hardware** while containers virtualise **operating systems**.  There are other differences (and benefits):
 
@@ -47,7 +47,7 @@ A few examples of how containers are being used at Pawsey include:
 Here's an overview of what a typical workflow looks like:
 
 <!-- ![Container Workflow]({{ page.root }}/fig/container_lifecycle.png) -->
-<img src="{{ page.root }}/fig/container_lifecycle.png" alt="Container Workflow" width="613" height="255"/>
+<img src="{{ page.root }}/fig/container_lifecycle.png" alt="Container Workflow" width="716" height="298"/>
 
 ### Terminology
 
