@@ -14,20 +14,9 @@ keypoints:
 ---
 
 
-### *Sudo* privileges with Singularity
-
-Singularity does not allow for privileges escalation.  
-In other words, if you are a standard user and you run `singularity`, any command inside the container will be run with the privileges of the standard user, *i.e.* without admin powers.  If you try and `sudo` from inside the container you will get an error.  
-On the other hand, if your user can run with *sudo*, and if you then decide to run Singularity as `sudo singularity`, then you will run any command from inside the container with admin powers.  
-This design contributes to making Singularity safe to run on HPC: users without admin rights are unable to escalate their privileges from inside the containers.
-
-However, when building a container image you might need to install software using commands that require admin rights, *e.g.* `apt get` in Ubuntu/Debian or `yum` in Centos.  To achieve this, you need to run `sudo singularity build`, implying that you need to carry out your build in a machine where you DO have admin rights.  
-Ruling out HPC systems, suitable platforms to build container images can be your laptop, an office workstation, or a virtual machine on the cloud.
-
-
 ### Building a basic container
 
-Singularity can build container images in different formats.  Let's focus on the Singularity Image Format, *i.e.* the one typically adopted to ship production-ready containers.  
+Singularity can build container images in different formats.  Let's focus on the Singularity Image Format, *SIF*, which is the one typically adopted to ship production-ready containers.  
 This example is adapted from this well crafted [Singularity Tutorial](https://github.com/ArangoGutierrez/Singularity-tutorial).
 
 Let us cd into the appropriate directory:
@@ -37,7 +26,7 @@ $ cd $TUTO/demos/lolcow
 ```
 {: .bash}
 
-To build an image we need a recipe, or **definition file** in the Singularity language.  You'll learn more on how to write one in a dedicated episode.
+To build an image we need a recipe, or **definition file**, in the Singularity language.  You'll learn more on how to write one in a dedicated episode.
 
 Here, let's use one, `lolcow.def`, to build our first image.  To this end we're using `sudo singularity build`, followed by the filename (and path) we decide to attribute to the container image, and then by the filename of the def file to be used:
 
@@ -75,9 +64,21 @@ lolcow.def lolcow.sif
 {: .output}
 
 
+### *Sudo* privileges with Singularity
+
+As the image builds, let's discuss this important matter.  
+
+Singularity does not allow for privileges escalation.  
+In other words, if you are a standard user and you run `singularity`, any command inside the container will be run with the privileges of the standard user, *i.e.* without admin powers.  If you try and `sudo` from inside the container you will get an error.  
+On the other hand, if your user can run with *sudo*, and if you then decide to run Singularity as `sudo singularity`, then you will run any command from inside the container with admin powers.  
+This design contributes to making Singularity safe to run on HPC: users without admin rights are unable to escalate their privileges from inside the containers.
+
+However, when building a container image you might need to install software using commands that require admin rights, *e.g.* `apt get` in Ubuntu/Debian or `yum` in Centos.  To achieve this, you need to run `sudo singularity build`, as we have just done above.  
+This requirement implies that you must carry out your build in a machine where you DO have admin rights. Ruling out HPC systems, suitable platforms to build container images can be your laptop, an office workstation, or a virtual machine on the cloud.
+
+
 ### Remote build
 
-As the image builds locally, let's discuss another possibility.  
 What if you need to build an image from a system where you don't have admin privileges, *i.e.* you can't run commands with *sudo*?
 
 Singularity offers the option to run a build remotely, using the **Sylabs Remote Builder**; once again you will need a Sylabs account and a token to use this feature.  If this is the case, just use `singularity build -r` to proceed with the remote build.  Once finished, the image will be downloaded so that it's ready to use:
@@ -206,8 +207,8 @@ WARNING: Skipping container verifying
 ```
 {: .output}
 
-Note the use of the flag `-U` to allow pushing unsigned containers (see further down).  
-Also note once again the format for the registry: <user>/<user-collection>/<name>:<tag>.
+Note the use of the flag `-U` to allow pushing unsigned containers (for more information see this Singularity [documentation page](https://sylabs.io/guides/3.5/user-guide/signNverify.html)).  
+Also note once again the format for the registry: `<user>/<project>/<name>:<tag>`.
 
 Finally, you (or other peers) are now able to pull your image from the Cloud Library:
 

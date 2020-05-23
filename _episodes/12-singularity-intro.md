@@ -140,8 +140,8 @@ Container images have a **name** and a **tag**, in this case `ubuntu` and `18.04
 {: .callout}
 
 
-Here Singularity pulled the image from an online image registry, as represented in this example by the prefix `library://`, that corresponds to the [**Sylabs Cloud Library**](https://cloud.sylabs.io).  Images in there are organised as: `<user>/<user collection>/<name>:<tag>`.  
-In the example above we didn't specify the **user**, `library`, and the **user collection**, `default`.  Why?  Because the specific case of `library/default/` can be omitted.  The full specification is used in the next example:
+Here Singularity pulled the image from an online image registry, as represented in this example by the prefix `library://`, that corresponds to the [**Sylabs Cloud Library**](https://cloud.sylabs.io).  Images in there are organised as: `<user>/<project>/<name>:<tag>`.  
+In the example above we didn't specify the **user**, `library`, and the **project**, `default`.  Why?  Because the specific case of `library/default/` can be omitted.  The full specification is used in the next example:
 
 ```
 $ singularity exec library://library/default/ubuntu:18.04 echo "Hello World"
@@ -207,7 +207,7 @@ Rather than just downloading a SIF file, now there's more work for Singularity, 
 
 Note that, to point Singularity to Docker Hub, the prefix `docker://` is required.
 
-Docker Hub organises images only by users (also called *repositories*), not by collections: `<repository>/<name>:<tag>`.  In the case of the Ubuntu image, the repository was `library` and could be omitted.
+Docker Hub organises images only by users (also called *repositories*), not by projects: `<repository>/<name>:<tag>`.  In the case of the Ubuntu image, the repository was `library` and could be omitted.
 
 
 > ## What is the *latest* Ubuntu image from Docker Hub?
