@@ -313,3 +313,160 @@ Loaded image: lolcow:1Nov19
 {: .output}
 
 **Note**: you need Docker to extract the image from the compressed archive, Singularity can't do it.
+
+
+### Bonus: example Dockerfiles
+
+Have a look at these, just to get a taste of what a production Dockerfile might look like.
+
+
+> ## Pawsey MPI-base container
+> 
+> > ## Dockerfile
+> >
+> > ```
+> > FROM ubuntu:18.04
+> > 
+> > LABEL maintainer="brian.skjerven@pawsey.org.au"
+> > 
+> > # Install package dependencies
+> > RUN apt-get update -qq \
+> >       && apt-get -y --no-install-recommends install \
+> >          build-essential \
+> >          gdb \
+> >          gfortran \
+> >          wget \
+> >       && apt-get clean all \
+> >       && rm -r /var/lib/apt/lists/*
+> > 
+> > 
+> > ### Build MPICH ###
+> > 
+> > ARG MPICH_VERSION="3.1.4"
+> > ARG MPICH_CONFIGURE_OPTIONS="--enable-fast=all,O3 --prefix=/usr"
+> > ARG MPICH_MAKE_OPTIONS="-j4"
+> > 
+> > WORKDIR /tmp/mpich-build
+> > 
+> > RUN wget http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz \
+> >       && tar xvzf mpich-${MPICH_VERSION}.tar.gz \
+> >       && cd mpich-${MPICH_VERSION}  \
+> >       && ./configure ${MPICH_CONFIGURE_OPTIONS} \
+> >       && make ${MPICH_MAKE_OPTIONS} \
+> >       && make install \
+> >       && ldconfig
+> > 
+> > 
+> > ### Build OSU Benchmarks ###
+> > 
+> > ARG OSU_BENCH_VERSION="5.4.2"
+> > ARG OSU_BENCH_CONFIGURE_OPTIONS="--prefix=/usr/local CC=mpicc CXX=mpicxx CFLAGS=-O3"
+> > ARG OSU_BENCH_MAKE_OPTIONS="-j4"
+> > 
+> > WORKDIR /tmp/osu-benchmark-build
+> > 
+> > RUN wget http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OSU_BENCH_VERSION}.tar.gz \
+> >       && tar xzvf osu-micro-benchmarks-${OSU_BENCH_VERSION}.tar.gz \
+> >       && cd osu-micro-benchmarks-${OSU_BENCH_VERSION} \
+> >       && ./configure ${OSU_BENCH_CONFIGURE_OPTIONS} \
+> >       && make ${OSU_BENCH_MAKE_OPTIONS} \
+> >       && make install
+> > 
+> > WORKDIR /
+> > RUN rm -rf /tmp/*
+> > CMD ["/bin/bash"]
+> > ```
+> > {: .source}
+> {: .solution}
+{: .challenge}
+
+
+> ## A simple Python container
+> 
+> > ## Dockerfile
+> >
+> > ```
+> > FROM continuumio/miniconda3:4.5.11
+> > 
+> > MAINTAINER Marco De La Pierre <marco.delapierre@pawsey.org.au>
+> > 
+> > RUN apt-get clean all && \
+> >     apt-get update && \
+> >     apt-get upgrade -y && \
+> >     apt-get install -y \
+> >         vim && \
+> >     conda update -y conda \
+> >     && apt-get clean all && \
+> >     apt-get purge && \
+> >     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+> > 
+> > ARG atlas_version="2.0.1"
+> > RUN conda install -y -c bioconda -c conda-forge metagenome-atlas="$atlas_version"
+> > 
+> > RUN mkdir /databases && \
+> >     chmod go+w /databases
+> > 
+> > RUN mkdir /home/none && \
+> >     mkdir /home/none/.cache && \
+> >     cp -p $HOME/.bashrc $HOME/.profile /home/none/ && \
+> >     chmod -R go+w /home/none
+> > ENV HOME="/home/none"
+> > VOLUME /data
+> > WORKDIR /data
+> > ```
+> > {: .source}
+> {: .solution}
+{: .challenge}
+
+
+> ## A large R container
+> 
+> > ## Dockerfile
+> >
+> > ```
+> > FROM rocker/tidyverse:latest
+> > 
+> > RUN apt-get update -qq && apt-get -y --no-install-recommends install \
+> >       autoconf \
+> >       automake \
+> >       g++ \
+> >       gcc \
+> >       gfortran \
+> >       make \
+> >       && apt-get clean all \
+> >       && rm -rf /var/lib/apt/lists/*
+> > 
+> > RUN mkdir -p $HOME/.R
+> > COPY Makevars /root/.R/Makevars
+> > 
+> > RUN Rscript -e "library('devtools')" \
+> >       -e "install_github('Rdatatable/data.table', build_vignettes=FALSE)" \
+> >       -e "install.packages('reshape2')" \
+> >       -e "install.packages('fields')" \
+> >       -e "install.packages('ggbeeswarm')" \
+> >       -e "install.packages('gridExtra')" \
+> >       -e "install.packages('dynamicTreeCut')" \
+> >       -e "install.packages('DEoptimR')" \
+> >       -e "install.packages('http://cran.r-project.org/src/contrib/Archive/robustbase/robustbase_0.90-2.tar.gz', repos=NULL, type='source')" \
+> >       -e "install.packages('dendextend')" \
+> >       -e "install.packages('RColorBrewer')" \
+> >       -e "install.packages('locfit')" \
+> >       -e "install.packages('KernSmooth')" \
+> >       -e "install.packages('BiocManager')" \
+> >       -e "source('http://bioconductor.org/biocLite.R')" \
+> >       -e "biocLite('Biobase')" \
+> >       -e "biocLite('BioGenerics')" \
+> >       -e "biocLite('BiocParallel')" \
+> >       -e "biocLite('SingleCellExperiment')" \
+> >       -e "biocLite('GenomeInfoDb')" \
+> >       -e "biocLite('GenomeInfgoDbData')" \
+> >       -e "biocLite('DESeq')" \
+> >       -e "biocLite('DESeq2')" \
+> >       -e "BiocManager::install(c('scater', 'scran'))" \
+> >       -e "library('devtools')" \
+> >       -e "install_github('IMB-Computational-Genomics-Lab/ascend', ref = 'devel')" \
+> >       && rm -rf /tmp/downloaded_packages
+> > ```
+> > {: .source}
+> {: .solution}
+{: .challenge}
