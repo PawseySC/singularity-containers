@@ -377,3 +377,29 @@ cc967c529ced: Mounted from library/ubuntu
 
 Your image is now publicly available for anyone to pull.
 
+
+### Sharing the Docker image as a single file
+
+If you don't want to use an online registry to share your images, Docker allows you to convert them to a compressed `tar.gz` archive, which you can then share as any other large file, *e.g.* using `scp`, `rsync`, and other file transfer tools.  
+For instance, this can be useful when needing to transfer or share images including proprietary software, amongst collaborators that own the appropriate license.
+
+Use `docker save` to create the archive:
+
+```
+$ docker save -o lolcow_1Nov19.tar.gz lolcow:1Nov19
+```
+{: .bash}
+
+After the transfer, use `docker load` to extract the image in a format that is usable by Docker:
+
+```
+$ docker load -i lolcow_1Nov19.tar.gz
+```
+{: .bash}
+
+```
+Loaded image: lolcow:1Nov19
+```
+{: .output}
+
+**Note**: you need Docker to extract the image from the compressed archive, Singularity can't do it.

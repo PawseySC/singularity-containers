@@ -12,17 +12,6 @@ keypoints:
 ---
 
 
-### Container image formats
-
-One of the differences between Docker and Singularity is the adopted format to store container images.
-
-Docker adopts a layered format compliant with the *Open Containers Initiative* (OCI).  Each build command in the recipe file results in the creation of a distinct image layer.  These layers are cached during the build process, making them quite useful for development.  In fact, repeated build attempts that make use of the same layers will exploit the cache, thus reducing the overall build time.  On the other hand, shipping a container image is not straightforward, and requires either relying on a public registry, or compressing the image in a *tar* archive.
-
-Since version 3.0, Singularity has developed the *Singularity Image Format* (SIF), a single file layout for container images, with extension `.sif`.  Among the benefits, an image is simply a very large file, and thus can be transferred and shipped as any other file.  Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption.  A drawback of this approach is that during build time a progressive, incremental approach is not possible.
-
-Note that Singularity versions prior to 3.0 used different image formats, characterised by the extensions `.simg` or `.sqsh`.  You can still find these around in the web; newer Singularity versions are still able to run them.
-
-
 ### Why using Docker for container builds?
 
 Over the whole of this tutorial we're proposing Singularity as the principal tool to handle and run containerised applications in HPC.  Do we really need to extend our toolkit to include [Docker](https://hub.docker.com/search/?type=edition&offering=community)?
@@ -44,7 +33,18 @@ Although Singularity builds offer some interesting advantages, there's a single 
 It's **compatibility**.  Build with Docker, and you'll know the resulting image can be run from every container engine anywhere in the world.
 
 
-### Building the container image
+### Container image formats
+
+One of the differences between Docker and Singularity is the adopted format to store container images.
+
+Docker adopts a layered format compliant with the *Open Containers Initiative* (OCI).  Each build command in the recipe file results in the creation of a distinct image layer.  These layers are cached during the build process, making them quite useful for development.  In fact, repeated build attempts that make use of the same layers will exploit the cache, thus reducing the overall build time.  On the other hand, shipping a container image is not straightforward, and requires either relying on a public registry, or compressing the image in a *tar* archive.
+
+Since version 3.0, Singularity has developed the *Singularity Image Format* (SIF), a single file layout for container images, with extension `.sif`.  Among the benefits, an image is simply a very large file, and thus can be transferred and shipped as any other file.  Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption.  A drawback of this approach is that during build time a progressive, incremental approach is not possible.
+
+Note that Singularity versions prior to 3.0 used different image formats, characterised by the extensions `.simg` or `.sqsh`.  You can still find these around in the web; newer Singularity versions are still able to run them.
+
+
+### Building the container image with Docker
 
 Let's cd into the relevant demo directory:
 
@@ -145,7 +145,7 @@ Let's comment on the Docker instructions that appear in this Dockerfile.
 More information on the Dockerfile syntax can be found at the [Dockerfile reference](https://docs.docker.com/engine/reference/builder/).
 
 
-### Layers in a container image
+### Layers in a Docker image
 
 Note how the `RUN` instruction above is used to execute a sequence of commands to update the list of available packages and install a set of Linux packages.  
 We have concatenated all these commands in one using the `&&` linux operator, and then the `\` symbol to break them into multiple lines for readability.
@@ -156,17 +156,17 @@ Well, each `RUN` creates a distinct **layer** in the final image, increasing its
 
 ### Syntax of recipe files: Singularity *vs* Docker
 
-| Task            | Singularity      | Docker            |
-| :-------------- | :--------------: | :---------------: |
-| Starting image  | BootStrap + From | FROM              |
-| Linux commands  | %post            | RUN               |
-| Shell variables | %environment     | ENV               |
-| Copying files   | %files           | COPY, ADD         |
-| Metadata        | %labels, %help   | MAINTAINER, LABEL |
-| Default command | %runscript       | CMD, ENTRYPOINT   |
-| Long running    | %startscript     | Not Available     |
-| Work directory  | Not required     | WORKDIR           |
-| Mount points    | Not required     | VOLUME            |
+| Task            | Singularity          | Docker              |
+| :-------------- | :------------------: | :-----------------: |
+| Starting image  | `BootStrap` + `From` | `FROM`              |
+| Linux commands  | `%post`              | `RUN`               |
+| Shell variables | `%environment`       | `ENV`               |
+| Copying files   | `%files`             | `COPY`, `ADD`       |
+| Metadata        | `%labels`, `%help`   | `MAINTAINER, LABEL` |
+| Default command | `%runscript`         | `CMD, ENTRYPOINT`   |
+| Long running    | `%startscript`       | Not required        |
+| Work directory  | Not required         | `WORKDIR `          |
+| Mount points    | Not required         | `VOLUME`            |
 
 
 ### Pushing the image to Docker Hub
@@ -284,3 +284,30 @@ $ ./lolcow_1Nov19.sif
 {: .output}
 
 Sure it does!
+
+
+### Sharing the Docker image as a single file
+
+If you don't want to use an online registry to share your images, Docker allows you to convert them to a compressed `tar.gz` archive, which you can then share as any other large file, *e.g.* using `scp`, `rsync`, and other file transfer tools.  
+For instance, this can be useful when needing to transfer or share images including proprietary software, amongst collaborators that own the appropriate license.
+
+Use `docker save` to create the archive:
+
+```
+$ docker save -o lolcow_1Nov19.tar.gz lolcow:1Nov19
+```
+{: .bash}
+
+After the transfer, use `docker load` to extract the image in a format that is usable by Docker:
+
+```
+$ docker load -i lolcow_1Nov19.tar.gz
+```
+{: .bash}
+
+```
+Loaded image: lolcow:1Nov19
+```
+{: .output}
+
+**Note**: you need Docker to extract the image from the compressed archive, Singularity can't do it.
