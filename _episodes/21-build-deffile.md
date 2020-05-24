@@ -172,7 +172,7 @@ $ singularity run -B $TUTO/_episodes lolcow.sif
 
 The def file specification has a number of other interesting features.  To know more about them you can visit the [Sylabs docs on def files](https://sylabs.io/guides/3.5/user-guide/definition_files.html).
 
-1. In the episode on GUI applications we'll see how to use `%startscript` to configure the behaviour of containers running in background as **long running web servers**.
+1. In the episode on GUI enabled web applications we'll see how to use `%startscript` to configure the behaviour of containers running in background as **long running web servers**.
 
 2. If you are in a development phase, where you don't know yet what you will include in your final container image, you can start with a **sandbox** image.  This is a special type of image designed for development purposes, consisting not of a single file, but instead of a directory.  To create one, run something like:
 

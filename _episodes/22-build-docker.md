@@ -21,7 +21,7 @@ To better inform an answer to this question, here are some of the advantages whe
 
 #### Singularity
 * Single file image, can be handled as any other file and shared easily;
-* Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on GUI applications);
+* Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on web applications);
 * Ability to sign/verify images for improved security.
 
 #### Docker

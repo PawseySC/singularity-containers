@@ -139,8 +139,9 @@ $ singularity exec -B $TUTO docker://ubuntu:18.04 ls $TUTO/_episodes
 {: .bash}
 
 ```
-01-containers-intro.md    03-bio-example-mounts.md  05-gpu-gromacs.md         07-mpi-openfoam.md        09-ml-python.md           11-docker.md
-02-singularity-intro.md   04-writable-containers.md 06-build-intro.md         08-gui-rstudio.md         10-workflow-engines.md    12-other-tools.md
+11-containers-intro.md    14-build-intro.md         23-web-rstudio.md         32-writable-containers.md 44-docker.md
+12-singularity-intro.md   21-build-deffile.md       24-ml-python.md           33-gpu-gromacs.md         45-other-tools.md
+13-bio-example-host.md    22-build-docker.md        31-mpi-openfoam.md        41-workflow-engines.md
 ```
 {: .output}
 

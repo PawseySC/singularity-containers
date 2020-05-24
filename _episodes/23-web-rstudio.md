@@ -1,5 +1,5 @@
 ---
-title: "GUI enabled applications: RStudio in a container"
+title: "GUI enabled web applications: RStudio in a container"
 teaching: 10
 exercises: 10
 questions:
