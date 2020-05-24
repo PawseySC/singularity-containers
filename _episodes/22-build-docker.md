@@ -9,6 +9,7 @@ objectives:
 keypoints:
 - Build images starting from a `Dockerfile` recipe with `docker build`
 - Push images to a web registry with `docker push`
+- Share images as a single file using `docker save` and `docker load`
 ---
 
 
