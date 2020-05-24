@@ -1,14 +1,17 @@
 ---
-title: "Share files with the host: BLAST, a bioinformatics example"
+title: "Share files with the host: BLAST, a bioinformatics demo"
 teaching: 5
 exercises: 15
 questions:
 objectives:
 - Learn how to mount host directories in a container
+- Learn how to pass specific variables to the container
 - Run a real-world bioinformatics application in a container
 keypoints:
 - By default Singularity mounts the host current directory, and uses it as the container working directory
-- Map additional host directories in the containers with the flag `-B`
+- Map additional host directories in the containers with the flag `-B`, or the variable SINGULARITY_BINDPATH
+- By default Singularity passes all host variables to the container
+- Pass specific shell variables to containers by prefixing them with SINGULARITYENV_
 ---
 
 
@@ -183,6 +186,49 @@ $ export SINGULARITY_BINDPATH="dir1,dir2,dir3"
 >
 > Finally, you should also **avoid running a container from your host home**, otherwise this will be bind mounted as it is the current working directory.
 {: .callout}
+
+
+### How about sharing environment variables with the host?
+
+By default, shell variables are inherited in the container from the host:
+
+```
+$ export HELLO=world
+$ singularity exec docker://ubuntu:18.04 bash -c 'echo $HELLO'
+```
+{: .bash}
+
+```
+world
+```
+{: .output}
+
+There might be situations where you want to isolate the shell environment of the container; to this end you can use the flag `-C`, or `--containall`:  
+(Note that this will also isolate system directories such as `/tmp`, `/dev` and `/run`)
+
+```
+$ export HELLO=world
+$ singularity exec -C docker://ubuntu:18.04 bash -c 'echo $HELLO'
+```
+{: .bash}
+
+```
+
+```
+{: .output}
+
+If you need to pass only specific variables to the container, that might or might not be defined in the host, you can define variables that start with `SINGULARITYENV_`; this prefix will be automatically trimmed in the container:
+
+```
+$ export SINGULARITYENV_CIAO=mondo
+$ singularity exec -C docker://ubuntu:18.04 bash -c 'echo $CIAO'
+```
+{: .bash}
+
+```
+mondo
+```
+{: .output}
 
 
 ### Running BLAST from a container
