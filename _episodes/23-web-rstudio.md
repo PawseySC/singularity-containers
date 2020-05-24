@@ -104,7 +104,7 @@ Here, we're saying we want the web server to listen to port 8787 on any IP addre
 {: .callout}
 
 
-Do we need more? Yes, we need to ensure we know the username and password for authenticating; *rserver* will configure them based on the values of the environment variables `USER` and `PASSWORD`; normally we would pick a random string for the latter. Today we'll use 'rstudiopassword'.
+Do we need more? Yes, we need to ensure we know the username and password for authenticating; *rserver* will configure them based on the values of the environment variables `USER` and `PASSWORD`; normally we would pick a random string for the latter.  Today we'll use "rstudiopassword".
 
 ```
 $ export PASSWORD=rstudiopassword
@@ -113,23 +113,28 @@ $ echo $USER && echo $PASSWORD
 {: .bash}
 
 Lastly, containers are read-only, but RStudio will want to be able to write configuration and temporary files in the home.  Let us bind mount the current work directory as the container home (we'll use the `-B` flag).  
-There's a little caveat here, due to the way the **Rocker** developers designed the container image in the recipe file.  The actual username in the RStudio server will be `rstudio` if your user has ID equal to *1000* (first user in the system), and it will instead be the same as your user, *i.e.* `$USER`, otherwise.  We are required to define the home path accordingly.  Let us code these conditions as follows, using a bit of bash syntax:
+There's a little caveat here, due to the way the **Rocker** developers designed the container image in the recipe file.  Depending on your user ID in the host machine, the actual username in the RStudio server might be `rstudio` (*ID = 1000*) or the same as your user (otherwise); this has an impact on the container home path.  
+A simple solution to this is to bind mount the fake home in the host twice, once mapped to `/home/rstudio` and once to `$HOME`. Singularity let us do this, and will handle the two bind mounts correctly.
 
+<!-- This solution is sooo elegant, but also an over-complication to the audience -->
+<!--
+Let us code these conditions as follows, using a bit of bash syntax:
 ```
 $ export HOME_USER=$USER && [ "$(id -u)" == "1000" ] && export HOME_USER=rstudio
 ```
 {: .bash}
+-->
 
 Now we have everything we need to put together the Singularity idiomatic way to launch an interactive RStudio web server:
 
 ```
 $ export PASSWORD=rstudiopassword
 $ echo $USER && echo $PASSWORD
-$ export HOME_USER=$USER && [ "$(id -u)" == "1000" ] && export HOME_USER=rstudio
 
 $ singularity exec \
     -c \
-    -B $(pwd):/home/$HOME_USER \
+    -B $(pwd):/home/rstudio \
+    -B $(pwd):$HOME \
     tidyverse_3.6.1.sif \
     rserver --www-port 8787 --www-address 0.0.0.0 --auth-none=0 --auth-pam-helper-path=pam-helper
 ```
@@ -203,11 +208,11 @@ Once the container image is built, let's use it to start an instance via `singul
 ```
 $ export PASSWORD=rstudiopassword
 $ echo $USER && echo $PASSWORD
-$ export HOME_USER=$USER && [ "$(id -u)" == "1000" ] && export HOME_USER=rstudio
 
 $ singularity instance start \
     -c \
-    -B $(pwd):/home/$HOME_USER \
+    -B $(pwd):/home/rstudio \
+    -B $(pwd):$HOME \
     tidyverse_long.sif \
     myserver
 ```
