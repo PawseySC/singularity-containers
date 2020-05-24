@@ -16,7 +16,8 @@ keypoints:
 
 Python is a great language for doing all kinds of work, but sometimes it can present issues...
 
-![Python can get messy]({{ page.root }}/fig/python-complexity-cartoon.png)
+<!-- ![Python can get messy]({{ page.root }}/fig/python-complexity-cartoon.png) -->
+<img src="{{ page.root }}/fig/python-complexity-cartoon.png" alt="Python can get messy" width="492" height="487"/>
 
 
 ### Run a basic Python script from a container
