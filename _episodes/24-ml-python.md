@@ -62,7 +62,7 @@ For this example we'll try installing some machine learning (ML) packages to run
 > Think of how you would write a minimal def file that:
 > * uses `jupyter/datascience-notebook:latest` from Docker Hub as base image 
 > * installs the *Plotly* package via `/opt/conda/bin/conda install plotly=3.10`
-> * we'll use this image as an interactive session, so do not care about `%startscript`
+> * we'll use this image as an interactive session, so DO NOT care about `%startscript`
 > 
 > > ## Solution
 > > 
@@ -108,7 +108,11 @@ In the same directory we have both a Jupyter notebook (`LogisticRegression.ipynb
 After we've built our image we'll start up the container and log into our Jupyter notebook server (note the idiomatic expression for Jupyter Notebooks with Singularity):
 
 ```
-$ singularity exec -C -B $(pwd):$HOME plotly.sif jupyter notebook --no-browser --port=8888 --ip 0.0.0.0 --notebook-dir=$HOME
+$ singularity exec \
+    -C \
+    -B $(pwd):$HOME \
+    plotly.sif \
+    jupyter notebook --no-browser --port=8888 --ip 0.0.0.0 --notebook-dir=$HOME
 ```
 {: .bash}
 
@@ -220,7 +224,11 @@ In here we have some image data (`dataset/`), the Jupyter notebook `FlowerClassi
 > > ## Solution
 > > 
 > > ```
-> > $ singularity exec -C -B $(pwd):$HOME class.sif jupyter notebook --no-browser --port=8888 --ip 0.0.0.0 --notebook-dir=$HOME
+> > $ singularity exec \
+> >     -C \
+> >     -B $(pwd):$HOME \
+> >     class.sif \
+> >     jupyter notebook --no-browser --port=8888 --ip 0.0.0.0 --notebook-dir=$HOME
 > > ```
 > > {: .bash}
 > {: .solution}
