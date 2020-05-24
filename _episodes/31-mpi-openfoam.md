@@ -242,8 +242,11 @@ What's the performance overhead in running an MPI application through containers
 
 Well, the benchmark figures just below reveal it's quite small...good news!
 
-![OSU bandwidth test]({{ page.root }}/fig/OSU_Bandwidth.png)
+<!-- ![OSU bandwidth test]({{ page.root }}/fig/OSU_Bandwidth.png) -->
+<img src="{{ page.root }}/fig/OSU_Bandwidth.png" alt="OSU bandwidth test" width="651" height="489"/>
 
-![OSU point-to-point latency test]({{ page.root }}/fig/OSU_Latency_P2P.png)
+<!-- ![OSU point-to-point latency test]({{ page.root }}/fig/OSU_Latency_P2P.png) -->
+<img src="{{ page.root }}/fig/OSU_Latency_P2P.png" alt="OSU point-to-point latency test" width="651" height="489"/>
 
-![OSU collective latency test]({{ page.root }}/fig/OSU_Latency_Coll.png)
+<!-- ![OSU collective latency test]({{ page.root }}/fig/OSU_Latency_Coll.png) -->
+<img src="{{ page.root }}/fig/OSU_Latency_Coll.png" alt="OSU collective latency test" width="651" height="489"/>
