@@ -155,19 +155,20 @@ We could have used one `RUN` instruction per command, so why concatenating inste
 Well, each `RUN` creates a distinct **layer** in the final image, increasing its size.  It is a good practice to use as few layers, and thus `RUN` instructions, as possible, to keep the image size smaller.
 
 
-### Syntax of recipe files: Singularity *vs* Docker
-
-| Task            | Singularity          | Docker              |
-| :-------------- | :------------------: | :-----------------: |
-| Starting image  | `BootStrap` + `From` | `FROM`              |
-| Linux commands  | `%post`              | `RUN`               |
-| Shell variables | `%environment`       | `ENV`               |
-| Copying files   | `%files`             | `COPY`, `ADD`       |
-| Metadata        | `%labels`, `%help`   | `MAINTAINER, LABEL` |
-| Default command | `%runscript`         | `CMD, ENTRYPOINT`   |
-| Long running    | `%startscript`       | Not required        |
-| Work directory  | Not required         | `WORKDIR `          |
-| Mount points    | Not required         | `VOLUME`            |
+> ## Syntax of recipe files: Singularity *vs* Docker
+> 
+> | Task            | Singularity          | Docker              |
+> | :-------------- | :------------------: | :-----------------: |
+> | Starting image  | `BootStrap` + `From` | `FROM`              |
+> | Linux commands  | `%post`              | `RUN`               |
+> | Shell variables | `%environment`       | `ENV`               |
+> | Copying files   | `%files`             | `COPY`, `ADD`       |
+> | Metadata        | `%labels`, `%help`   | `MAINTAINER, LABEL` |
+> | Default command | `%runscript`         | `CMD, ENTRYPOINT`   |
+> | Long running    | `%startscript`       | Not required        |
+> | Work directory  | Not required         | `WORKDIR `          |
+> | Mount points    | Not required         | `VOLUME`            |
+{: .callout}
 
 
 ### Pushing the image to Docker Hub
