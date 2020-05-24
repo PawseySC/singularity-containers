@@ -30,12 +30,14 @@ $ cd $TUTO/demos/trinity
 and then discuss how to use the Linux tools `dd` and `mkfs.ext3` to create and format an empty *ext3* file system image, which we will call `my_overlay`.  These Linux tools typically require `sudo` privileges to run.  However, we can bypass this requirement by using the ones provided inside a standard *Ubuntu* container.  The following command looks a bit cumbersome, but is indeed just an idiomatic syntax to achieve our goal:
 
 ```
+$ export COUNT="200"
+$ export BS="1M"
 $ singularity exec docker://ubuntu:18.04 bash -c " \
-  mkdir -p overlay_tmp/upper && \
-  dd if=/dev/zero of=my_overlay count=200 bs=1M && \
-  mkfs.ext3 -d overlay_tmp my_overlay && \
-  rm -rf overlay_tmp \
-  "
+    mkdir -p overlay_tmp/upper && \
+    dd if=/dev/zero of=my_overlay count=$COUNT bs=$BS && \
+    mkfs.ext3 -d overlay_tmp my_overlay && \
+    rm -rf overlay_tmp \
+    "
 ```
 {: .bash}
 
@@ -60,7 +62,8 @@ Writing superblocks and filesystem accounting information: done
 ```
 {: .output}
 
-Here we have wrapped four commands into a single bash call from a container, just for the convenience of running it once.  What are the single commands doing?  
+Here we have wrapped four commands into a single bash call from a container, just for the convenience of running it once.  We've also defined shell variables for better clarity.  
+What are the single commands doing?  
 We are creating (and then deleting at the end) a service directory, `overlay_tmp/upper`, that will be used by the command `mkfs.ext3`.  
 The `dd` command creates a file named `my_overlay`, made up of blocks of zeros, namely with `count` blocks of size `bs` (the unit here is *megabytes*); the product `count*bs` gives the total file size in bytes, in this case corresponding to *200 MB*.
 The command `mkfs.ext3` is then used to format the file as a *ext3* filesystem image, that will be usable by Singularity.  Here we are using the service directory we created, `my_overlay`, with the flag `-d`, to tell `mkfs` we want the filesystem to be owned by the same owner of this directory, *i.e.* by the current user.  If we skipped this option, we would end up with a filesystem that is writable only by *root*, not very useful.
@@ -175,8 +178,9 @@ Now, we're going to run a test assembly with our sample dataset, using the direc
 >
 > ```
 > $ Trinity \
->   --seqType fq --left trinity_test_data/reads.left.fq.gz  --right trinity_test_data/reads.right.fq.gz \
->   --max_memory 1G --CPU 1 --output <OUTPUT-DIRECTORY>
+>     --seqType fq --left trinity_test_data/reads.left.fq.gz \
+>     --right trinity_test_data/reads.right.fq.gz \
+>     --max_memory 1G --CPU 1 --output <OUTPUT-DIRECTORY>
 > ```
 > {: .bash}
 >
@@ -187,9 +191,10 @@ Now, we're going to run a test assembly with our sample dataset, using the direc
 > >
 > > ```
 > > $ singularity exec --overlay my_overlay trinityrnaseq_2.8.6.sif \
-> >   Trinity \
-> >   --seqType fq --left trinity_test_data/reads.left.fq.gz  --right trinity_test_data/reads.right.fq.gz \
-> >   --max_memory 1G --CPU 1 --output /trinity_out_dir
+> >     Trinity \
+> >     --seqType fq --left trinity_test_data/reads.left.fq.gz \
+> >     --right trinity_test_data/reads.right.fq.gz \
+> >     --max_memory 1G --CPU 1 --output /trinity_out_dir
 > > ```
 > > {: .bash}
 > {: .solution}
