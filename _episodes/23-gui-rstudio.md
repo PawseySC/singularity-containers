@@ -7,7 +7,7 @@ objectives:
 - Learn how to run interactive GUI web sessions from a container
 - Learn how to setup a long running web service from a container
 keypoints:
-- An interactive web session can essentially be executed as any other containerised application, via `singularity exec`
+- An interactive web session can be executed as any other containerised application, via `singularity exec`
 - Use the `%startscript` section of a def file to configure an image for long running services
 - Launch/shutdown long running services in the background with `singularity instance start/stop`
 ---
@@ -46,25 +46,41 @@ To begin with, we are going to run a minimalistic example taken from the worksho
 Let us start with running the R script through the R container; we're going to compute average values in this example:
 
 ```
-$ singularity exec tidyverse_3.6.1.sif Rscript readings-density.R --mean inflammation-density.png data/inflammation-*.csv
+$ Rscript readings-density.R --mean inflammation-density.png data/inflammation-*.csv
 ```
 {: .bash}
 
-```
-5.45
-5.425
-6.1
 
-[..]
+> ## Run the R script with Singularity
+> 
+> How would you run the above command using Singularity and the R image you just puled?
+> 
+> > ## Solution
+> > 
+> > ```
+> > $ singularity exec tidyverse_3.6.1.sif Rscript readings-density.R --mean inflammation-density.png data/inflammation-*.csv
+> > ```
+> > {: .bash}
+> > 
+> > ```
+> > 5.45
+> > 5.425
+> > 6.1
+> > 
+> > [..]
+> > 
+> > 6.875
+> > 6.025
+> > 6.9
+> > Saving 7 x 7 in image
+> > ```
+> > {: .output}
+> > 
+> > We even got a nice plot file out of the analysis, `inflammation-density.png`. 
+> {: .solution}
+{: .challenge}
 
-6.875
-6.025
-6.9
-Saving 7 x 7 in image
-```
-{: .output}
-
-We even got a nice plot file out of the analysis, `inflammation-density.png`. So, what if want to run our R workflow using the RStudio web-based GUI interface?
+So, what if want to run our R workflow using the RStudio web-based GUI interface?
 
 
 ### Run an interactive RStudio session
@@ -111,7 +127,11 @@ $ export PASSWORD=rstudiopassword
 $ echo $USER && echo $PASSWORD
 $ export HOME_USER=$USER && [ "$(id -u)" == "1000" ] && export HOME_USER=rstudio
 
-$ singularity exec -c -B $(pwd):/home/$HOME_USER tidyverse_3.6.1.sif rserver --www-port 8787 --www-address 0.0.0.0 --auth-none=0 --auth-pam-helper-path=pam-helper
+$ singularity exec \
+    -c \
+    -B $(pwd):/home/$HOME_USER \
+    tidyverse_3.6.1.sif \
+    rserver --www-port 8787 --www-address 0.0.0.0 --auth-none=0 --auth-pam-helper-path=pam-helper
 ```
 {: .bash}
 
@@ -185,7 +205,11 @@ $ export PASSWORD=rstudiopassword
 $ echo $USER && echo $PASSWORD
 $ export HOME_USER=$USER && [ "$(id -u)" == "1000" ] && export HOME_USER=rstudio
 
-$ singularity instance start -c -B $(pwd):/home/$HOME_USER tidyverse_long.sif myserver
+$ singularity instance start \
+    -c \
+    -B $(pwd):/home/$HOME_USER \
+    tidyverse_long.sif \
+    myserver
 ```
 {: .bash}
 
