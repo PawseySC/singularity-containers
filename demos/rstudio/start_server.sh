@@ -1,10 +1,11 @@
 #!/bin/bash
 
-export PASSWORD=rstudiopassword
-echo $USER && echo $PASSWORD
+export SINGULARITYENV_USER=$USER
+export SINGULARITYENV_PASSWORD=rstudiopassword
+echo $SINGULARITYENV_USER && echo $SINGULARITYENV_PASSWORD
 
 singularity instance start \
-    -c \
+    -C \
     -B $(pwd):/home/rstudio \
     -B $(pwd):$HOME \
     tidyverse_long.sif \

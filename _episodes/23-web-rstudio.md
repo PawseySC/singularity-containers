@@ -104,11 +104,12 @@ Here, we're saying we want the web server to listen to port 8787 on any IP addre
 {: .callout}
 
 
-Do we need more? Yes, we need to ensure we know the username and password for authenticating; *rserver* will configure them based on the values of the environment variables `USER` and `PASSWORD`; normally we would pick a random string for the latter.  Today we'll use "rstudiopassword".
+Do we need more? Yes, we need to ensure we know the username and password for authenticating; *rserver* will configure them based on the values of the container environment variables `USER` and `PASSWORD`; normally we would pick a random string for the latter.  Today we'll use "rstudiopassword".
 
 ```
-$ export PASSWORD=rstudiopassword
-$ echo $USER && echo $PASSWORD
+$ export SINGULARITYENV_USER=$USER
+$ export SINGULARITYENV_PASSWORD=rstudiopassword
+$ echo $SINGULARITYENV_USER && echo $SINGULARITYENV_PASSWORD
 ```
 {: .bash}
 
@@ -128,11 +129,12 @@ $ export HOME_USER=$USER && [ "$(id -u)" == "1000" ] && export HOME_USER=rstudio
 Now we have everything we need to put together the Singularity idiomatic way to launch an interactive RStudio web server:
 
 ```
-$ export PASSWORD=rstudiopassword
-$ echo $USER && echo $PASSWORD
+$ export SINGULARITYENV_USER=$USER
+$ export SINGULARITYENV_PASSWORD=rstudiopassword
+$ echo $SINGULARITYENV_USER && echo $SINGULARITYENV_PASSWORD
 
 $ singularity exec \
-    -c \
+    -C \
     -B $(pwd):/home/rstudio \
     -B $(pwd):$HOME \
     tidyverse_3.6.1.sif \
@@ -140,7 +142,7 @@ $ singularity exec \
 ```
 {: .bash}
 
-Note the `-c` flag for `singularity exec`, used to avoid sharing directories such as `/tmp` with the host, and thus to better clean up the session upon exit.  
+Note the `-C` flag for `singularity exec`, used to isolate the container from the host, including the use of a volatile `/tmp` directory instead of the host one, to better clean up the session upon exit.  As a by product, shell environment is also isolated, which is way we're defining `USER` and `PASSWORD` prefixing them with `SINGULARITYENV_`.  
 If everything is fine, no output will be printed.
 
 Now, open your web browser, and type the following as URL: `<Singularity machine IP Address>:8787`.  The `IP` can be replaced with `localhost` if you're running locally on your laptop or workstation.  
@@ -206,11 +208,12 @@ Basically, we're starting from the `tidyverse` Docker image we used above, and t
 Once the container image is built, let's use it to start an instance via `singularity instance start`.  Note how the other options are the same as for the interactive session above; the only addition is the specification of a name for the instance, `myserver` in this case, that has to follow the image name:
 
 ```
-$ export PASSWORD=rstudiopassword
-$ echo $USER && echo $PASSWORD
+$ export SINGULARITYENV_USER=$USER
+$ export SINGULARITYENV_PASSWORD=rstudiopassword
+$ echo $SINGULARITYENV_USER && echo $SINGULARITYENV_PASSWORD
 
 $ singularity instance start \
-    -c \
+    -C \
     -B $(pwd):/home/rstudio \
     -B $(pwd):$HOME \
     tidyverse_long.sif \
@@ -239,7 +242,7 @@ myserver         18080    /home/ubuntu/singularity-containers/demos/rstudio/tidy
 Note that we can run commands from the instance by referring to it as `instance://<INSTANCE-NAME>`, *e.g.*
 
 ```
-$ singularity exec instance://myserver echo $USER $PASSWORD
+$ singularity exec instance://myserver bash -c 'echo $USER $PASSWORD'
 ```
 {: .bash}
 
