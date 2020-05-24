@@ -117,7 +117,7 @@ $ singularity exec \
 ```
 {: .bash}
 
-Here the `-C` flag is to completely insulate the container from the host, including the use of a volatile `/run` directory instead of the host one.  We're almost bind mounting our current directory as the container `$HOME`.
+Here the `-C` flag is to isolate the container from the host, including the use of a volatile `/run` directory instead of the host one.  We're also bind mounting our current directory as the container `$HOME`.
 
 
 > ## Communication ports
