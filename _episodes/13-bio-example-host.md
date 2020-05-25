@@ -130,7 +130,8 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > ## What happens on Pawsey HPC systems?
 > 
 > This last example won't work as expected on Zeus, Magnus and other Pawsey HPC machines.  
-> This is due to site defaults that are meant to make users' life easier. In particular, `/group` and `/scratch` are bind mounted by default.
+> This is due to site defaults that are meant to make users' life easier. In particular, `/group` and `/scratch` get bind mounted by default.  
+> If you want to experience this example on Pawsey HPC, you should first `unset SINGULARITY_BINDPATH`.
 {: .callout}
 
 
