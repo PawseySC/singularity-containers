@@ -1,4 +1,5 @@
 #!/bin/bash
+# use docker://biocontainers/blast:v2.2.31_cv2
 
 cd ../blast_db
 makeblastdb -in zebrafish.1.protein.faa -dbtype prot

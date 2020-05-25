@@ -1,4 +1,5 @@
 #!/bin/bash
+# use docker://trinityrnaseq/trinityrnaseq:2.8.6
 
 Trinity \
     --seqType fq --left trinity_test_data/reads.left.fq.gz  \
