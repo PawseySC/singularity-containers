@@ -22,11 +22,12 @@ To better inform an answer to this question, here are some of the advantages whe
 #### Singularity
 * Single file image, can be handled as any other file and shared easily;
 * Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on web applications);
+* Powerful ways of defining shell environment (see [Sylabs docs on Environment and Metadata](https://sylabs.io/guides/3.5/user-guide/environment_and_metadata.html));
 * Ability to sign/verify images for improved security.
 
 #### Docker
 * Compatibility: image format can be run by all existing container engines, including Singularity;
-* Quick development: layered image format allows caching, for reduced build time during repeated builds.
+* Layered image format allows caching, for reduced build time during prototyping and development.
 
 Note how, at present, both tools require root privileges for building, implying that this step cannot be performed on HPC, and requires a dedicated machine instead.
 
@@ -159,6 +160,8 @@ Well, each `RUN` creates a distinct **layer** in the final image, increasing its
 > 
 > | Task            | Singularity          | Docker              |
 > | :-------------- | :------------------: | :-----------------: |
+> |                 | *Section*            | *Directive*         |
+> | :-------------- | :------------------: | :-----------------: |
 > | Starting image  | `BootStrap` + `From` | `FROM`              |
 > | Linux commands  | `%post`              | `RUN`               |
 > | Shell variables | `%environment`       | `ENV`               |
@@ -166,7 +169,7 @@ Well, each `RUN` creates a distinct **layer** in the final image, increasing its
 > | Metadata        | `%labels`, `%help`   | `MAINTAINER, LABEL` |
 > | Default command | `%runscript`         | `CMD, ENTRYPOINT`   |
 > | Long running    | `%startscript`       | Not required        |
-> | Work directory  | Not required         | `WORKDIR `          |
+> | Work directory  | Not required         | `WORKDIR`           |
 > | Mount points    | Not required         | `VOLUME`            |
 {: .callout}
 

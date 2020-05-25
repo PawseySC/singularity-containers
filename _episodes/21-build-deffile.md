@@ -203,7 +203,7 @@ At the time of writing, [Docker Hub](https://hub.docker.com) is the most popular
 [nvidia/cuda](https://hub.docker.com/r/nvidia/cuda) has images to build GPU enabled applications.  There are different image types for different needs.  Tags containing `runtime` are suitable for binary applications that are ready to run; if you need to compile GPU code, pick tags containing `devel` instead.  Different OS flavours are available, too.
 
 #### MPI
-As you can see in the episode on MPI applications, when containerising this type of software the MPI libraries in the image need to be ABI compatible with the MPI libraries in the host.  The Pawsey Supercomputing Centre maintains some dedicated base images at [pawsey/mpi-base](https://hub.docker.com/r/pawsey/mpi-base), for building images that will run on our HPC systems.
+As you can see in the episode on MPI applications, when containerising this type of software the MPI libraries in the image need to be ABI compatible with the MPI libraries in the host.  The Pawsey Supercomputing Centre maintains some dedicated base images at [pawsey/mpich-base](https://hub.docker.com/r/pawsey/mpich-base), for building images that will run on our HPC systems.
 
 #### Python
 [python](https://hub.docker.com/_/python) hosts the official Python images.  Different versions are available for some OS flavours.  Smaller base images have tags ending with `-slim`.
