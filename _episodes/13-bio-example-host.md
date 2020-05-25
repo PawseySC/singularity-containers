@@ -124,6 +124,12 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > >
 > > Host directories external to the current directory are not visible!  How can we fix this?  Read on...
 > {: .solution}
+> 
+> ## What happens on Pawsey HPC sytems?
+> 
+> This example won't work as expected on Zeus, Magnus and other Pawsey HPC.  
+> This is due to site defaults that are meant to make users' life easier.
+> {: .callout}
 {: .challenge}
 
 
