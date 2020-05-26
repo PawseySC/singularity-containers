@@ -17,7 +17,7 @@ These will allow you to follow the online materials and to login to a facility w
   * Essential (core of the tutorial)
     - Singularity : [script]({{ page.root }}/files/install-singularity.sh) \| [docs](https://sylabs.io/guides/3.5/user-guide/quick_start.html)
 
-  * Desirable (to run all the base episode)
+  * Desirable (to run all the base episodes)
     - Docker : [docs (unofficial)](https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-docker-on-ubuntu-18-04-lts-bionic-beaver.html)
     - MPICH library : [script]({{ page.root }}/files/install-mpich.sh) \| [docs](https://www.mpich.org/documentation/guides/)
     - Nvidia GPU driver (GPU card required)
