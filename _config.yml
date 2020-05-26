@@ -6,7 +6,7 @@
 carpentry: "swc"
 
 # Overall title for pages.
-title: "Containers in HPC with Singularity"
+title: "Containers on HPC and Cloud with Singularity"
 
 # Contact.  This *must* include the protocol: if it's an email
 # address, it must look like "mailto:lessons@software-carpentry.org",
