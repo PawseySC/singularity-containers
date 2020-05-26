@@ -15,7 +15,9 @@ keypoints:
 
 ### Create a persistent overlay filesystem
 
-There can be instances where, rather than reading/writing files in the host filesystem, it would instead come handy to persistently store them inside the container filesystem.  
+We haven't stated this explicitly in previous episodes: Singularity containers are **read-only**.  In other words, you cannot create or edit any files inside their filesystem.
+
+However, there can be instances where, rather than reading/writing files in the host filesystem, it would instead come handy to persistently store them inside the container filesystem.  
 A practical user case is when using a host parallel filesystem such as *Lustre* to run applications that create a large number (*e.g.* millions) of small files.  This practice creates a huge workload on the metadata servers of the filesystem, degrading its performance.  In this context, significant performance benefits can be achieved by reading/writing these files inside the container.
 
 Singularity offers a feature to achieve this, called *OverlayFS*.
