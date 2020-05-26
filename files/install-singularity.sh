@@ -5,6 +5,7 @@ export USERID=$USER
 sudo apt-get update
 sudo apt-get install -y \
     build-essential \
+    git \
     libssl-dev \
     uuid-dev \
     libgpgme11-dev \
