@@ -174,6 +174,25 @@ Well, each `RUN` creates a distinct **layer** in the final image, increasing its
 {: .callout}
 
 
+### List local Docker images
+
+We know that Docker container images are not single files, but rather adopt a multi-layered format.  To keep things tidy, Docker stores images and their layers in a hidden directory, under its own control.  
+To get the list of available images, including the ones you built, use `docker images`:
+
+```
+$ sudo docker images
+```
+{: .bash}
+
+```
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+lolcow              1Nov19              a67808f049be        5 hours ago         170MB
+```
+{: .output}
+
+
+
+
 ### Pushing the image to Docker Hub
 
 If you have a (free) Docker Hub account you must first login to Docker.

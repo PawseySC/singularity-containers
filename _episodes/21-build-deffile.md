@@ -168,6 +168,23 @@ $ singularity run -B $TUTO/_episodes lolcow.sif
 {: .output}
 
 
+> ## Use `%runscript` only for the talking cow!
+> 
+> Beside this amusing example, the use of `%runscript` is well documented and advertised in the Singularity docs.  However, we are here suggesting to avoid using such functionality for production container images.
+> 
+> Why?  
+> Well, Singularity has two main ways to execute commands:
+> * `> singularity exec <image> <cmd>`
+> * `singularity run <image>` (default command only)
+> 
+> Now, most software packages provide multiple executables, depending on specific functions to be used, or tasks to be run.  There are some ill defined aspects here.  
+> First, what type of general tip can we suggest for picking the *default* command to be associated with `run`?  It's hard to tell.  
+> Second, this would result in an inconsistent user experience, where one command in an image is executed using `run`, and all the others via `exec`.  
+> 
+> For these reasons, our recommended best practice is to always use the `exec` syntax in Singularity to execute commands from a container.
+{: .callout}
+
+
 ### Advanced build options
 
 The def file specification has a number of other interesting features.  To know more about them you can visit the [Sylabs docs on def files](https://sylabs.io/guides/3.5/user-guide/definition_files.html).
