@@ -139,7 +139,7 @@ Let's discuss what the above mentioned implications are.
 
 * A host MPI installation must be present to spawn the MPI processes.
 
-* An MPI installation is required in the container, to compile the application.  Also, during build the application must be linked *dynamically** to the MPI libraries, so as to have the capability of using the host ones at runtime.  Note how dynamic linking is typically the default behaviour on Linux systems.  
+* An MPI installation is required in the container, to compile the application.  Also, during build the application must be linked *dynamically* to the MPI libraries, so as to have the capability of using the host ones at runtime.  Note how dynamic linking is typically the default behaviour on Linux systems.  
 A specific section of the recipe file needs to take care of this, or in alternative the base image for the recipe needs to have the MPI libraries.  Either way, if we take the example of a *def file* for the *MPICH* flavour of MPI, the code would look like:
 
 ```
