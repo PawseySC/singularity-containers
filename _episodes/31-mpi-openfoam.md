@@ -68,7 +68,7 @@ drwxr-xr-x 3 user000 tutorial    76 Nov 16 22:47 20
 ```
 {: .output}
 
-We ran using *2** MPI* processes, who created outputs in the directories `processor0` and `processor1`, respectively.  The final reconstruction creates results in the directory `20` (which stands for the *20th* and last simulation step in this very short demo run).
+We ran using *2 MPI* processes, who created outputs in the directories `processor0` and `processor1`, respectively.  The final reconstruction creates results in the directory `20` (which stands for the *20th* and last simulation step in this very short demo run).
 
 What has just happened?
 
@@ -139,7 +139,7 @@ Let's discuss what the above mentioned implications are.
 
 * A host MPI installation must be present to spawn the MPI processes.
 
-* An MPI installation is required in the container, to compile the application.  
+* An MPI installation is required in the container, to compile the application.  Also, during build the application must be linked *dynamically** to the MPI libraries, so as to have the capability of using the host ones at runtime.  Note how dynamic linking is typically the default behaviour on Linux systems.  
 A specific section of the recipe file needs to take care of this, or in alternative the base image for the recipe needs to have the MPI libraries.  Either way, if we take the example of a *def file* for the *MPICH* flavour of MPI, the code would look like:
 
 ```
