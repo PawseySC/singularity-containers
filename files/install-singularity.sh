@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export USERID=$USER
+
 sudo apt-get update
 sudo apt-get install -y \
     build-essential \
@@ -11,7 +13,6 @@ sudo apt-get install -y \
     pkg-config
 
 # install go
-export USERID=ubuntu
 export GO_DIR=/opt
 export GOPATH=${GO_DIR}/go
 sudo mkdir -p $GOPATH

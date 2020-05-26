@@ -1,8 +1,8 @@
 #!/bin/bash
 
-USERID="ubuntu"
-
 CHARLIE_VER="0.15"
+
+USERID="$USER"
 
 # install Spack dependencies
 sudo apt update
