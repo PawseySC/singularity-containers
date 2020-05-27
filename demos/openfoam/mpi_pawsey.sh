@@ -8,6 +8,7 @@
 image="library://marcodelapierre/beta/openfoam:v1812"
 
 # this configuration depends on the host
+module unload xalt
 module load singularity
 
 
