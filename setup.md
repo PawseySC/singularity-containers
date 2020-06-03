@@ -10,8 +10,6 @@ root: .
 The main requirement for this workshop is a personal computer with a web browser and a command line shell program (*Windows* users: get [MobaXterm](https://mobaxterm.mobatek.net/download-home-edition.html), [Visual Studio Code](https://code.visualstudio.com/) or PuTTY).  
 These will allow you to follow the online materials and to login to a facility with the required software stack.
 
-You might want to brush up on the fundamentals of the [Linux Shell for HPC](https://pawseysc.github.io/shell-hpc/).
-
 
 ### Optional: Pawsey users
 
