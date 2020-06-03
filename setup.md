@@ -26,6 +26,7 @@ You might want to brush up on the fundamentals of the [Linux Shell for HPC](http
 > If you have a Linux box, you can install the required software yourself (might take a while).
 > 
 > > ## Read more
+> > 
 > > * Essential (core of the tutorial)
 > >   - Singularity : [script]({{ page.root }}/files/install-singularity.sh) \| [docs](https://sylabs.io/guides/3.5/user-guide/quick_start.html)
 > > * Desirable (to run all the base episodes)

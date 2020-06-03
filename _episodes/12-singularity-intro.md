@@ -92,6 +92,8 @@ This tutorial assumes Singularity version 3.0 or higher. Version **3.5.0 or high
 
 ### Executing a simple command in a Singularity container
 
+For these first exercises, we're going to use a plain *Ubuntu* container image.  It's small and quick to download, and will allow use to get to know how containers work by using common Linux commands.  
+
 Within the tutorial directory, let us cd into `demos/singularity`:
 
 ```
@@ -102,7 +104,7 @@ $ cd $TUTO/demos/singularity
 Running a command is done by means of `singularity exec`:
 
 ```
-$ singularity exec library://ubuntu:18.04 cat /etc/os-release
+$ singularity exec library://ubuntu:16.04 cat /etc/os-release
 ```
 {: .bash}
 
@@ -110,17 +112,16 @@ $ singularity exec library://ubuntu:18.04 cat /etc/os-release
 INFO:    Downloading library image
 
 NAME="Ubuntu"
-VERSION="18.04 LTS (Bionic Beaver)"
+VERSION="16.04.5 LTS (Xenial Xerus)"
 ID=ubuntu
 ID_LIKE=debian
-PRETTY_NAME="Ubuntu 18.04 LTS"
-VERSION_ID="18.04"
-HOME_URL="https://www.ubuntu.com/"
-SUPPORT_URL="https://help.ubuntu.com/"
-BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
-PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
-VERSION_CODENAME=bionic
-UBUNTU_CODENAME=bionic
+PRETTY_NAME="Ubuntu 16.04.5 LTS"
+VERSION_ID="16.04"
+HOME_URL="http://www.ubuntu.com/"
+SUPPORT_URL="http://help.ubuntu.com/"
+BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"
+VERSION_CODENAME=xenial
+UBUNTU_CODENAME=xenial
 ```
 {: .output}
 
@@ -131,7 +132,7 @@ Here is what Singularity has just done:
 * instantiated a container from that image;
 * executed the command `cat /etc/os-release`.
 
-Container images have a **name** and a **tag**, in this case `ubuntu` and `18.04`.  The tag can be omitted, in which case Singularity will default to a tag named `latest`.
+Container images have a **name** and a **tag**, in this case `ubuntu` and `16.04`.  The tag can be omitted, in which case Singularity will default to a tag named `latest`.
 
 
 > ## Using the *latest* tag
@@ -144,7 +145,7 @@ Here Singularity pulled the image from an online image registry, as represented 
 In the example above we didn't specify the **user**, `library`, and the **project**, `default`.  Why?  Because the specific case of `library/default/` can be omitted.  The full specification is used in the next example:
 
 ```
-$ singularity exec library://library/default/ubuntu:18.04 echo "Hello World"
+$ singularity exec library://library/default/ubuntu:16.04 echo "Hello World"
 ```
 {: .bash}
 
@@ -162,7 +163,7 @@ Interestingly, Singularity is able to download and run Docker images as well.
 Let's try and download a Ubuntu container from the [**Docker Hub**](https://hub.docker.com), *i.e.* the main registry for Docker containers:
 
 ```
-$ singularity exec docker://ubuntu:18.04 cat /etc/os-release
+$ singularity exec docker://ubuntu:16.04 cat /etc/os-release
 ```
 {: .bash}
 
@@ -183,20 +184,19 @@ Copying config sha256:6cd71496ca4e0cb2f834ca21c9b2110b258e9cdf09be47b54172ebbcf8
 Writing manifest to image destination
 Storing signatures
 INFO:    Creating SIF file...
-INFO:    Build complete: /data/singularity/.singularity/cache/oci-tmp/a7b8b7b33e44b123d7f997bd4d3d0a59fafc63e203d17efedf09ff3f6f516152/ubuntu_18.04.sif
+INFO:    Build complete: /data/singularity/.singularity/cache/oci-tmp/a7b8b7b33e44b123d7f997bd4d3d0a59fafc63e203d17efedf09ff3f6f516152/ubuntu_16.04.sif
 
 NAME="Ubuntu"
-VERSION="18.04.3 LTS (Bionic Beaver)"
+VERSION="16.04.6 LTS (Xenial Xerus)"
 ID=ubuntu
 ID_LIKE=debian
-PRETTY_NAME="Ubuntu 18.04.3 LTS"
-VERSION_ID="18.04"
-HOME_URL="https://www.ubuntu.com/"
-SUPPORT_URL="https://help.ubuntu.com/"
-BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
-PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
-VERSION_CODENAME=bionic
-UBUNTU_CODENAME=bionic
+PRETTY_NAME="Ubuntu 16.04.6 LTS"
+VERSION_ID="16.04"
+HOME_URL="http://www.ubuntu.com/"
+SUPPORT_URL="http://help.ubuntu.com/"
+BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"
+VERSION_CODENAME=xenial
+UBUNTU_CODENAME=xenial
 ```
 {: .output}
 
@@ -241,12 +241,12 @@ Sometimes it can be useful to open a shell inside a container, rather than to ex
 Achieve this by using `singularity shell`:
 
 ```
-$ singularity shell docker://ubuntu:18.04
+$ singularity shell docker://ubuntu:16.04
 ```
 {: .bash}
 
 ```
-Singularity ubuntu_18.04.sif:/home/ubuntu/singularity-containers/demos/singularity>
+Singularity ubuntu_16.04.sif:/home/ubuntu/singularity-containers/demos/singularity>
 ```
 {: .output}
 
@@ -255,14 +255,14 @@ Remember to type `exit`, or hit `Ctrl-D`, when you're done!
 
 ### Download and use images via SIF file names
 
-All examples so far have identified container images using their registry name specification, *e.g.* `docker://ubuntu:18.04` or similar.
+All examples so far have identified container images using their registry name specification, *e.g.* `docker://ubuntu:16.04` or similar.
 
 An alternative option to handle images is to download them to a known location, and then refer to their full directory path and file name.
 
 Let's use `singularity pull` to save the image to a specified path (output might differ depending on the Singularity version you use):
 
 ```
-$ singularity pull docker://ubuntu:18.04
+$ singularity pull docker://ubuntu:16.04
 ```
 {: .bash}
 
@@ -274,14 +274,14 @@ $ ls
 {: .bash}
 
 ```
-ubuntu_18.04.sif
+ubuntu_16.04.sif
 ```
 {: .output}
 
 Then you can use this image file by:
 
 ```
-$ singularity exec ./ubuntu_18.04.sif echo "Hello World"
+$ singularity exec ./ubuntu_16.04.sif echo "Hello World"
 ```
 {: .bash}
 
@@ -294,14 +294,14 @@ You can specify the storage location with the `--dir` flag:
 
 ```
 $ mkdir -p sif_lib
-$ singularity pull --dir ~/path/to/sif/lib docker://library/ubuntu:18.04
+$ singularity pull --dir ~/path/to/sif/lib docker://library/ubuntu:16.04
 ```
 {: .bash}
 
 Being able to specify download locations allows you to keep the local set of images organised and tidy, by making use of a directory tree.  It also allows for easy sharing of images within your team in a shared resource.  In general, you will need to specify the location of the image upon execution, *e.g.* by defining a dedicated variable:
 
 ```
-$ export image="~/path/to/sif/lib/ubuntu_18.04.sif"
+$ export image="~/path/to/sif/lib/ubuntu_16.04.sif"
 $ singularity exec $image echo "Hello Again"
 ```
 {: .bash}
@@ -327,24 +327,18 @@ $ singularity cache list -v
 
 ```
 NAME                     DATE CREATED           SIZE             TYPE
-ubuntu_18.04.sif         2020-05-14 08:30:05    54.62 MB         library
-ubuntu_18.04.sif         2020-05-14 08:31:46    25.89 MB         oci
-ubuntu_latest.sif        2020-05-14 08:32:35    27.77 MB         oci
-23884877105a7ff84a9108   2020-05-14 08:31:36    26.69 MB         blob
-2910811b6c4227c2f42aae   2020-05-14 08:31:38    0.85 kB          blob
-357debb1f5fbc903e8d1e2   2020-05-14 08:31:42    0.81 kB          blob
-36505266dcc64eeb1010bd   2020-05-14 08:31:40    0.16 kB          blob
-6154df8ff9882934dc5bf2   2020-05-14 08:32:26    0.85 kB          blob
-95c3f3755f37380edb2f8f   2020-05-14 08:32:29    2.48 kB          blob
-96878229af8adf91bcbf11   2020-05-14 08:32:29    0.81 kB          blob
-a0a91ba64d5bae825e23f0   2020-05-14 08:31:41    2.48 kB          blob
-bc38caa0f5b94141276220   2020-05-14 08:31:37    35.37 kB         blob
-d51af753c3d3a984351448   2020-05-14 08:32:24    28.56 MB         blob
-fc878cd0a91c7bece56f66   2020-05-14 08:32:25    32.30 kB         blob
-fee5db0ff82f7aa5ace634   2020-05-14 08:32:27    0.16 kB          blob
+ubuntu_latest.sif        2020-06-03 05:48:16    28.11 MB         library
+ubuntu_16.04.sif         2020-06-03 05:47:25    37.04 MB         library
+ubuntu_16.04.sif         2020-06-03 05:48:50    37.08 MB         oci
+53e3366ec435596bed2563   2020-06-03 05:48:39    0.17 kB          blob
+8a8a00d36ef8c18c877a5d   2020-06-03 05:48:41    0.81 kB          blob
+9387a5fd608d7a23de5064   2020-06-03 05:48:41    2.48 kB          blob
+b9fd7cb1ff8f489cf08278   2020-06-03 05:48:37    0.53 kB          blob
+e92ed755c008afc1863a61   2020-06-03 05:48:36    44.25 MB         blob
+ee690f2d57a128744cf4c5   2020-06-03 05:48:38    0.85 kB          blob
 
-There are 3 container file(s) using 108.28 MB and 12 oci blob file(s) using 55.32 MB of space
-Total space used: 163.60 MB
+There are 3 container file(s) using 102.24 MB and 6 oci blob file(s) using 44.25 MB of space
+Total space used: 146.49 MB
 ```
 {: .output}
 
