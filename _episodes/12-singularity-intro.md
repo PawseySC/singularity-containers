@@ -4,12 +4,16 @@ teaching: 20
 exercises: 20
 questions:
 objectives:
-- Learn how to download and run images
+- Download container images
+- Run commands from inside a container
+- Discuss what are the most popular image registries
 keypoints:
 - Singularity can run both Singularity and Docker container images
 - Execute commands in containers with `singularity exec`
 - Open a shell in a container with `singularity shell`
 - Download a container image in a selected location with `singularity pull`
+- You should not use the `latest` tag, as it may limit workflow reproducibility
+- The most commonly used registries are Docker Hub, Quay, Biocontainers and Nvidia GPU Cloud
 ---
 
 
@@ -371,7 +375,7 @@ If we really wanted to wipe the cache, we would need to use the `-f` flag instea
 
 ### Popular registries (*aka* image libraries)
 
-At the time of writing, Docker Hub hosts a much wider selection of container images than Sylabs Cloud.  This includes Linux distributions, Python and R deployments, as well as a big variety of applications.
+At the time of writing, **Docker Hub** hosts a much wider selection of container images than **Sylabs Cloud**.  This includes Linux distributions, Python and R deployments, as well as a big variety of applications.
 
 Bioinformaticians should keep in mind another container registry, [Quay](https://quay.io) by Red Hat, that hosts thousands of applications in this domain of science.  These mostly come out of the [Biocontainers](https://biocontainers.pro) project, that aims to provide automated container builds of all of the packages made available through [Bioconda](https://bioconda.github.io).
 

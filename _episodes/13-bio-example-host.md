@@ -4,12 +4,13 @@ teaching: 5
 exercises: 15
 questions:
 objectives:
-- Learn how to mount host directories in a container
-- Learn how to pass specific variables to the container
+- Mount host directories in a container
+- Pass specific variables to the container
 - Run a real-world bioinformatics application in a container
 keypoints:
 - By default Singularity mounts the host current directory, and uses it as the container working directory
 - Map additional host directories in the containers with the flag `-B`, or the variable SINGULARITY_BINDPATH
+- Avoid mounting the `$HOME` directory, to better protect your sensitive data in the host
 - By default Singularity passes all host variables to the container
 - Pass specific shell variables to containers by prefixing them with SINGULARITYENV_
 ---

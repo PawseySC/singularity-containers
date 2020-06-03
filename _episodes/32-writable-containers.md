@@ -4,8 +4,8 @@ teaching: 10
 exercises: 10
 questions:
 objectives:
-- Learn how to create and mount a writable overlay filesystem
-- Learn how to make a container temporarily writable
+- Create and mount a writable overlay filesystem
+- Make a container temporarily writable
 keypoints:
 - Use linux tools from a Ubuntu container to create a filesystem image file
 - Mount a filesystem image using the flag `--overlay`

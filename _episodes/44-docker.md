@@ -6,7 +6,7 @@ questions:
 objectives:
 - Be aware of the pros and cons compared to Singularity
 - Get started with Docker, download and run container images
-- Learn how to build and share an image with Docker
+- Discuss how to build and share an image with Docker
 keypoints:
 - Use `docker pull` to download container images
 - Use `docker run` to execute commands in containers

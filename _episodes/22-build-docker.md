@@ -4,12 +4,18 @@ teaching: 15
 exercises: 5
 questions:
 objectives:
-- Learn the pros&cons of building with Singularity vs Docker
-- Learn how to build and share an image with Docker
+- Discuss the pros&cons of building with Singularity vs Docker
+- Learn the basic syntax of a Dockerfile
+- Build and share an image with Docker
+- Convert a Docker image into the Singularity format
 keypoints:
+- `FROM` specifies the build starting image
+- `RUN` allows to execute shell commands
+- `ENV` is used to declare environment variables
 - Build images starting from a `Dockerfile` recipe with `docker build`
 - Push images to a web registry with `docker push`
 - Share images as a single file using `docker save` and `docker load`
+- You can locally convert a Docker image by using `singularity pull docker-daemon:`
 ---
 
 

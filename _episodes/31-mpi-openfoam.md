@@ -4,11 +4,13 @@ teaching: 10
 exercises: 10
 questions:
 objectives:
-- Learn the steps required to configure and run MPI applications from a container
+- Discuss the steps required to configure and run MPI applications from a container
+- Discuss the performance of parallel applications inside containers *versus* regular runs
 keypoints:
 - You need to build your application in the container with an MPI version which is ABI compatible with MPI libraries in the host
 - Appropriate environment variables and bind mounts are required at runtime to make the most out of MPI applications (sys admins can help)
-- Singularity interfaces with HPC schedulers such as Slurm, with some requirements
+- Singularity interfaces almost transparently with HPC schedulers such as Slurm
+- MPI performance of containerised applications almost coincide with those of a native run
 ---
 
 

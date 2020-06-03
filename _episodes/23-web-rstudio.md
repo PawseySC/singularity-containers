@@ -4,8 +4,8 @@ teaching: 10
 exercises: 10
 questions:
 objectives:
-- Learn how to run interactive GUI web sessions from a container
-- Learn how to setup a long running web service from a container
+- Run interactive GUI web sessions from a container
+- Setup a long running web service from a container
 keypoints:
 - An interactive web session can be executed as any other containerised application, via `singularity exec`
 - Use the `%startscript` section of a def file to configure an image for long running services

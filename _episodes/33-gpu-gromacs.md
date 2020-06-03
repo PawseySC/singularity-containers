@@ -7,7 +7,7 @@ objectives:
 - Get started with Nvidia GPU containers for HPC applications
 keypoints:
 - You can run containerised GPU applications using the flag `--nv`
-- Singularity transparently interfaces with HPC schedulers such as Slurm
+- By using this flag, Singularity will look for GPU drivers in the host for you, and bind mount them in the container
 ---
 
 

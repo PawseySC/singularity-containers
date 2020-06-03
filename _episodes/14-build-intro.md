@@ -4,8 +4,8 @@ teaching: 10
 exercises: 10
 questions:
 objectives:
-- Learn how to build a container image
-- Learn how to share an image with others
+- Build a container image
+- Share an image with others
 keypoints:
 - Build images using `sudo singularity build`
 - Use the remote builder with the flag `-r`, if you need to build images from a machine where you don't have sudo rights

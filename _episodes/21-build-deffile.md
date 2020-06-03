@@ -4,8 +4,9 @@ teaching: 15
 exercises: 5
 questions:
 objectives:
-- Learn what is a def file
-- Learn the basic syntax of a def file
+- Discuss what a definition file is
+- Learn the basic syntax of a definition file
+- Discuss some useful base container images
 keypoints:
 - Use `Bootstrap` and `From` to specify the build starting point
 - The `%post` section contains the list of commands needed to install and setup packages in the image
