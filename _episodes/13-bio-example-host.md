@@ -151,7 +151,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ```
 > > {: .output}
 > > 
-> > We have just learn something more on containers: by default, they are **read-only**.
+> > We have just learn something more on containers: by default, they are **read-only**.  How can we get a container to write files then?  Read on...
 > {: .solution}
 {: .challenge}
 
@@ -174,6 +174,19 @@ $ singularity exec -B $TUTO docker://ubuntu:18.04 ls $TUTO/_episodes
 11-containers-intro.md    14-build-intro.md         23-web-rstudio.md         32-writable-containers.md 44-docker.md
 12-singularity-intro.md   21-build-deffile.md       24-ml-python.md           33-gpu-gromacs.md         45-other-tools.md
 13-bio-example-host.md    22-build-docker.md        31-mpi-openfoam.md        41-workflow-engines.md
+```
+{: .output}
+
+Also, we can write files in a host dir which has been bind mounted in the container:
+
+```
+$ singularity exec -B $TUTO docker://ubuntu:18.04 touch $TUTO/_episodes/example
+$ singularity exec -B $TUTO docker://ubuntu:18.04 ls $TUTO/_episodes/example
+```
+{: .bash}
+
+```
+/home/ubuntu/singularity-containers/_episodes/example
 ```
 {: .output}
 
