@@ -135,6 +135,27 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 {: .callout}
 
 
+> ## And by the way, can we write inside a container?
+> 
+> Try and create a file called `example` in the container root directory.  (**Hint**: run `touch /example` inside the container).
+> 
+> > ## Solution
+> > 
+> > ```
+> > $ singularity exec docker://ubuntu:18.04 touch /example
+> > ```
+> > {: .bash}
+> > 
+> > ```
+> > touch: cannot touch '/example': Read-only file system
+> > ```
+> > {: .output}
+> > 
+> > We have just learn something more on containers: by default, they are **read-only**.
+> {: .solution}
+{: .challenge}
+
+
 ### Bind mounting host directories
 
 Singularity has the runtime flag `--bind`, `-B` in short, to mount host directories.
