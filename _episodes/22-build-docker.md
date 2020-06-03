@@ -337,12 +337,35 @@ Loaded image: lolcow:1Nov19
 **Note**: you need Docker to extract the image from the compressed archive, Singularity can't do it.
 
 
+### What if you need to debug the build process?
+
+Quite often devising a recipe to install software involves a certain deal of trial and error.  
+
+If you need to inspect a Docker container during build, you can open an interactive shell session this way:
+
+```
+$ sudo docker run --rm -it ubuntu:18.04 bash
+```
+{:. bash}
+
+```
+root@dd1ca993f4ad:/#
+```
+{: .output}
+
+Here, `-it` keeps the container standard input open and allocates a terminal; `--rm` does some clean up when closing the session.  
+
+Note that Docker containers, unlike Singularity containers, are writable.  So during an interactive sessions you can even trial software installations.  However, edits are ephemeral, *i.e.* you lose them when you close the container.
+
+When you're done, type `exit`, or hit `Ctrl-D`, to leave the interactive shell.
+
+
 ### Bonus: example Dockerfiles
 
 Have a look at these, just to get a taste of what a production Dockerfile might look like.
 
 
-> ## Pawsey MPI-base container
+> ## Pawsey MPI-base image
 > 
 > > ## Dockerfile
 > >
@@ -403,7 +426,7 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 {: .challenge}
 
 
-> ## A simple Python container
+> ## A simple Python image
 > 
 > > ## Dockerfile
 > >
@@ -441,7 +464,7 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 {: .challenge}
 
 
-> ## A large R container
+> ## A large R image
 > 
 > > ## Dockerfile
 > >

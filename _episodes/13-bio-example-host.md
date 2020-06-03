@@ -438,4 +438,4 @@ Sequences producing significant alignments:                          (Bits)  Val
 ```
 {: .output}
 
-When you're done, quit the view by pressing `q`.
+When you're done, quit the view by hitting the `q` button.
