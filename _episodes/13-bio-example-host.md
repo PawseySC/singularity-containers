@@ -288,7 +288,7 @@ $ singularity pull docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4
 
 > ## Bonus: search for the BLAST image on an online registry
 > 
-> If time allows, you might want to give it a go with looking for the container image yourself.  
+> **If time allows**, you might want to give it a go with looking for the container image yourself.  
 > Start with the assumption that most bioinformatics packages can be found within the *BioContainers* project (this is the repo/name you'll be looking for), and are hosted in both [Quay](https://quay.io) and [Biocontainers](https://biocontainers.pro).  
 > These two registries contain the same images, they just offer a slightly different user interface.  At the time of writing, *Quay* has a cleaner and more readable interface compared to *BioContainers*; hopefully this will change in the future.  
 > 
@@ -308,7 +308,7 @@ $ singularity pull docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4
 > > * Click on the *Registry* button on the top of the page;
 > > * In the new page, type `blast` in the search field;
 > > * You will need to scroll a bit to find the proper `BLAST` entry; click on it;
-> > * The list of images here is quite rich, with entries for *Docker*, *Singularity* and *Conda*; consider only the *Docker* entries, look for the highest Blast version (`2.9.0` at the time of writing) and, among the multiple tags for this version, identify the most recent one (*Hint*: sort by *Modified date*).  You might need to widen your window to read the full image names and tags, and on some smaller screens you won't be able to); **^Alternative download**
+> > * The list of images here is quite rich, with entries for *Docker*, *Singularity* and *Conda*; consider only the *Docker* entries, look for the highest Blast version (`2.9.0` at the time of writing) and, among the multiple tags for this version, identify the most recent one (*Hint*: sort by *Modified date*).  You might need to widen your window to read the full image names and tags, and on some smaller screens you won't be able to; **^Alternative download**
 > > * At the time of writing, the resulting image will be `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`;
 > > * You can click on the *Copy* icon just at the right of the image name field, to copy the full image name in your clipboard (you will need to get rid of *docker pull*).
 > > 
