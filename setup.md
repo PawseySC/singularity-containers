@@ -39,6 +39,7 @@ These will allow you to follow the online materials and to login to a facility w
 > >   - Podman : [script]({{ page.root }}/files/install-podman.sh) \| [docs](https://podman.io/getting-started/installation)
 > >   - Sarus : [script]({{ page.root }}/files/install-sarus.sh) \| [docs](https://sarus.readthedocs.io/en/latest/install/requirements.html)
 > >   - Charliecloud : [script]({{ page.root }}/files/install-charliecloud.sh) (uses [Spack](https://spack.io)) \| [docs](https://hpc.github.io/charliecloud)
+> >   - Enroot : [script]({{ page.root }}/files/install-enroot.sh) \| [docs](https://github.com/NVIDIA/enroot/blob/master/doc/installation.md)
 > > 
 > > **Notes**
 > > * Install scripts have been tested on a Ubuntu machine through a user that can run *sudo* commands without password prompts. There's no warranty they will work in your Linux box, you should consider them as templates.

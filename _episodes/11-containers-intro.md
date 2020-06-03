@@ -87,4 +87,6 @@ A number of tools are available to create, deploy and run containerised applicat
 
 * **Charliecloud**: a Docker-compatible tool for lightweight, user-defined software stacks for high-performance computing.
 
+* **Enroot**: Nvidia's take on containers, a simple, yet powerful tool to turn traditional container/OS images into unprivileged sandboxes.
+
 * **Podman**: a *root*-less alternative to Docker.  Misses on some features for HPC.

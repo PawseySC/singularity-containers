@@ -180,3 +180,12 @@ If you want to test it, you might just use the image `ubuntu:18.04` as a test be
     $ sarus run ubuntu/18.04 cat /etc/os-release
     ```
     {: .bash}
+
+
+### Enroot
+
+[Enroot](https://github.com/NVIDIA/enroot) is Nvidia way of deploying containerised applications on their platforms.  
+
+The tool has been kept simple by design, and can run fully unprivileged.  It comes with native support for GPUs and Mellanox Infiniband (unsurprisingly).  However, there is currently no mention of any MPI integration right now in the documentation.
+
+It's definitely worth watching Nvidia's space for updates on this promising project.
