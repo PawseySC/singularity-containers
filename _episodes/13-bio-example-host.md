@@ -278,12 +278,47 @@ mondo
 We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro).  BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics packages.  
 This example is adapted from the [BioContainers documentation](http://biocontainers-edu.biocontainers.pro/en/latest/running_example.html).
 
-We're going to use the BLAST image `biocontainers/blast:v2.2.31_cv2`.  First, we'll pull the image.  This might take up to about 10 minutes (unless you had pulled the image in advance):
+We're going to use an image for the most recent BLAST version from the `quay.io` registry, *i.e.* `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`.  First, we'll pull the image.  This should take a few minutes (unless you had pulled the image in advance):
 
 ```
-$ singularity pull docker://biocontainers/blast:v2.2.31_cv2
+$ singularity pull docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4
 ```
 {: .bash}
+
+
+> ## Bonus: search for the BLAST image on an online registry
+> 
+> If time allows, you might want to give it a go with looking for the container image yourself.  
+> Start with the assumption that most bioinformatics packages can be found within the *BioContainers* project (this is the repo/name you'll be looking for), and are hosted in both [Quay](https://quay.io) and [Biocontainers](https://biocontainers.pro).  
+> These two registries contain the same images, they just offer a slightly different user interface.  At the time of writing, *Quay* has a cleaner and more readable interface compared to *BioContainers*; hopefully this will change in the future.  
+> 
+> > ## Solution: Quay
+> > 
+> > * Go to https://quay.io (NO registration required!);
+> > * Locate the *Search* field on the top right of the page (you might need to widen the browser window), and type `blast`;
+> > * We want an image from `biocontainers`, so look for `biocontainers/blast` and click on it;
+> > * Click on the *Tags* icon on the left, and scroll the list of images to look for the highest Blast version (`2.9.0` at the time of writing); among the multiple tags for this version, identify the most recent one;
+> > * At the time of writing, the resulting image will be `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`;
+> > * You can click on the *Fetch* icon at the rightmost side of the record, select *Pull by Tag*, and then copy the full image name in your clipboard.
+> {: .solution}
+> 
+> > ## Solution: BioContainers
+> > 
+> > * Go to https://biocontainers.pro;
+> > * Click on the *Registry* button on the top of the page;
+> > * In the new page, type `blast` in the search field;
+> > * You will need to scroll a bit to find the proper `BLAST` entry; click on it;
+> > * The list of images here is quite rich, with entries for *Docker*, *Singularity* and *Conda*; consider only the *Docker* entries, look for the highest Blast version (`2.9.0` at the time of writing) and, among the multiple tags for this version, identify the most recent one (*Hint*: sort by *Modified date*).  You might need to widen your window to read the full image names and tags, and on some smaller screens you won't be able to); **^Alternative download**
+> > * At the time of writing, the resulting image will be `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`;
+> > * You can click on the *Copy* icon just at the right of the image name field, to copy the full image name in your clipboard (you will need to get rid of *docker pull*).
+> > 
+> > **^Alternative download**: *Singularity* image
+> > 
+> > * Pick the highest version and latest tag from the list of *Singularity* entries;
+> > * At the time of writing, the resulting image is again `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`;
+> > * Click on the *Copy* icon just at the right of the image name field, to copy the full image name in your clipboard.  In this case, this is a *URL* to download the SIF image straight away: to achieve this, on your shell you will execute `wget <PASTE THE IMAGE NAME FROM CLIPBOARD>`.
+> {: .solution}
+{: .challenge}
 
 
 > ## Run a test command
@@ -293,7 +328,7 @@ $ singularity pull docker://biocontainers/blast:v2.2.31_cv2
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec blast_v2.2.31_cv2.sif blastp -help
+> > $ singularity exec blast_2.9.0--pl526h3066fca_4.sif blastp -help
 > > ```
 > > {: .bash}
 > >
@@ -334,7 +369,7 @@ $ gunzip zebrafish.1.protein.faa.gz
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec blast_v2.2.31_cv2.sif makeblastdb -in zebrafish.1.protein.faa -dbtype prot
+> > $ singularity exec ../blast/blast_2.9.0--pl526h3066fca_4.sif makeblastdb -in zebrafish.1.protein.faa -dbtype prot
 > > ```
 > > {: .bash}
 > > ```
@@ -375,7 +410,7 @@ $ cd ../blast
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec -B $TUTO/demos/blast_db blast_v2.2.31_cv2.sif blastp -query P04156.fasta -db $TUTO/demos/blast_db/zebrafish.1.protein.faa -out results.txt
+> > $ singularity exec -B $TUTO/demos/blast_db blast_2.9.0--pl526h3066fca_4.sif blastp -query P04156.fasta -db $TUTO/demos/blast_db/zebrafish.1.protein.faa -out results.txt
 > > ```
 > > {: .bash}
 > {: .solution}
@@ -402,3 +437,5 @@ Sequences producing significant alignments:                          (Bits)  Val
 [..]
 ```
 {: .output}
+
+When you're done, quit the view by pressing `q`.
