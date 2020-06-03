@@ -156,6 +156,9 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 {: .challenge}
 
 
+To summarise what we've learnt in the previous examples, we may say that a container ships an application and its dependencies by encapsulating them in an isolated, read-only filesystem.  In order for a container to access directories from the host filesystem (and write files), one needs to explicitly bind mount them.  The main exception here is the current work directory, which is bind mounted by default.
+
+
 ### Bind mounting host directories
 
 Singularity has the runtime flag `--bind`, `-B` in short, to mount host directories.

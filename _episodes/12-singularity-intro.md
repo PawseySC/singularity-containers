@@ -137,7 +137,7 @@ Container images have a **name** and a **tag**, in this case `ubuntu` and `16.04
 
 > ## Using the *latest* tag
 >
-> The practice of using the `latest` tag can be handy for quick typing, but is dangerous when it comes to reproducibility of your workflow, as the *latest* image could change over time under the hood in the registry.
+> The practice of using the `latest` tag can be handy for quick typing, but is dangerous when it comes to reproducibility of your workflow, as under the hood the *latest* tag could point to different images over time.
 {: .callout}
 
 
