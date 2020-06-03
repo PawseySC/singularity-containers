@@ -4,11 +4,16 @@ title: Setup
 root: .
 ---
 
+
+### Key requirement
+
 The main requirement for this workshop is a personal computer with a web browser and a command line shell program (*Windows* users: get [MobaXterm](https://mobaxterm.mobatek.net/download-home-edition.html), [Visual Studio Code](https://code.visualstudio.com/) or PuTTY).  
 These will allow you to follow the online materials and to login to a facility with the required software stack.
 
+You might want to brush up on the fundamentals of the [Linux Shell for HPC](https://pawseysc.github.io/shell-hpc/).
 
-## Pawsey users
+
+### Optional: Pawsey users
 
 * **Nimbus Cloud @Pawsey**: if you have access, both Singularity and Docker are preinstalled in the *Ubuntu Pawsey* base image.
 <!-- Test: Ubuntu 18.04 VM with 2 cores, 6 GB RAM, 40 GB disk -->
@@ -16,7 +21,7 @@ These will allow you to follow the online materials and to login to a facility w
 * **Zeus @Pawsey**: if you have access, Singularity can be loaded with `module load singularity`. MPI libraries are configured properly, and GPU applications can be run on the Slurm partition `gpuq`.
 
 
-## Advanced: installation DIY (Do It Yourself)
+### Advanced: installation DIY (Do It Yourself)
 
 If you have a Linux box, you can install the required software yourself (might take a while):
 
