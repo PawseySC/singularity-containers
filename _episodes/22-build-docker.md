@@ -9,9 +9,9 @@ objectives:
 - Build and share an image with Docker
 - Convert a Docker image into the Singularity format
 keypoints:
-- `FROM` specifies the build starting image
-- `RUN` allows to execute shell commands
-- `ENV` is used to declare environment variables
+- Use `FROM` to specify the build starting image
+- Execute shell commands with `RUN`
+- Declare environment variables with `ENV`
 - Build images starting from a `Dockerfile` recipe with `docker build`
 - Push images to a web registry with `docker push`
 - Share images as a single file using `docker save` and `docker load`
