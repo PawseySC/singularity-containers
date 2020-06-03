@@ -318,14 +318,14 @@ For instance, this can be useful when needing to transfer or share images includ
 Use `docker save` to create the archive:
 
 ```
-$ docker save -o lolcow_1Nov19.tar.gz lolcow:1Nov19
+$ sudo docker save -o lolcow_1Nov19.tar.gz lolcow:1Nov19
 ```
 {: .bash}
 
 After the transfer, use `docker load` to extract the image in a format that is usable by Docker:
 
 ```
-$ docker load -i lolcow_1Nov19.tar.gz
+$ sudo docker load -i lolcow_1Nov19.tar.gz
 ```
 {: .bash}
 
@@ -346,7 +346,7 @@ If you need to inspect a Docker container during build, you can open an interact
 ```
 $ sudo docker run --rm -it ubuntu:18.04 bash
 ```
-{:. bash}
+{: .bash}
 
 ```
 root@dd1ca993f4ad:/#
