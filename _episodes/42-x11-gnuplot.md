@@ -1,7 +1,7 @@
 ---
 title: "GUI applications using X11 windows: the Gnuplot example"
-teaching: 5
-exercises: 10
+teaching: 10
+exercises: 5
 questions:
 objectives:
 - Run an X11 enabled GUI application from a container
