@@ -1,5 +1,5 @@
 ---
-title: "GUI applications using X11 windows: the *Gnuplot* example"
+title: "GUI applications using X11 windows: the Gnuplot example"
 teaching: 5
 exercises: 10
 questions:
@@ -65,6 +65,7 @@ Usually this file is located in the user's home directory, so the mounting will 
 ```
 -B ~/.Xauthority
 ```
+{: .bash}
 
 Less often, a dedicated location is used for this file which is contained in the `$XAUTHORITY` variable.  In this case, this will do the job: `-B $XAUTHORITY`.
 
