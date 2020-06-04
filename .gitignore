@@ -1,3 +1,4 @@
+*.sif
 *.pyc
 *~
 .DS_Store
