@@ -1,0 +1,13 @@
+#%Module1.0######################################################################
+##
+## blast modulefile
+##
+proc ModulesHelp { } {
+    puts stderr "\tModule for blast version 2.9.0\n"
+    puts stderr "\tThis module uses the container image docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4"
+}
+
+module-whatis   "edits the PATH to use the tool blast version 2.9.0"
+
+module load singularity
+prepend-path     PATH            $env(TUTO)/demos/wrap_blast/apps/blast/2.9.0/bin
