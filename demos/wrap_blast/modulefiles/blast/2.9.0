@@ -9,5 +9,4 @@ proc ModulesHelp { } {
 
 module-whatis   "edits the PATH to use the tool blast version 2.9.0"
 
-module load singularity
 prepend-path     PATH            $env(TUTO)/demos/wrap_blast/apps/blast/2.9.0/bin
