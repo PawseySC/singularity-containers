@@ -173,7 +173,7 @@ We're in a shell terminal.
     Inside the VM:
 
     ```
-    vagrant $ cd /vagrant
+    vagrant$ cd /vagrant
     ```
     {: .bash}
 
