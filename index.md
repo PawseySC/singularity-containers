@@ -22,7 +22,7 @@ Episodes can be thought as categorised as follows:
 * Customising Containers: eps. 5-8
 * Scaling to HPC: eps. 9-11
 * Bonus Episodes: eps. 12-15
-* Other Tools: eps. 16-17
+* Other Tools: eps. 16-18
 
 Once you've gone through the Core episodes 1-4, there are almost no further dependencies.  
 You can go on and pick whichever you are interested in, and you will be able to follow through.
