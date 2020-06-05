@@ -201,7 +201,7 @@ So far in this episode, we've devised a scenario to deploy a containerised appli
 2. pull it in a directory;
 3. in that same directory, create bash wrappers for the commands you need to execute from that container.
 
-If you're in a system with lots of other applications, you might want to tidy up the environment by using modules.  Here, we're using the [Environment Modules](http://modules.sourceforge.net) implementation.  This tutorial provides a template installation [script]([script]({{ page.root }}/files/install-modules.sh)) for a Linux box.  
+If you're in a system with lots of other applications, you might want to tidy up the environment by using modules.  Here, we're using the [Environment Modules](http://modules.sourceforge.net) implementation.  This tutorial provides a template installation [script]({{ page.root }}/files/install-modules.sh) for a Linux box.  
 **Note that** discussing modules in details is off scope here, we're just using them to show how to organise containerised applications.
 
 We have just said that all relevant files for our containerised application, *e.g.* BLAST, are in a single location.  
