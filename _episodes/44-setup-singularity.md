@@ -1,7 +1,7 @@
 ---
 title: "Setup Singularity on your machine"
-teaching: 10
-exercises: 10
+teaching: 15
+exercises: 0
 questions:
 objectives:
 - aa
