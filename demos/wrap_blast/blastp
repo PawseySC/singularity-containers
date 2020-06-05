@@ -1,11 +1,12 @@
 #!/bin/bash
 
 image_name="blast_2.9.0--pl526h3066fca_4.sif"
-
-# the following works only if image and bash wrapper are in the same directory
+# the following only works if image and bash wrapper are in the same directory
 image_dir="$(dirname $0)"
 
+# the following only works if bash wrapper and command have the same name
 cmd="$(basename $0)"
+
 args="$@"
 
 singularity exec $image_dir/$image_name $cmd $args
