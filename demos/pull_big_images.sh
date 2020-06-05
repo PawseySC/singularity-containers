@@ -3,7 +3,7 @@
 # executing a dummy command just to cause images to be downloaded in the cache
 
 # day 1
-singularity exec docker://biocontainers/blast:v2.2.31_cv2 echo ciao
+singularity exec docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4 echo ciao
 
 # day 2
 singularity exec docker://rocker/tidyverse:3.6.1 echo ciao
