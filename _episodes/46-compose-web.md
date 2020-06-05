@@ -98,11 +98,11 @@ $ docker-compose up -d
 
 > ## Communication ports
 >
-> In order to be able to use the web server, we need to ensure that the machine we're running Docker Compose from has opened the communication port we need, in this case `3030`.  
+> In order to be able to use the web server, we need to ensure that the machine we're running Docker Compose from has opened the communication port we need, in this case `3000`.  
 > On cloud platforms, such as Nimbus at Pawsey, this will typically involve some setup in the system dashboard.  
 {: .callout}
 
-Now, let's open our web browser, and type the following as URL: `<Docker Compose machine IP Address>:3030`.  The `IP` can be replaced with `localhost` when running locally on a laptop or workstation.  
+Now, let's open our web browser, and type the following as URL: `<Docker Compose machine IP Address>:3000`.  The `IP` can be replaced with `localhost` when running locally on a laptop or workstation.  
 
 We'll get to the home page of CodiMD, where we can create a user, login, and then start creating notes in Markdown, ready to be shared with the world!
 
