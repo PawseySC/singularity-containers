@@ -12,11 +12,12 @@ keypoints:
 ---
 
 
-### Note on the installation
-
-We're here briefly outlining how to install Singularity on Linux, macOS and Windows.  
-
-In all cases, you will need *admin* privileges in the machine to finalise the installation.
+> ## Note on the installation
+> 
+> We're here briefly outlining how to install Singularity on Linux, macOS and Windows.  
+> 
+> In all cases, you will need ***admin* privileges** in the machine to finalise the installation.
+{: .callout}
 
 
 ### Linux installation: template script
