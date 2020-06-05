@@ -37,6 +37,7 @@ This equipment will allow you to follow the online materials and to login to a f
 > > * Optional (bonus episodes)
 > >   - Nextflow engine : [script]({{ page.root }}/files/install-nextflow.sh) \| [docs](https://www.nextflow.io/docs/latest/getstarted.html)
 > >   - Environment modules : [script]({{ page.root }}/files/install-modules.sh) \| [docs](http://modules.sourceforge.net)
+> >   - Docker Compose: [script]({{ page.root }}/files/install-dockercompose.sh) \| [docs](https://docs.docker.com/compose/)
 > >   - HPCCM : [script]({{ page.root }}/files/install-hpccm.sh) \| [docs](https://github.com/NVIDIA/hpc-container-maker/blob/master/docs/getting_started.md)
 > >   - Podman : [script]({{ page.root }}/files/install-podman.sh) \| [docs](https://podman.io/getting-started/installation)
 > >   - Sarus : [script]({{ page.root }}/files/install-sarus.sh) \| [docs](https://sarus.readthedocs.io/en/latest/install/requirements.html)
