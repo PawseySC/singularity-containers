@@ -8,7 +8,7 @@ objectives:
 keypoints:
 - Administrative privileges are required to install singularity
 - A relatively short script can be used to install Singularity on Linux boxes
-- Installation on macOS and Windows require a Virtual Machine engine to spawn a Linux box; the Linux script can then be used
+- Installation on macOS and Windows requires a Virtual Machine engine to spawn a Linux box; the Linux script can then be used
 ---
 
 
