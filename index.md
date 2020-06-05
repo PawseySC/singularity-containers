@@ -13,7 +13,7 @@ permalink: index.html  # Is the only page that don't follow the partner /:path/i
 {: .prereq}
 
 
-### Structure
+## Structure
 
 This tutorial has been designed in a modular way.
 
@@ -24,4 +24,5 @@ Episodes can be thought as categorised as follows:
 * Bonus Episodes: eps. 12-15
 * Other Tools: eps. 16-17
 
-Once you've gone through the Core episodes 1-4, there are almost no further dependencies.  You can go on and pick whichever you are interested in, and you will be able to follow through.
+Once you've gone through the Core episodes 1-4, there are almost no further dependencies.  
+You can go on and pick whichever you are interested in, and you will be able to follow through.
