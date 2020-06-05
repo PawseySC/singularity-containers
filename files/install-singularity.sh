@@ -52,4 +52,3 @@ cd $GOPATH/src/github.com/sylabs/singularity && \
 sudo sed -i 's/^ *mount *home *=.*/mount home = no/g' $SING_DIR/etc/singularity/singularity.conf
 
 echo ". ${SING_DIR}/etc/bash_completion.d/singularity" >> $(eval echo ~${USERID})/.bashrc
-
