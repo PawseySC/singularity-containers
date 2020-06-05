@@ -82,6 +82,7 @@ $ cd $TUTO/demos/gnuplot
 ```
 {: .bash}
 
+The sample script we're going to use comes from the Gnuplot Collection of Demo Scripts (see [this page](http://gnuplot.sourceforge.net/demo/hidden2.html)).  
 We're going to use the image `docker://marcodelapierre/gnuplot:5.2.2_4`.  Let's start `gnuplot` from this image.  Don't forget the additional bind mounting:
 
 ```

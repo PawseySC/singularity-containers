@@ -19,6 +19,8 @@ Python is a great language for doing all kinds of work, but sometimes it can pre
 <!-- ![Python can get messy]({{ page.root }}/fig/python-complexity-cartoon.png) -->
 <img src="{{ page.root }}/fig/python-complexity-cartoon.png" alt="Python can get messy" width="492" height="487"/>
 
+Before going further, kudos to our former Pawsey colleague [Brian Skjerven](https://github.com/skjerven) for crafting this tutorial.
+
 
 ### Run a basic Python script from a container
 
