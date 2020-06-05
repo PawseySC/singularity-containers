@@ -1,10 +1,10 @@
 #!/bin/bash
 
 MPICH_VERSION="3.1.4"
+MPICH_ROOT="/opt/mpich"
 
 USERID="$USER"
 
-MPICH_ROOT="/opt/mpich"
 MPICH_DIR="$MPICH_ROOT/mpich-$MPICH_VERSION/apps"
 MPICH_CONFIGURE_OPTIONS="--enable-fast=all,O3 --prefix=$MPICH_DIR"
 MPICH_MAKE_OPTIONS="-j4"

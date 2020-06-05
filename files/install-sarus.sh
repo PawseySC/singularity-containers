@@ -7,7 +7,7 @@ sarus_root="/opt/sarus"
 
 
 # do not change these
-USERID=$USER
+USERID="$USER"
 sarus_dir="$sarus_root/${sarus_ver}-Release"
 
 

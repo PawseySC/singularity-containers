@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export USERID=$USER
+USERID="$USER"
 
 sudo apt update
 sudo apt install -y environment-modules

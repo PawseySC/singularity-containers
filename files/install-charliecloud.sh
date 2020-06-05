@@ -1,6 +1,7 @@
 #!/bin/bash
 
 CHARLIE_VER="0.15"
+SPACK_ROOT="/opt/spack"
 
 USERID="$USER"
 
@@ -15,7 +16,6 @@ sudo apt install -y \
   unzip
 
 # create install dir
-export SPACK_ROOT="/opt/spack"
 sudo mkdir -p $SPACK_ROOT
 sudo chown ${USERID}:${USERID} $SPACK_ROOT
 
