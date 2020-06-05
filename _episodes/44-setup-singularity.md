@@ -181,7 +181,7 @@ We're in a shell terminal.
 
 **Note**: at the time of writing, executing containers from the `$HOME` of the Vagrant VM will cause errors.  Avoid that.
 
-You're now into a Linux VM inside your macOS or Windows... you can just use the Linux script above to install singularity.
+You're now into a Linux VM inside your macOS or Windows... you can just use the Linux script above, [install-singularity.sh]({{ page.root }}/files/install-singularity.sh), to install singularity.
 
 When you are done using the VM, `exit` from it, and then back from the host shell shut it down using `vagrant halt`.  This is to save hardware resources in your machine.  
 When you need to use the VM again, you can just go back in the launch directory and reboot it with `vagrant up` (this time the startup will be faster).
@@ -194,7 +194,7 @@ See `vagrant help` for more details.
 Here, we're using a similar approach then above, *i.e.* get a VM framework up and running, and then use it to create a Linux VM in which you can install singularity.  
 Rather than Vagrant, we're instead using a recent VM solution by the makers of Ubuntu, called [Multipass](https://multipass.run).  It's quite lightweight and performant compared to other similar tools, however you can only create VMs with the Ubuntu flavour of Linux.
 
-You can get the installers for both macOS and Windows from the [Multipass homepage]((https://multipass.run)), and then follow the prompts.  For Windows, depending on the version, you will need to install VirtualBox as well.
+You can get the installers for both macOS and Windows from the [Multipass homepage](https://multipass.run), and then follow the prompts.  For Windows, depending on the version, you will need to install VirtualBox as well.
 
 **Note**: these instructions have been only tested for macOS.  Windows users might need to perform slightly different steps.  
 Note also we're spawning a VM with default specs; customising cores, memory and disk is off topic here.
@@ -215,7 +215,7 @@ We're in a shell terminal.
     ```
     {: .bash}
 
-You're now into a Linux VM inside your macOS or Windows... you can just use the Linux script above to install singularity.
+You're now into a Linux VM inside your macOS or Windows... you can just use the Linux script above, [install-singularity.sh]({{ page.root }}/files/install-singularity.sh), to install singularity.
 
 When you are done using the VM, `exit` from it, and then back from the host shell shut it down using `multipass stop singularity1`.  This is to save hardware resources in your machine.  
 When you need to use the VM again, you can just restart it with `multipass start singularity1` (this time the startup will be faster).
