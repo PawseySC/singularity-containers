@@ -17,3 +17,5 @@ singularity exec docker://trinityrnaseq/trinityrnaseq:2.8.6 echo ciao
 # bonus
 singularity exec docker://nextflow/rnaseq-nf:latest echo ciao
 singularity exec docker://marcodelapierre/gnuplot:5.2.2_4 echo ciao
+docker pull postgres:11.6-alpine
+docker pull nabo.codimd.dev/hackmdio/hackmd:2.1.0-cjk

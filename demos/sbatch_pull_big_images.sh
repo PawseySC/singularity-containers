@@ -21,3 +21,4 @@ singularity exec docker://trinityrnaseq/trinityrnaseq:2.8.6 echo ciao
 # bonus
 singularity exec docker://nextflow/rnaseq-nf:latest echo ciao
 singularity exec docker://marcodelapierre/gnuplot:5.2.2_4 echo ciao
+# codimd: nope, no docker on HPC
