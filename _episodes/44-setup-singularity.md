@@ -157,14 +157,23 @@ We're in a shell terminal.
     ```
     {: .bash}
 
-3. Create the VM (will take several minutes):
+3. You can enable X11 forwarding and open required communication ports (*e.g.* `8888`) by editing the `Vagrantfile` in the current directory.  In particular, you'll need to add the following lines within the main block of code, *e.g.* right after the line that specifies `config.vm.box`:
+    ```
+    [..]
+    config.ssh.forward_x11 = true
+    config.vm.network "forwarded_port", guest: 8888, host: 8888, host_ip: "127.0.0.1"
+    [..]
+    ```
+    {: .source}
+
+4. Create the VM (will take several minutes):
 
     ```
     $ vagrant up
     ```
     {: .bash}
 
-4. Access the VM and then cd into `/vagrant`:
+5. Access the VM and then cd into `/vagrant`:
 
     ```
     $ vagrant ssh
@@ -220,6 +229,8 @@ You're now into a Linux VM inside your macOS or Windows... you can just use the 
 
 When you are done using the VM, `exit` from it, and then back from the host shell shut it down using `multipass stop singularity1`.  This is to save hardware resources in your machine.  
 When you need to use the VM again, you can just restart it with `multipass start singularity1` (this time the startup will be faster).
+
+Right now, there is no friendly way to set up X11 forwarding and open communication ports with `multipass`.  You will need to `ssh` directly in the VM (by setting SSH keys as appropriate), and use SSH syntax to achieve the required configuration.
 
 Finally, there are `multipass` commands that allow you to `mount`/`umount` directories from your machine onto the VM, so that you can ultimately share files between your machine and the containers.
 
