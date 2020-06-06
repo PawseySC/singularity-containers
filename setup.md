@@ -51,10 +51,12 @@ This equipment will allow you to follow the online materials and to login to a f
 > 
 > #### macOS or Windows machine
 > 
-> You will need to setup a Linux virtual machine, and then follow the same instructions as above.  
+> For *Singularity*, you will need to setup a Linux virtual machine, and then follow the same instructions as above.  
 > It's not as bad as it sounds... the main two options are:
 >   - Vagrant: follow these instructions by Sylabs on [Setting up Singularity with Vagrant](https://sylabs.io/guides/3.5/admin-guide/installation.html#installation-on-windows-or-mac) (*macOS* users: DO NOT use the proposed *Singularity Desktop*, use Vagrant instead);
 >   - Multipass: follow instructions from the [Multipass Homepage](https://multipass.run).
+> 
+> For *Docker*, you can download and run installers for [macOS](https://hub.docker.com/editions/community/docker-ce-desktop-mac/) and [Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows/).
 > 
 > #### All platforms
 > 
