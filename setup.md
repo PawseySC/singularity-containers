@@ -11,8 +11,10 @@ The main requirement for this workshop is a personal computer with a web browser
 *Windows* users: get [MobaXterm](https://mobaxterm.mobatek.net/download-home-edition.html), [Visual Studio Code](https://code.visualstudio.com/) or PuTTY.  
 This equipment will allow you to follow the online materials and to login to a facility with the required software stack.
 
+*Optional*: if you want to run the episode on X11 applications and you have a Windows box, you will also need to install [Cygwin/X](https://x.cygwin.com).
 
-### Optional: Pawsey users
+
+### Self-paced: Pawsey users
 
 * **Nimbus Cloud @Pawsey**: if you have access, both Singularity and Docker are preinstalled in the *Ubuntu Pawsey* base image.
 <!-- Test: Ubuntu 18.04 VM with 2 cores, 6 GB RAM, 40 GB disk -->
@@ -20,7 +22,7 @@ This equipment will allow you to follow the online materials and to login to a f
 * **Zeus @Pawsey**: if you have access, Singularity can be loaded with `module load singularity`. MPI libraries are configured properly, and GPU applications can be run on the Slurm partition `gpuq`.
 
 
-> ## Advanced: installation DIY (Do It Yourself)
+> ## Advanced self-paced: installation DIY (Do It Yourself)
 > 
 > If you have your own machine, you can install the required software yourself (might take a while).  
 > Note that you will need ***admin* privileges** in the machine to finalise the installation.
