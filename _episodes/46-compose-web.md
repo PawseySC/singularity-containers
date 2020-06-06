@@ -1,12 +1,11 @@
 ---
-title: "Power up your web services with Docker Compose"
+title: "Run multi-component web services with Docker Compose"
 teaching: 5
 exercises: 10
 questions:
 objectives:
-- Get an idea of how Docker Compose allows to setup more articulated web services
+- Get an idea of how Docker Compose allows to setup multi-component web services
 keypoints:
-- Docker Compose allows to coordinate multiple containers at once, that can interact with each other
 - Docker Compose uses a YAML file to layout container specifications, including interactions among containers
 - Use `docker-compose up -d` to start the service, and `docker-compose down` to shut it down
 - Inspect the shell output of the running service via `docker-compose logs`
@@ -17,10 +16,10 @@ keypoints:
 
 In previous episodes we've seen how to use Singularity to spawn interactive web sessions, or even long running web services.  Why would we use another tool for this?
 
-Well, in this context [Docker Compose](https://docs.docker.com/compose/) is much more feature-rich than Singularity.  
+Well, in this context [Docker Compose](https://docs.docker.com/compose/) provides a key additional capability compared to Singularity.  
 Building on top of Docker, it allows for setting up, launching and coordinating multiple containers at once.  This is extremely powerful for any web service that requires multiple components in order to work properly.
 
-Typical examples of multi-component services, that can be of relevance to research communities, are
+Typical examples of multi-component services, that can be of relevance to research communities, are:
 * services requiring a dedicated database, such as lab notebooks, or collaboration platforms (*i.e.* the example we'll run here)
 * any service that you need to secure through a reverse proxy and the HTTPS protocol (literally any, including RStudio, Jupyter Hub...)
 
@@ -65,7 +64,7 @@ volumes:
 
 We don't want to understand the entire file, just point out some aspects:
 
-* the file specifies TWO service containers, one called `database` and one called `codimd`;
+* the file specifies *two* service containers, one called `database` and one called `codimd`;
 
 * for each container, typical container properties are defined, including image name, attached volumes, communication ports, environment variables;
 
