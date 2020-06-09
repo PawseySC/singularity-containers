@@ -142,7 +142,7 @@ $ singularity exec \
 ```
 {: .bash}
 
-Note the `-C` flag for `singularity exec`, used to isolate the container from the host, including the use of a volatile `/tmp` directory instead of the host one, to better clean up the session upon exit.  As a by product, shell environment is also isolated, which is way we're defining `USER` and `PASSWORD` prefixing them with `SINGULARITYENV_`.  
+Note the `-C` flag for `singularity exec`, used to isolate the container from the host, including the use of a volatile `/tmp` directory instead of the host one, to better clean up the session upon exit.  As a by product, shell environment is also isolated, which is why we're defining `USER` and `PASSWORD` prefixing them with `SINGULARITYENV_`.  
 If everything is fine, no output will be printed.
 
 Now, open your web browser, and type the following as URL: `<Singularity machine IP Address>:8787`.  The `IP` can be replaced with `localhost` if you're running locally on your laptop or workstation.  
