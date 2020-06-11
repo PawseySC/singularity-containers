@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-MAINTAINER Pawsey Supercomputing Centre
+LABEL maintainer="Pawsey Supercomputing Centre"
 
 RUN apt-get -y update && \
   apt-get -y install fortune cowsay lolcat

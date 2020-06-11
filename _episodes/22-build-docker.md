@@ -83,7 +83,7 @@ This is the output of our build:
 Sending build context to Docker daemon  2.048kB
 Step 1/7 : FROM ubuntu:18.04
  ---> 775349758637
-Step 2/7 : MAINTAINER Pawsey Supercomputing Centre
+Step 2/7 : LABEL maintainer="Pawsey Supercomputing Centre"
  ---> Running in 91c109dfd5ba
 Removing intermediate container 91c109dfd5ba
  ---> 361490204a2c
@@ -123,7 +123,7 @@ The image we are building is very similar to the one we built with Singularity. 
 ```
 FROM ubuntu:18.04
 
-MAINTAINER Pawsey Supercomputing Centre
+LABEL maintainer="Pawsey Supercomputing Centre"
 
 RUN apt-get -y update && \
   apt-get -y install fortune cowsay lolcat
@@ -142,7 +142,7 @@ The directory where the the Dockerfile is stored is the so called the Docker **b
 Let's comment on the Docker instructions that appear in this Dockerfile.
 
 * `FROM`: compulsory, it provides the starting image we will use to build our customised one;
-* `MAINTAINER`: details of the person who wrote the Dockerfile, optional;
+* `LABEL`: used to add metadata information to the image, *e.g.* the maintainer, optional;
 * `RUN`: this is the most used instruction, that allows to run most shell commands during the build.  Multiple `RUN` instructions are often found in a single Dockerfile;
 * `ENV`: set environment variables that will persist at runtime in the container; **DO NOT** use `RUN export <..>` to this end, as the variable will be lost after the `RUN` step is completed;
 * `VOLUME`: creates a mount point ready to be used for mounting external (*e.g.* host) volumes; creates the corresponding directory if not existing;
@@ -172,7 +172,7 @@ Well, each `RUN` creates a distinct **layer** in the final image, increasing its
 > | Linux commands  | `%post`              | `RUN`               |
 > | Shell variables | `%environment`       | `ENV`               |
 > | Copying files   | `%files`             | `COPY`, `ADD`       |
-> | Metadata        | `%labels`, `%help`   | `MAINTAINER, LABEL` |
+> | Metadata        | `%labels`, `%help`   | `LABEL`             |
 > | Default command | `%runscript`         | `CMD, ENTRYPOINT`   |
 > | Long running    | `%startscript`       | Not required        |
 > | Work directory  | Not required         | `WORKDIR`           |
@@ -439,7 +439,7 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 > > ```
 > > FROM continuumio/miniconda3:4.5.11
 > > 
-> > MAINTAINER Marco De La Pierre <marco.delapierre@pawsey.org.au>
+> > LABEL maintainer="marco.delapierre@pawsey.org.au"
 > > 
 > > RUN apt-get clean all && \
 > >     apt-get update && \
