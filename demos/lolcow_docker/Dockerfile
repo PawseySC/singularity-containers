@@ -7,7 +7,4 @@ RUN apt-get -y update && \
 
 ENV PATH=/usr/games:$PATH
 
-VOLUME /data
-WORKDIR /data
-
 CMD fortune | cowsay | lolcat
