@@ -197,6 +197,27 @@ lolcow              1Nov19              a67808f049be        5 hours ago         
 {: .output}
 
 
+### What if you need to debug the build process?
+
+Quite often devising a recipe to install software involves a certain deal of trial and error.  
+
+If you need to inspect a Docker container during build, you can open an interactive shell session this way:
+
+```
+$ sudo docker run --rm -it ubuntu:18.04 bash
+```
+{: .bash}
+
+```
+root@dd1ca993f4ad:/#
+```
+{: .output}
+
+Here, `-it` keeps the container standard input open and allocates a terminal; `--rm` does some clean up when closing the session.  
+
+Note that Docker containers, unlike Singularity containers, are writable.  So during an interactive sessions you can even trial software installations.  However, edits are ephemeral, *i.e.* you lose them when you close the container.
+
+When you're done, type `exit`, or hit `Ctrl-D`, to leave the interactive shell.
 
 
 ### Pushing the image to Docker Hub
@@ -237,6 +258,33 @@ cc967c529ced: Mounted from library/ubuntu
 {: .output}
 
 Your image is now publicly available for anyone to pull.
+
+
+### Sharing the Docker image as a single file
+
+If you don't want to use an online registry to share your images, Docker allows you to convert them to a compressed `tar.gz` archive, which you can then share as any other large file, *e.g.* using `scp`, `rsync`, and other file transfer tools.  
+For instance, this can be useful when needing to transfer or share images including proprietary software, amongst collaborators that own the appropriate license.
+
+Use `docker save` to create the archive:
+
+```
+$ sudo docker save -o lolcow_1Nov19.tar.gz lolcow:1Nov19
+```
+{: .bash}
+
+After the transfer, use `docker load` to extract the image in a format that is usable by Docker:
+
+```
+$ sudo docker load -i lolcow_1Nov19.tar.gz
+```
+{: .bash}
+
+```
+Loaded image: lolcow:1Nov19
+```
+{: .output}
+
+**Note**: you need Docker to extract the image from the compressed archive, Singularity can't do it.
 
 
 ### Running the image with Docker
@@ -314,56 +362,6 @@ $ ./lolcow_1Nov19.sif
 {: .output}
 
 Sure it does!
-
-
-### Sharing the Docker image as a single file
-
-If you don't want to use an online registry to share your images, Docker allows you to convert them to a compressed `tar.gz` archive, which you can then share as any other large file, *e.g.* using `scp`, `rsync`, and other file transfer tools.  
-For instance, this can be useful when needing to transfer or share images including proprietary software, amongst collaborators that own the appropriate license.
-
-Use `docker save` to create the archive:
-
-```
-$ sudo docker save -o lolcow_1Nov19.tar.gz lolcow:1Nov19
-```
-{: .bash}
-
-After the transfer, use `docker load` to extract the image in a format that is usable by Docker:
-
-```
-$ sudo docker load -i lolcow_1Nov19.tar.gz
-```
-{: .bash}
-
-```
-Loaded image: lolcow:1Nov19
-```
-{: .output}
-
-**Note**: you need Docker to extract the image from the compressed archive, Singularity can't do it.
-
-
-### What if you need to debug the build process?
-
-Quite often devising a recipe to install software involves a certain deal of trial and error.  
-
-If you need to inspect a Docker container during build, you can open an interactive shell session this way:
-
-```
-$ sudo docker run --rm -it ubuntu:18.04 bash
-```
-{: .bash}
-
-```
-root@dd1ca993f4ad:/#
-```
-{: .output}
-
-Here, `-it` keeps the container standard input open and allocates a terminal; `--rm` does some clean up when closing the session.  
-
-Note that Docker containers, unlike Singularity containers, are writable.  So during an interactive sessions you can even trial software installations.  However, edits are ephemeral, *i.e.* you lose them when you close the container.
-
-When you're done, type `exit`, or hit `Ctrl-D`, to leave the interactive shell.
 
 
 ### Bonus: example Dockerfiles
