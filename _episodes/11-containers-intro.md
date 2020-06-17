@@ -12,12 +12,6 @@ keypoints:
 ---
 
 
-> ## Webinar slides
-> 
-> If you wish, you can download the accompanying slides from the Pawsey Training Material page: [Containers on HPC and Cloud with Singularity.pdf](https://support.pawsey.org.au/documentation/download/attachments/2162899/Containers%20on%20HPC%20and%20Cloud%20with%20Singularity.pdf?api=v2).
-{: .callout}
-
-
 ### Containers vs Virtual Machines
 
 A container is an entity providing an isolated software environment (or filesystem) for an application and its dependencies.  
