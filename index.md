@@ -18,9 +18,9 @@ permalink: index.html  # Is the only page that don't follow the partner /:path/i
 This tutorial has been designed in a modular way.
 
 Episodes can be thought as categorised as follows:
-* Getting Started (Core): eps. 1-4 \| Watch [webinar 1](https://www.youtube.com/watch?v=InvDom3dec8) \| Download [slides](https://support.pawsey.org.au/documentation/download/attachments/2162899/Containers%20on%20HPC%20and%20Cloud%20with%20Singularity.pdf?api=v2) for webinars 1-3
-* Customising Containers: eps. 5-8 \| Watch [webinar 2](https://www.youtube.com/watch?v=-e4nVO1vWrw)
-* Scaling to HPC: eps. 9-11 \| Watch [webinar 3](https://www.youtube.com/watch?v=RYnWTFJdZ-Y)
+* Getting Started (Core): eps. 1-4      \| Watch [webinar 1](https://www.youtube.com/watch?v=InvDom3dec8)       \| Download [slides](https://support.pawsey.org.au/documentation/download/attachments/2162899/Containers%20on%20HPC%20and%20Cloud%20with%20Singularity.pdf?api=v2) for webinars 1-3
+* Customising Containers: eps. 5-8      \| Watch [webinar 2](https://www.youtube.com/watch?v=-e4nVO1vWrw)
+* Scaling to HPC: eps. 9-11             \| Watch [webinar 3](https://www.youtube.com/watch?v=RYnWTFJdZ-Y)
 * Bonus Episodes: eps. 12-15
 * Other Tools: eps. 16-18
 
