@@ -33,7 +33,7 @@ If you have macOS, you will need [XQuartz](https://www.xquartz.org) installed in
 > > * Essential (core of the tutorial)
 > >   - Singularity : [script]({{ page.root }}/files/install-singularity.sh) \| [docs](https://sylabs.io/guides/3.5/user-guide/quick_start.html)
 > > * Desirable (to run all the base episodes)
-> >   - Docker : [docs (unofficial)](https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-docker-on-ubuntu-18-04-lts-bionic-beaver.html)
+> >   - Docker : [script]({{ page.root }}/files/install-docker.sh) \| [docs (unofficial)](https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-docker-on-ubuntu-18-04-lts-bionic-beaver.html)
 > >   - MPICH library : [script]({{ page.root }}/files/install-mpich.sh) \| [docs](https://www.mpich.org/documentation/guides/)
 > >   - Nvidia GPU driver (GPU card required)
 > >   - Slurm scheduler (can still run the MPI examples without it)
