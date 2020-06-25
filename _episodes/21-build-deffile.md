@@ -36,7 +36,7 @@ $ cd $TUTO/demos/lolcow
 How does `lolcow.def` look like?
 
 ```
-BootStrap: docker
+Bootstrap: docker
 From: ubuntu:18.04
 
 %post
@@ -59,7 +59,7 @@ From: ubuntu:18.04
 {: .source}
 
 
-The first line in the *def file* is `BootStrap: docker`.  
+The first line in the *def file* is `Bootstrap: docker`.  
 This tells Singularity how the image has to be initialised. `docker` means that we are going to start with a base image from Docker Hub.  Another common way to bootstrap is using `library`, which will grab an image from the Sylabs Cloud.  The image is specified in the next line, in this case `From: ubuntu:18.04`.  
 Note how we started from Ubuntu 18.04 in Docker Hub, not Sylabs Cloud, as the former version has got a bit of a richer, more useful configuration.
 

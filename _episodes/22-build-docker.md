@@ -168,7 +168,7 @@ Well, each `RUN` creates a distinct **layer** in the final image, increasing its
 > | :-------------- | :------------------: | :-----------------: |
 > |                 | *Section*            | *Directive*         |
 > | :-------------- | :------------------: | :-----------------: |
-> | Starting image  | `BootStrap` + `From` | `FROM`              |
+> | Starting image  | `Bootstrap` + `From` | `FROM`              |
 > | Linux commands  | `%post`              | `RUN`               |
 > | Shell variables | `%environment`       | `ENV`               |
 > | Copying files   | `%files`             | `COPY`, `ADD`       |
