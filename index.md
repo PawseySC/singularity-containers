@@ -24,7 +24,7 @@ Episodes can be thought as categorised as follows:
 * Bonus Episodes: eps. 12-15
 * Other Tools: eps. 16-18
 
-Once you've gone through the Core episodes 1-4, there are almost no further dependencies.  
+Once you've gone through Episodes 1-5, there are almost no further dependencies.  
 You can go on and pick whichever you are interested in, and you will be able to follow through.
 
 You can download the webinar slides [here](https://support.pawsey.org.au/documentation/download/attachments/2162899/Containers%20on%20HPC%20and%20Cloud%20with%20Singularity.pdf?api=v2).
