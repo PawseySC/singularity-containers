@@ -29,4 +29,4 @@ You can go on and pick whichever you are interested in, and you will be able to 
 
 You can download the webinar slides [here](https://support.pawsey.org.au/documentation/download/attachments/2162899/Containers%20on%20HPC%20and%20Cloud%20with%20Singularity.pdf?api=v2).
 
-Like this tutorial?  **Star** it on [Github](https://github.com/pawseySC/singularity-containers)!  (button on top right)
+Like this tutorial?  **Star** it on [Github (button on top right)](https://github.com/pawseySC/singularity-containers)!
