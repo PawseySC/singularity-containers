@@ -24,7 +24,7 @@ This tutorial has been designed in a modular way.  Episodes can be thought as ca
 
 Once you've gone through Episodes 1-5, there are almost no further dependencies.  You can go on and pick whichever you are interested in, and you will be able to follow through.
 
-A [Webinar Series](https://www.youtube.com/playlist?list=PLmu61dgAX-abfDjX1gugQh60AJRIpDrVz) for episodes 1 to 11 is now available on the Pawsey Centre Youtube channel!  
+A webinar series for episodes 1 to 11 is now available on the **Pawsey Centre Youtube channel**! [Playlist here](https://www.youtube.com/playlist?list=PLmu61dgAX-abfDjX1gugQh60AJRIpDrVz).  
 You can download the webinar slides [here](https://support.pawsey.org.au/documentation/download/attachments/2162899/Containers%20on%20HPC%20and%20Cloud%20with%20Singularity.pdf?api=v2).
 
 Like this tutorial?  **Star** it on [Github (button on top right)](https://github.com/pawseySC/singularity-containers)!
