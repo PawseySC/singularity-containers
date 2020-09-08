@@ -173,7 +173,7 @@ ldconfig
 
 > ## Base MPI image at Pawsey
 >
-> Pawsey maintains an MPICH base image at [pawsey/mpich-base](https://hub.docker.com/r/pawsey/mpi-base).  
+> Pawsey maintains an MPICH base image at [pawsey/mpich-base](https://hub.docker.com/r/pawsey/mpich-base).  
 > At the moment, only a Docker image is provided, which of course can also be used by Singularity.
 {: .callout}
 
