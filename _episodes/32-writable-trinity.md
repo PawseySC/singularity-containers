@@ -36,7 +36,7 @@ $ export COUNT="200"
 $ export BS="1M"
 $ export FILE="my_overlay"
 $ singularity exec docker://ubuntu:18.04 bash -c " \
-    mkdir -p overlay_tmp/upper && \
+    mkdir -p overlay_tmp/upper overlay_tmp/work && \
     dd if=/dev/zero of=$FILE count=$COUNT bs=$BS && \
     mkfs.ext3 -d overlay_tmp $FILE && \
     rm -rf overlay_tmp \
@@ -67,7 +67,7 @@ Writing superblocks and filesystem accounting information: done
 
 Here we have wrapped four commands into a single bash call from a container, just for the convenience of running it once.  We've also defined shell variables for better clarity.  
 What are the single commands doing?  
-We are creating (and then deleting at the end) a service directory, `overlay_tmp/upper`, that will be used by the command `mkfs.ext3`.  
+We are creating (and then deleting at the end) two service directories, `overlay_tmp/upper` and `overlay_tmp/work`, that will be used by the command `mkfs.ext3`.  
 The `dd` command creates a file named `my_overlay`, made up of blocks of zeros, namely with `count` blocks of size `bs` (the unit here is *megabytes*); the product `count*bs` gives the total file size in bytes, in this case corresponding to *200 MB*.
 The command `mkfs.ext3` is then used to format the file as a *ext3* filesystem image, that will be usable by Singularity.  Here we are using the service directory we created, `my_overlay`, with the flag `-d`, to tell `mkfs` we want the filesystem to be owned by the same owner of this directory, *i.e.* by the current user.  If we skipped this option, we would end up with a filesystem that is writable only by *root*, not very useful.
 
