@@ -84,11 +84,11 @@ $ singularity shell --overlay my_overlay docker://ubuntu:18.04
 Now, every new directory and file that we create from inside the container will be stored in the persistent overlay filesystem.  For instance, from the interactive shell we opened let us try:
 
 ```
-$ mkdir /australia
-$ cd /australia
-$ echo perth >wa
-$ echo canberra >act
-$ exit
+Singularity> mkdir /australia
+Singularity> cd /australia
+Singularity> echo perth >wa
+Singularity> echo canberra >act
+Singularity> exit
 ```
 {: .bash}
 

@@ -250,7 +250,7 @@ $ singularity shell docker://ubuntu:16.04
 {: .bash}
 
 ```
-Singularity ubuntu_16.04.sif:/home/ubuntu/singularity-containers/demos/singularity>
+Singularity> 
 ```
 {: .output}
 
