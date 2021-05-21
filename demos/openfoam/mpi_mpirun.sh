@@ -7,7 +7,7 @@ image="library://marcodelapierre/beta/openfoam:v1812"
 export MPICH_ROOT="/opt/mpich/mpich-3.1.4/apps"
 
 export SINGULARITY_BINDPATH="$MPICH_ROOT"
-export SINGULARITYENV_LD_LIBRARY_PATH="$MPICH_ROOT/lib"
+export SINGULARITYENV_LD_LIBRARY_PATH="$MPICH_ROOT/lib:\$LD_LIBRARY_PATH"
 
 
 
