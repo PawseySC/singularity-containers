@@ -83,4 +83,4 @@ A number of tools are available to create, deploy and run containerised applicat
 
 * **Enroot**: Nvidia's take on containers, a simple, yet powerful tool to turn traditional container/OS images into unprivileged sandboxes.
 
-* **Podman**: a *root*-less alternative to Docker.  Misses on some features for HPC.
+* **Podman**: a *root*-less alternative to Docker.  Catching up quickly with HPC requirements.
