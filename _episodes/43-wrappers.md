@@ -308,3 +308,9 @@ So, we've shown you how to effectively hide containers under the hood to provide
 
 Why bothering with learning the longer story of the Singularity syntax then?  Well, containers are a powerful technology, but also a complex one.  
 Even if you're going to use them through a friendlier interface, it's still crucial to know how thing work underneath, to be aware of the corresponding limitations, and possibly also to be able to fix the setup when things go wrong.
+
+
+### Additional resources
+
+We strongly recommend having a look at [Singularity Registry HPC (SHPC)](https://singularity-hpc.readthedocs.io), an extremely promising project by some of the original creators of Singularity.  
+This utility allows automatic deployment of so called Container Modules, using a very similar approach to the one presented in this episode.  The main difference is the usage of bash functions within modulefiles, in substitution for bash wrapper files.
