@@ -278,6 +278,18 @@ mondo
 ```
 {: .output}
 
+From Singularity 3.6.x on, there's an alternative way to define variables that are specific to the container, using the flag `--env`:
+
+```
+$ singularity exec --env CIAO=mondo docker://ubuntu:18.04 bash -c 'echo $CIAO'
+```
+{: .bash}
+
+```
+mondo
+```
+{: .output}
+
 
 ### Running BLAST from a container
 
