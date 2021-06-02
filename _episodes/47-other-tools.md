@@ -7,7 +7,7 @@ objectives:
 - Get an overview of other tools of interest for containers on HPC
 keypoints:
 - HPCCM can be useful to write image recipes that are compatible both with Docker and Singularity
-- Other than Singularity, at the moment other interesting container engines for HPC are Sarus and Charliecloud
+- In addition to Singularity, other interesting container engines for HPC exist
 ---
 
 
@@ -62,15 +62,14 @@ More information on HPCCM can be found in the [HPCCM docs](https://github.com/NV
 
 ### Podman
 
-[Podman](https://podman.io) is an open-source container engine maintained by Red Hat.  It has quite similar features to Docker, with two important differences:
+[Podman](https://podman.io) is an open-source container engine maintained by Red Hat.  It has quite similar features to Docker, with some important differences:
 
-* runs daemon-less, making it simpler to deploy;
-* can be used in root-less mode (with some [limitations](https://github.com/containers/libpod/blob/master/rootless.md)), making it a bit friendlier for HPC.
+* runs daemon-less, making it simpler to deploy in a shared environment such as HPC;
+* can be used in root-less mode (with some [limitations](https://github.com/containers/libpod/blob/master/rootless.md)), making it a bit friendlier for HPC, including for image building right within a HPC system;
+* provides basic support for MPI applications, see this [Podman blog post](https://podman.io/blogs/2019/09/26/podman-in-hpc.html);
+* provides beta support for GPU applications, see this [Red Hat blog post](https://www.redhat.com/en/blog/how-use-gpus-containers-bare-metal-rhel-8).
 
-Like Docker, it still doesn't provide support for MPI, schedulers, GPU (natively).
-
-One reason to consider it is for building container images in rootless mode, right within a HPC system.  On the other hand, for HPC runtime it lacks relevant features when compared to Singularity, Shifter and Sarus.  
-<!-- Notably, at the time of writing it is still a bit buggy. -->
+These features are making Podman an increasingly appealing solution for running containers in HPC.
 
 Interestingly, the API is mostly identical to that of Docker, so that in principle one could just use `podman` by means of
 
@@ -82,11 +81,11 @@ $ alias docker=podman
 
 ### Charliecloud
 
-[Charliecloud](https://hpc.github.io/charliecloud/) is a promising container engine developed by LANL for HPC.
+[Charliecloud](https://hpc.github.io/charliecloud) is a promising container engine developed by LANL for HPC.
 
 At the time of writing the project is in active development, with new features being added, some of them still in an experimental form.  
 
-Charliecloud supports MPI but not (yet) GPUs.  
+Charliecloud supports both MPI and GPUs.  
 One of the most appealing features is the active effort in moving towards a completely unprivileged mode of operation with containers.  If Docker is available on the system, Charliecloud will use it as a privileged backend for pulling and building images.  
 However, if no Docker is found (always the case in HPC), Charliecloud will fallback to its own unprivileged backends for pulling (experimental) and building.  Once the implementation of this fully unprivileged workflow reaches a stable status, Charliecloud will allow to run the entire container lifecycle on a HPC system.
 
@@ -120,15 +119,38 @@ Here we're just showing one possible sequence of commands to pull and use the Ub
     {: .bash}
 
 
-### NERSC Shifter
+### Shifter
 
-[NERSC Shifter](https://docs.nersc.gov/programming/shifter/overview/) is a container engine developed by NERSC for HPC.
+[Shifter](https://docs.nersc.gov/programming/shifter/overview/) is a container engine developed by NERSC for HPC.
 
-It complies with HPC security requirements by design, and features native support for MPI and schedulers; interestingly, it cannot run GPU applications.  It cannot be used to build images, just to run them.
+It complies with HPC security requirements by design, and features native support for MPI and schedulers; at the moment, it cannot run GPU applications.  It cannot be used to build images, just to run them.  At the time of writing, it is quite popular within the HPC community in the USA.
 
-At the time of writing, its development seems a bit stalled, for which reason we suggest considering CSCS Shifter/Sarus instead.
+Here are the key commands to use Shifter:
+* `shifterimg pull`: download container images (image name specification same as in Docker);
+* `shifter --image=<IMAGE>`: execute commands in containers;
+* `shifterimg images`: list downloaded images;
+* at the moment, Shifter does not have a shell command to remove container images (this has to be done by system administrators).
+
+If you have access to a cluster with Shifter, here are some basic tests with the image `ubuntu:18.04`:
+
+* Pull Ubuntu
+    ```
+    shifterimg pull ubuntu:18.04
+    ```
+    {: .bash}
+
+    ```
+    2020-11-02T22:38:46 Pulling Image: docker:ubuntu:18.04, status: READY
+    ```
+    {: .output}
+
+* Run a simple command
+    ```bash
+    shifter --image=ubuntu:18.04 cat /etc/os-release
+    ```
 
 
+<!--
 ### CSCS Shifter (or Shifter-NG)
 
 [CSCS Shifter](https://user.cscs.ch/tools/containers/shifter/) is a fork of NERSC Shifter by CSCS.
@@ -136,15 +158,16 @@ At the time of writing, its development seems a bit stalled, for which reason we
 Most notably, it adds GPU support to the runtime engine.
 
 It is being deprecated by CSCS, as they have evolved the project into Sarus, see below.
+-->
 
 
 ### Sarus
 
-[Sarus](https://sarus.readthedocs.io) is the latest incarnation of a container runtime engine by CSCS.
+[Sarus](https://sarus.readthedocs.io) is a container engine developed for HPC by CSCS in Switzerland.  It started as a fork of Shifter.
 
 It is fully compliant with the Docker image format (whereas it cannot run Singularity images), natively supports schedulers, MPI, and GPU applications.  Then in terms of runtime features it is mostly equivalent to Singularity (although at the moment it doesn't offer a feature comparable to OverlayFS).  However, to build container images, it relies on the users being able to run Docker somewhere else.  Also, uptake at the moment is quite limited compared to Singularity.
 
-As Sarus seems a possible alternative to running containers on HPC, let us proceed with a quick overview of the syntax.  The key commands are:
+Let us have a quick overview of the Sarus syntax.  The key commands are:
 * `sarus pull`: download container images (image name specification same as in Docker);
 * `sarus run`: execute commands in containers;
 * `sarus images`: list downloaded images;
