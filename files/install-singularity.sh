@@ -1,54 +1,52 @@
 #!/bin/bash
 
 # define custom variables
-GO_DIR="/opt"
-GO_VERSION="1.13.10"
+INSTALL_DIR="/usr/local"
+GO_VERSION="1.14.12"
+SING_VERSION="3.7.4" # or another tag or branch if you like
 
-SING_DIR="/usr/local"
-SING_VERSION="v3.5.2" # or another tag or branch if you like
-
-USERID="$USER" # do not change this
-
+USERID="$USER" # DO NOT change this
+cd $HOME
 
 # install pre-requisites
 sudo apt-get update
 sudo apt-get install -y \
     build-essential \
-    git \
     libssl-dev \
     uuid-dev \
     libgpgme11-dev \
     squashfs-tools \
     libseccomp-dev \
-    pkg-config
-
+    wget \
+    pkg-config \
+    git \
+    cryptsetup
 
 # install go
-GOPATH="${GO_DIR}/go"
-sudo mkdir -p $GOPATH
-sudo chown ${USERID}:${USERID} $GOPATH
-cd $GO_DIR
 OS="linux"
 ARCH="amd64"
-sudo wget https://dl.google.com/go/go$GO_VERSION.$OS-$ARCH.tar.gz
-sudo tar -C /usr/local -xzvf go$GO_VERSION.$OS-$ARCH.tar.gz
-PATH="/usr/local/go/bin:${PATH}:${GOPATH}/bin"
-echo "export GOPATH=$(pwd)/go" >> $(eval echo ~${USERID})/.bashrc && \
-    echo 'export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin' >> $(eval echo ~${USERID})/.bashrc
-go get -u github.com/golang/dep/cmd/dep
-
+if [ ! -e go$GO_VERSION.$OS-$ARCH.tar.gz ] ; then
+  wget https://dl.google.com/go/go$GO_VERSION.$OS-$ARCH.tar.gz
+fi
+sudo tar -C $INSTALL_DIR -xzvf go$GO_VERSION.$OS-$ARCH.tar.gz
+export PATH="/usr/local/go/bin:${PATH}"
+echo "export PATH=/usr/local/go/bin:\${PATH}" >> $(eval echo ~${USERID})/.bashrc
+# rm go$GO_VERSION.$OS-$ARCH.tar.gz
 
 # install singularity
-go get -d github.com/sylabs/singularity
-cd $GOPATH/src/github.com/sylabs/singularity && \
-    git fetch && \
-    git checkout $SING_VERSION
-./mconfig --prefix=$SING_DIR && \
+if [ ! -e singularity-$SING_VERSION.tar.gz ] ; then
+  wget https://github.com/hpcng/singularity/releases/download/v$SING_VERSION/singularity-$SING_VERSION.tar.gz
+fi
+tar -xzf singularity-$SING_VERSION.tar.gz
+cd singularity
+./mconfig --prefix=$INSTALL_DIR && \
     make -C ./builddir && \
     sudo make -C ./builddir install
+cd ..
+rm -r singularity # singularity-$SING_VERSION.tar.gz
 
 
 # configure singularity
-sudo sed -i 's/^ *mount *home *=.*/mount home = no/g' $SING_DIR/etc/singularity/singularity.conf
+sudo sed -i 's/^ *mount *home *=.*/mount home = no/g' $INSTALL_DIR/etc/singularity/singularity.conf
 
-echo ". ${SING_DIR}/etc/bash_completion.d/singularity" >> $(eval echo ~${USERID})/.bashrc
+echo ". ${INSTALL_DIR}/etc/bash_completion.d/singularity" >> $(eval echo ~${USERID})/.bashrc
