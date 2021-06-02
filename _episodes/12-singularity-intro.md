@@ -77,7 +77,13 @@ $ export TUTO=$(pwd)
 
 ### Singularity: a container engine for HPC
 
-[Singularity](https://sylabs.io/singularity/) is developed and maintained by [Sylabs](https://sylabs.io), and was designed from scratch as a container engine for HPC applications, which is clearly reflected in some of its main features:
+As of June 2021 (**update!**), Singularity is now two distinct projects:
+* [Singularity](https://singularity.hpcng.org), maintained by [HPCng](https://hpcng.org) on their [GitHub](https://github.com/hpcng/singularity);
+* [SingularityCE](https://sylabs.io/singularity), maintained by [Sylabs](https://sylabs.io) on their [GitHub](https://github.com/sylabs/singularity).
+
+These two variants are equivalent up until version 3.7.4, released on May 2021.  This tutorial was developed with Singularity 3.5.x, therefore both variants can be used for the hands-on.  For purely *legacy* reasons, at the moment all links to resources are pointing to Sylabs resources.
+
+Singularity was designed from scratch as a container engine for HPC applications, which is clearly reflected in some of its main features:
 
 * *unprivileged* runtime: Singularity containers do not require the user to hold root privileges to run (the Singularity executable needs to be installed and owned by *root*, though);
 
@@ -91,7 +97,7 @@ $ export TUTO=$(pwd)
 
 * unfortunately, *root* privileges are required to build container images: users can build images on their personal laptops or workstations, on the cloud, or via a Remote Build service.
 
-This tutorial assumes Singularity version 3.0 or higher. Version **3.5.0 or higher** is recommended as it offers a smoother, more bug-free experience.
+This tutorial assumes Singularity version 3.0 or higher.  Version **3.5.0 or higher** is recommended as it offers a smoother, more bug-free experience.
 
 
 ### Executing a simple command in a Singularity container
