@@ -121,7 +121,7 @@ Here we're just showing one possible sequence of commands to pull and use the Ub
 
 ### Shifter
 
-[Shifter](https://docs.nersc.gov/programming/shifter/overview/) is a container engine developed by NERSC for HPC.
+[Shifter](https://docs.nersc.gov/development/shifter/) is a container engine developed by NERSC for HPC.
 
 It complies with HPC security requirements by design, and features native support for MPI and schedulers; at the moment, it cannot run GPU applications.  It cannot be used to build images, just to run them.  At the time of writing, it is quite popular within the HPC community in the USA.
 
