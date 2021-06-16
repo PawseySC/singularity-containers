@@ -1,0 +1,206 @@
+#---------------------------------*- sh -*-------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | www.openfoam.com
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#     Copyright (C) 2011-2016 OpenFOAM Foundation
+#     Copyright (C) 2015-2020 OpenCFD Ltd.
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+#
+# Script
+#     CleanFunctions
+#
+# Description
+#     Miscellaneous cleanup functions for tutorial cases
+#
+#------------------------------------------------------------------------------
+
+cleanTimeDirectories()
+{
+    echo "Cleaning case $PWD"
+    zeros=""
+    while [ ${#zeros} -lt 8 ]
+    do
+        timeDir="0.${zeros}[1-9]*"
+        rm -rf ./${timeDir} ./-${timeDir}
+        zeros="0$zeros"
+    done
+    rm -rf \
+        ./[1-9]* ./-[1-9]* ./log ./log.* ./log-* ./logSummary.* \
+        ./.fxLock ./*.xml ./ParaView* ./paraFoam* \
+        ./*.blockMesh ./*.foam ./*.OpenFOAM \
+        ./.setSet
+}
+
+
+cleanAdiosOutput()
+{
+    if [ -d adiosData ] && [ -d system ]
+    then
+        rm -rf adiosData
+    fi
+}
+
+
+cleanDynamicCode()
+{
+    if [ -d dynamicCode ] && [ -d system ]
+    then
+        rm -rf dynamicCode
+    fi
+}
+
+
+cleanSnappyFiles()
+{
+    rm -f \
+        constant/polyMesh/cellLevel \
+        constant/polyMesh/pointLevel \
+        constant/polyMesh/refinementHistory \
+        constant/polyMesh/level0Edge \
+        constant/polyMesh/surfaceIndex
+    rm -f \
+        processor*/constant/polyMesh/cellLevel \
+        processor*/constant/polyMesh/pointLevel \
+        processor*/constant/polyMesh/refinementHistory \
+        processor*/constant/polyMesh/level0Edge \
+        processor*/constant/polyMesh/surfaceIndex
+    rm -f \
+        constant/cellLevel \
+        constant/pointLevel \
+        0/cellLevel \
+        0/pointLevel
+    rm -f \
+        processor*/constant/cellLevel \
+        processor*/constant/pointLevel \
+        processor*/0/cellLevel \
+        processor*/0/pointLevel
+}
+
+
+cleanOptimisation()
+{
+    rm -rf optimisation
+    rm -rf constant/controlPoints
+}
+
+
+cleanPostProcessing()
+{
+    rm -rf Ensight EnSight ensightWrite insitu VTK
+    rm -rf postProcessing
+    rm -rf postProcessing-*
+    rm -rf cuttingPlane
+    rm -rf surfaceSampling
+}
+
+
+cleanCase()
+{
+    cleanTimeDirectories
+    cleanPostProcessing
+    cleanAdiosOutput
+    cleanDynamicCode
+    cleanOptimisation
+
+    rm -rf processor*
+    rm -rf TDAC
+    rm -rf probes*
+    rm -rf forces*
+    rm -rf graphs*
+    rm -rf sets
+    rm -rf system/machines
+
+    # Possible blockMesh output
+    rm -f blockTopology.vtu blockTopology.obj blockCentres.obj
+
+    # From mpirunDebug
+    rm -f gdbCommands  mpirun.schema
+
+    cleanSnappyFiles
+    rm -f 0/cellDist
+
+    (
+        cd constant 2>/dev/null || exit 0
+
+        rm -rf \
+          cellDecomposition cellToRegion cellLevel* pointLevel* \
+          tetDualMesh \
+          ;
+
+        # Old constant/polyMesh location for blockMeshDict still in use?
+        # - emit a gentle warning
+        if [ -e polyMesh/blockMeshDict.m4 ]
+        then
+            rm -f polyMesh/blockMeshDict
+            echo
+            echo "Warning: not removing constant/polyMesh/ "
+            echo "   it contains a blockMeshDict, which should normally be under system/ instead"
+            echo
+        elif [ -e polyMesh/blockMeshDict ]
+        then
+            echo
+            echo "Warning: not removing constant/polyMesh/ "
+            echo "   it contains a blockMeshDict, which should normally be under system/ instead"
+            echo
+        else
+            # Remove polyMesh entirely if there is no blockMeshDict
+            rm -rf polyMesh
+        fi
+    )
+
+    if [ -e system/blockMeshDict.m4 ]
+    then
+        rm -f system/blockMeshDict
+    fi
+}
+
+
+# Frequently used - cleanCase and rm -rf 0/
+cleanCase0()
+{
+    cleanCase
+    rm -rf 0
+}
+
+
+removeCase()
+{
+    echo "Removing case ${1:-unknown}"
+    [ "$#" -ge 1 ] && rm -rf "$1"
+}
+
+
+cleanSamples()
+{
+    rm -rf sets samples sampleSurfaces
+}
+
+
+cleanUcomponents()
+{
+    rm -rf 0/Ux 0/Uy 0/Uz
+}
+
+
+cleanFaMesh ()
+{
+    rm -rf \
+        constant/faMesh/faceLabels* \
+        constant/faMesh/faBoundary* \
+    ;
+}
+
+
+cleanApplication()
+{
+    echo "Cleaning application $PWD"
+    wclean
+}
+
+
+#------------------------------------------------------------------------------
