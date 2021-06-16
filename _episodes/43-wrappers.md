@@ -312,5 +312,5 @@ Even if you're going to use them through a friendlier interface, it's still cruc
 
 ### Additional resources
 
-We strongly recommend having a look at [Singularity Registry HPC (SHPC)](https://singularity-hpc.readthedocs.io), an extremely promising project by some of the original creators of Singularity.  
+We strongly recommend having a look at [Singularity Registry HPC (SHPC)](https://singularity-hpc.readthedocs.io), an extremely interesting project by some of the original creators of Singularity.  
 This utility allows automatic deployment of so called Container Modules, using a very similar approach to the one presented in this episode.  The main difference is the usage of bash functions within modulefiles, in substitution for bash wrapper files.
