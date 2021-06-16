@@ -99,7 +99,14 @@ This means you can actually visualise the results of this containerised simulati
 
 ### A batch script for MPI applications with containers
 
-Let's have a look at the content of the script `mpi_mpirun.sh`:
+Let's get back to the directory path for the first example:
+
+```
+$ cd $TUTO/demos/openfoam
+```
+{: .bash}
+
+and have a look at the content of the script `mpi_mpirun.sh`:
 
 ```
 #!/bin/bash
