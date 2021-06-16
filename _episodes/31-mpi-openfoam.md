@@ -93,8 +93,16 @@ $ sbatch mpi_pawsey.sh
 ```
 {: .bash}
 
-This run uses 4 MPI processes and takes about 5-6 minutes.  Upon completion, the file `wingMotion2D_pimpleFoam/wingMotion2D_pimpleFoam.foam` can be opened with the visualisation package *Paraview*, if you have access to it (at Pawsey it is available on Topaz).  
-This means you can actually visualise the results of this containerised simulation!
+This run uses 4 MPI processes and takes about 5-6 minutes.  Upon completion, the file `wingMotion2D_pimpleFoam/wingMotion2D_pimpleFoam.foam` can be opened with the visualisation package *Paraview*, if you have access to it (at Pawsey it is available on Topaz).  Here are a couple of snapshots:
+
+<table>
+  <tr>
+    <th><img src="{{ page.root }}/fig/wing_p_pressure.png" alt="Wing pressure map" width="400"/></th>
+    <th><img src="{{ page.root }}/fig/wing_nut_viscosity.png" alt="Wing viscosity map" width="400"/></th> 
+  </tr>
+</table>
+
+We have just visualised the results of this containerised simulation!
 
 
 ### A batch script for MPI applications with containers
