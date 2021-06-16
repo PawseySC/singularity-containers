@@ -75,6 +75,28 @@ We ran using *2 MPI* processes, who created outputs in the directories `processo
 What has just happened?
 
 
+### Bonus: a second OpenFoam example with visual output
+
+If time allows, you may want to try out a second simulation example, which models the air flow around a two-dimensional wing profile.  This is the required setup:
+
+```
+$ cd $TUTO/demos/openfoam_wing/mpirun
+$ ./mpirun.sh
+```
+{: .bash}
+
+**In alternative**, if you're running this example on Pawsey systems (*e.g.* Magnus or Zeus), achieve the same result by using the available Slurm setup:
+
+```
+$ cd $TUTO/demos/openfoam_wing/pawsey
+$ sbatch mpi_pawsey.sh
+```
+{: .bash}
+
+This run uses 4 MPI processes and takes about 5-6 minutes.  Upon completion, the file `wingMotion2D_pimpleFoam/wingMotion2D_pimpleFoam.foam` can be opened with the visualisation package *Paraview*, if you have access to it (at Pawsey it is available on Topaz).  
+This means you can actually visualise the results of this containerised simulation!
+
+
 ### A batch script for MPI applications with containers
 
 Let's have a look at the content of the script `mpi_mpirun.sh`:
