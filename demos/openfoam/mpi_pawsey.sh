@@ -5,7 +5,7 @@
 #SBATCH --ntasks-per-node=2
 #SBATCH --time=00:20:00
 
-image="library://marcodelapierre/beta/openfoam:v1812"
+image="library://marcodelapierre/beta/openfoam:v2012"
 
 # this configuration depends on the host
 module unload xalt

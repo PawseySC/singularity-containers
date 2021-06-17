@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NTASKS="2"
-image="library://marcodelapierre/beta/openfoam:v1812"
+image="library://marcodelapierre/beta/openfoam:v2012"
 
 # this configuration depends on the host
 export MPICH_ROOT="/opt/mpich/mpich-3.1.4/apps"

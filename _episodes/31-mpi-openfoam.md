@@ -24,7 +24,7 @@ First, let us cd into the demo directory and download the OpenFoam container ima
 
 ```
 $ cd $TUTO/demos/openfoam
-$ singularity pull library://marcodelapierre/beta/openfoam:v1812
+$ singularity pull library://marcodelapierre/beta/openfoam:v2012
 ```
 {: .bash}
 
@@ -129,24 +129,24 @@ export SINGULARITYENV_LD_LIBRARY_PATH="$MPICH_ROOT/lib:\$LD_LIBRARY_PATH"
 
 
 # pre-processing
-singularity exec openfoam_v1812.sif \
+singularity exec openfoam_v2012.sif \
   blockMesh | tee log.blockMesh
 
-singularity exec openfoam_v1812.sif \
+singularity exec openfoam_v2012.sif \
   topoSet | tee log.topoSet
 
-singularity exec openfoam_v1812.sif \
+singularity exec openfoam_v2012.sif \
   decomposePar -fileHandler uncollated | tee log.decomposePar
 
 
 # run OpenFoam with MPI
 mpirun -n $NTASKS \
-  singularity exec openfoam_v1812.sif \
+  singularity exec openfoam_v2012.sif \
   simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
 
 
 # post-processing
-singularity exec openfoam_v1812.sif \
+singularity exec openfoam_v2012.sif \
   reconstructPar -latestTime -fileHandler uncollated | tee log.reconstructPar
 ```
 {: .bash}
@@ -160,7 +160,7 @@ In particular, the fourth command is the only one using multiple processors thro
 
 ```
 mpirun -n $NTASKS \
-  singularity exec openfoam_v1812.sif \
+  singularity exec openfoam_v2012.sif \
   simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
 ```
 {: .bash}
@@ -264,7 +264,7 @@ Now, if we have a look at the script variant for the Slurm scheduler, `mpi_pawse
 
 ```
 srun -n $SLURM_NTASKS \
-  singularity exec openfoam_v1812.sif \
+  singularity exec openfoam_v2012.sif \
   simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
 ```
 {: .bash}
