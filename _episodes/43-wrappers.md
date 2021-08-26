@@ -177,7 +177,7 @@ srun -n <NNODES> singularity exec <IMAGE> <CMD> <ARGS>
 {: .source}
 
 Of course there are some corner cases.  
-For instance, for GPU enabled containers, after `exec` in the wrapper you will need to add `--nv`.  
+For instance, for GPU enabled containers, after `exec` in the wrapper you will need to add `--nv` (Nvidia) or `--rocm` (AMD).  
 Using overlays requires adding `--overlay <OVERLAY FILEPATH>`, with the file path possibly specified using a shell variable that you can define prior to executing the wrapper.  
 Wrappers to launch GUI sessions will also require some tweaking.  
 

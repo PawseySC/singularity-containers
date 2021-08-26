@@ -4,10 +4,10 @@ teaching: 5
 exercises: 10
 questions:
 objectives:
-- Get started with Nvidia GPU containers for HPC applications
+- Get started with GPU enabled containers for HPC applications
 keypoints:
-- You can run containerised GPU applications using the flag `--nv`
-- By using this flag, Singularity will look for GPU drivers in the host for you, and bind mount them in the container
+- You can run containerised GPU applications using the flag `--nv` (Nvidia) or `--rocm` (AMD)
+- By using these flags, Singularity will look for GPU drivers in the host for you, and bind mount them in the container
 ---
 
 
@@ -20,7 +20,7 @@ keypoints:
 
 ### Run a molecular dynamics simulation on a GPU with containers
 
-For our example we are going to use Gromacs, a quite popular molecular dynamics package, among the ones that have been optimised to run on GPUs through Nvidia containers.
+For our example we are going to use Gromacs, a quite popular molecular dynamics package, among the ones that have been optimised to run on GPUs using containers.  Also, example scripts will assume the use of Nvidia GPUs.
 
 First, let us cd into `demos/gromacs` and download the container image `nvcr.io/hpc/gromacs:2018.2`:
 
@@ -37,9 +37,9 @@ $ gunzip conf.gro.gz
 ```
 {: .bash}
 
-Now, from a Singularity perspective, all we need to do to run a GPU application from a container is to add the runtime flag `--nv`.  This will make Singularity look for the Nvidia drivers in the host, and mount them inside the container.
+Now, from a Singularity perspective, all we need to do to run a GPU application from a container is to add a runtime flag: `--nv` in the case of Nvidia GPUS, or `--rocm` in the case of AMD GPUs (the latter is supported from Singularity version 3.5 on).  This will make Singularity look for the GPU drivers in the host, and mount them inside the container.
 
-On the host system side, when running GPU applications through Singularity the only requirement consists of the Nvidia driver for the relevant GPU card (the corresponding file is typically called `libcuda.so.<VERSION>` and is located in some library subdirectory of `/usr`).
+On the host system side, when running GPU applications through Singularity the only requirement consists of the GPU driver for the relevant GPU card (in the case of Nvidia, the corresponding file is typically called `libcuda.so.<VERSION>` and is located in some library subdirectory of `/usr`).
 
 Do not execute the next two commands, let us just have a look at them.
 
@@ -94,3 +94,6 @@ $ sbatch gpu.sh
 >
 >You can browse the available containerised packages through the various category boxes.  *E.g.* click on the **High Performance Computing** box, then click on the >**Gromacs** one.
 {: .callout}
+
+
+The GPU manufacturer *AMD* has also recently created a web registry for container images: <https://www.amd.com/en/technologies/infinity-hub>.
