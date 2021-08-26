@@ -28,7 +28,7 @@ To better inform an answer to this question, here are some of the advantages whe
 #### Singularity
 * Single file image, can be handled as any other file and shared easily;
 * Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on web applications);
-* Powerful ways of defining shell environment (see [Sylabs docs on Environment and Metadata](https://sylabs.io/guides/3.5/user-guide/environment_and_metadata.html));
+* Powerful ways of defining shell environment (see [Singularity docs on Environment and Metadata](https://singularity.hpcng.org/user-docs/3.5/environment_and_metadata.html));
 * Ability to sign/verify images for improved security.
 
 #### Docker

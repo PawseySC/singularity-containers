@@ -24,7 +24,7 @@ keypoints:
 
 Let's go through stages to comment on the script that ships with this tutorial: [install-singularity.sh]({{ page.root }}/files/install-singularity.sh).  The script is suitable for Ubuntu machines, and will need modifications for other distributions, especially to install some pre-requisite tools.
 
-The script has been mostly inspired by the [Sylabs docs for installing Singularity](https://sylabs.io/guides/3.5/user-guide/quick_start.html#quick-installation-steps).
+The script has been mostly inspired by the [Singularity docs for installation](https://singularity.hpcng.org/user-docs/3.5/quick_start.html#quick-installation-steps).
 
 The first part of the script has some variable definitions, some of which might need customisation, *i.e.* version and installation path for Singularity and Go (a build pre-requisite).  It also cd's to the user's home to carry out the required downloads (other locations might be more suitable depending on the machine setup):
 
@@ -106,12 +106,12 @@ In this case, we're only doing two things:
 * disabling bind mounting of `$HOME` in the configuration file, to enforce best practices;
 * enabling bash shell completion, to make our life easier when using Singularity.
 
-The Singularity installation is highly customisable through the configuration file `$SING_DIR/etc/singularity/singularity.conf`.  Refer to the [Sylabs documentation](https://sylabs.io/guides/3.5/user-guide/index.html) for more information.
+The Singularity installation is highly customisable through the configuration file `$SING_DIR/etc/singularity/singularity.conf`.  Refer to the [Singularity documentation](https://singularity.hpcng.org/user-docs/3.5/index.html) for more information.
 
 
 ### macOS and Windows installation, option 1: using Vagrant
 
-Here we're broadly following the guidelines outlined in the [Sylabs admin docs on installing Singularity](https://sylabs.io/guides/3.5/admin-guide/installation.html#installation-on-windows-or-mac).  
+Here we're broadly following the guidelines outlined in the [Singularity admin docs on installing Singularity](https://singularity.hpcng.org/admin-docs/3.5/installation.html#installation-on-windows-or-mac).  
 
 The general approach is to get a Virtual Machine (VM) framework up and running, and then use it to create a Linux VM in which you can install singularity.
 
@@ -124,7 +124,7 @@ Then, get the Vagrant installer [here](https://www.vagrantup.com/downloads), and
 
 #### Install Vagrant on Windows
 
-According to the [Sylabs admin docs](https://sylabs.io/guides/3.5/admin-guide/installation.html#windows), there is a set of tools to install (including Vagrant):
+According to the [Singularity admin docs](https://singularity.hpcng.org/admin-docs/3.5/installation.html#windows), there is a set of tools to install (including Vagrant):
 
 * [Git for Windows](https://git-for-windows.github.io/)
 * [VirtualBox for Windows](https://www.virtualbox.org/wiki/Downloads)

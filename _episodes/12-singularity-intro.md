@@ -81,7 +81,7 @@ As of June 2021 (**update!**), Singularity is now two distinct projects:
 * [Singularity](https://singularity.hpcng.org), maintained by [HPCng](https://hpcng.org) on their [GitHub](https://github.com/hpcng/singularity);
 * [SingularityCE](https://sylabs.io/singularity), maintained by [Sylabs](https://sylabs.io) on their [GitHub](https://github.com/sylabs/singularity).
 
-These two variants are equivalent up until version 3.7.4, released on May 2021.  This tutorial was developed with Singularity 3.5.x, therefore both variants can be used for the hands-on.  For purely *legacy* reasons, at the moment all links to resources are pointing to Sylabs resources.
+These two variants are equivalent up until version 3.7.4, released on May 2021.  This tutorial was developed with Singularity 3.5.x, therefore both variants can be used for the hands-on.
 
 Singularity was designed from scratch as a container engine for HPC applications, which is clearly reflected in some of its main features:
 
