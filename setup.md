@@ -43,6 +43,7 @@ If you have macOS, you will need [XQuartz](https://www.xquartz.org) installed in
 > >   - Lmod module system : [script]({{ page.root }}/files/install-lmod.sh) \| [docs](https://lmod.readthedocs.io)
 > >   - Docker Compose: [script]({{ page.root }}/files/install-dockercompose.sh) \| [docs](https://docs.docker.com/compose/)
 > >   - HPCCM : [script]({{ page.root }}/files/install-hpccm.sh) \| [docs](https://github.com/NVIDIA/hpc-container-maker/blob/master/docs/getting_started.md)
+> >   - Spack : [script]({{ page.root }}/files/install-spack.sh) \| [docs](https://spack.readthedocs.io)
 > >   - Podman : [script]({{ page.root }}/files/install-podman.sh) \| [docs](https://podman.io/getting-started/installation)
 > >   - Sarus : [script]({{ page.root }}/files/install-sarus.sh) \| [docs](https://sarus.readthedocs.io/en/latest/install/requirements.html)
 > >   - Charliecloud : [script]({{ page.root }}/files/install-charliecloud.sh) (uses [Spack](https://spack.io)) \| [docs](https://hpc.github.io/charliecloud)

@@ -13,7 +13,7 @@ keypoints:
 - Open a shell in a container with `singularity shell`
 - Download a container image in a selected location with `singularity pull`
 - You should not use the `latest` tag, as it may limit workflow reproducibility
-- The most commonly used registries are Docker Hub, Quay, Biocontainers and Nvidia GPU Cloud
+- The most commonly used registries are Docker Hub, Red Hat Quay and BioContainers
 ---
 
 
@@ -81,7 +81,7 @@ As of June 2021 (**update!**), Singularity is now two distinct projects:
 * [Singularity](https://singularity.hpcng.org), maintained by [HPCng](https://hpcng.org) on their [GitHub](https://github.com/hpcng/singularity);
 * [SingularityCE](https://sylabs.io/singularity), maintained by [Sylabs](https://sylabs.io) on their [GitHub](https://github.com/sylabs/singularity).
 
-These two variants are equivalent up until version 3.7.4, released on May 2021.  This tutorial was developed with Singularity 3.5.x, therefore both variants can be used for the hands-on.  For purely *legacy* reasons, at the moment all links to resources are pointing to Sylabs resources.
+These two variants are equivalent up until version 3.7.4, released on May 2021.  This tutorial was developed with Singularity 3.5.x, therefore both variants can be used for the hands-on.
 
 Singularity was designed from scratch as a container engine for HPC applications, which is clearly reflected in some of its main features:
 
@@ -383,9 +383,11 @@ If we really wanted to wipe the cache, we would need to use the `-f` flag instea
 
 At the time of writing, **Docker Hub** hosts a much wider selection of container images than **Sylabs Cloud**.  This includes Linux distributions, Python and R deployments, as well as a big variety of applications.
 
-Bioinformaticians should keep in mind another container registry, [Quay](https://quay.io) by Red Hat, that hosts thousands of applications in this domain of science.  These mostly come out of the [Biocontainers](https://biocontainers.pro) project, that aims to provide automated container builds of all of the packages made available through [Bioconda](https://bioconda.github.io).
+Bioinformaticians should keep in mind another container registry, [Red Hat Quay](https://quay.io) by Red Hat, that hosts thousands of applications in this domain of science.  These mostly come out of the [BioContainers](https://biocontainers.pro) project, that aims to provide automated container builds of all of the packages made available through [Bioconda](https://bioconda.github.io).
 
-Nvidia maintains the [Nvidia GPU Cloud (NGC)](https://ngc.nvidia.com), hosting an increasing number of containerised applications optimised to run on GPUs.
+Nvidia maintains the [Nvidia GPU Cloud (NGC)](https://ngc.nvidia.com), hosting an increasing number of containerised applications optimised to run on Nvidia GPUs.
+
+AMD has recently created [AMD Infinity Hub](https://www.amd.com/en/technologies/infinity-hub), to host containerised applications optimised for AMD GPUs.
 
 Right now, the Sylabs Cloud Library does not contain a large number of images.  Still, it can turn useful for storing container images requiring features that are specific to Singularity (we will see some in the next episodes).
 

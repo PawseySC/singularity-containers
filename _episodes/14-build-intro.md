@@ -207,7 +207,7 @@ WARNING: Skipping container verifying
 ```
 {: .output}
 
-Note the use of the flag `-U` to allow pushing unsigned containers (for more information see this Singularity [documentation page](https://sylabs.io/guides/3.5/user-guide/signNverify.html)).  
+Note the use of the flag `-U` to allow pushing unsigned containers (for more information see this Singularity [documentation page](https://singularity.hpcng.org/user-docs/3.5/signNverify.html)).  
 Also note once again the format for the registry: `<user>/<project>/<name>:<tag>`.
 
 Finally, you (or other peers) are now able to pull your image from the Cloud Library:

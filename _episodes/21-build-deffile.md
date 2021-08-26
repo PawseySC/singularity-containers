@@ -188,7 +188,7 @@ $ singularity run -B $TUTO/_episodes lolcow.sif
 
 ### Advanced build options
 
-The def file specification has a number of other interesting features.  To know more about them you can visit the [Sylabs docs on def files](https://sylabs.io/guides/3.5/user-guide/definition_files.html).
+The def file specification has a number of other interesting features.  To know more about them you can visit the [Singularity docs on def files](https://singularity.hpcng.org/user-docs/3.5/definition_files.html).
 
 1. In the episode on GUI enabled web applications we'll see how to use `%startscript` to configure the behaviour of containers running in background as **long running web servers**.
 
@@ -207,10 +207,10 @@ The def file specification has a number of other interesting features.  To know 
     {: .bash}
 
     Do NOT use sandboxes for production, as their design is not reproducible by nature.  
-    More information on sandbox images can be found at the [Sylabs docs on building images](https://sylabs.io/guides/3.5/user-guide/build_a_container.html#creating-writable-sandbox-directories).
+    More information on sandbox images can be found at the [Singularity docs on building images](https://singularity.hpcng.org/user-docs/3.5/build_a_container.html#creating-writable-sandbox-directories).
 
 3. One last notable feature is the ability to use PGP keys to **sign and verify** container images.  In this way, users of 3rd party containers can double check that the image they're running is bit-by-bit equivalent to the one that the author originally built, largely reducing the possibility of running containers infected by malware.  
-    You can find more on this topic at the [Sylabs docs on signing and verifying containers](https://sylabs.io/guides/3.5/user-guide/signNverify.html).
+    You can find more on this topic at the [Singularity docs on signing and verifying containers](https://singularity.hpcng.org/user-docs/3.5/signNverify.html).
 
 
 ### Useful base images

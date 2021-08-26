@@ -307,10 +307,10 @@ $ singularity pull docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4
 > ## Bonus: search for the BLAST image on an online registry
 > 
 > **If time allows**, you might want to give it a go with looking for the container image yourself.  
-> Start with the assumption that most bioinformatics packages can be found within the *BioContainers* project (this is the repo/name you'll be looking for), and are hosted in both [Quay](https://quay.io) and [Biocontainers](https://biocontainers.pro).  
+> Start with the assumption that most bioinformatics packages can be found within the *BioContainers* project (this is the repo/name you'll be looking for), and are hosted in both [Red Hat Quay](https://quay.io) and [BioContainers](https://biocontainers.pro).  
 > These two registries contain the same images, they just offer a slightly different user interface.  At the time of writing, *Quay* has a cleaner and more readable interface compared to *BioContainers*; hopefully this will change in the future.  
 > 
-> > ## Solution: Quay
+> > ## Solution: Red Hat Quay
 > > 
 > > * Go to https://quay.io (NO registration required!);
 > > * Locate the *Search* field on the top right of the page (you might need to widen the browser window), and type `blast`;
