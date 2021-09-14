@@ -1,10 +1,11 @@
 ---
 title: "Other notable container tools"
-teaching: 10
+teaching: 15
 exercises: 0
 questions:
 objectives:
-- Get an overview of other tools of interest for containers on HPC
+- Get an overview of other tools of interest for building containers
+- Get an overview of other tools of interest for running containers on HPC
 keypoints:
 - HPCCM can be useful to write image recipes that are compatible both with Docker and Singularity
 - In addition to Singularity, other interesting container engines for HPC exist

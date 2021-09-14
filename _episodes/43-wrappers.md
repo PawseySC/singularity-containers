@@ -1,7 +1,7 @@
 ---
 title: "Streamline the user experience: bash wrappers and modules"
-teaching: 10
-exercises: 10
+teaching: 15
+exercises: 15
 questions:
 objectives:
 - Simplify containers usage by means of bash wrappers
