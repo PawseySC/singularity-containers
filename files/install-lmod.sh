@@ -4,7 +4,7 @@
 LMOD_VERSION="8.5"
 
 # install pre-requisites
-sudo apt update
+sudo apt-get update
 sudo apt-get install -y \
   lua5.3 \
   lua-bit32:amd64 \
