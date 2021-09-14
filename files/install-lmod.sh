@@ -1,36 +1,44 @@
 #!/bin/bash
+# following Lmod documentation
 
-LMOD_VER="8.3"
-SPACK_ROOT="/opt/spack"
+LMOD_VERSION="8.5"
 
-USERID="$USER"
-
-# install Spack dependencies
+# install pre-requisites
 sudo apt update
-sudo apt install -y \
-  python3 \
-  build-essential \
-  make \
-  git \
-  curl \
-  unzip
+sudo apt-get install -y \
+  lua5.3 \
+  lua-bit32:amd64 \
+  lua-posix:amd64 \
+  lua-posix-dev \
+  liblua5.3-0:amd64 \
+  liblua5.3-dev:amd64 \
+  tcl \
+  tcl-dev \
+  tcl8.6 \
+  tcl8.6-dev:amd64 \
+  libtcl8.6:amd64
 
-# create install dir
-sudo mkdir -p $SPACK_ROOT
-sudo chown ${USERID}:${USERID} $SPACK_ROOT
+# patch for default Lua tools
+sudo update-alternatives --install /usr/bin/lua \
+  lua-interpreter /usr/bin/lua5.3 130 \
+  --slave /usr/share/man/man1/lua.1.gz lua-manual \
+  /usr/share/man/man1/lua5.3.1.gz
+sudo update-alternatives --install /usr/bin/luac \
+  lua-compiler /usr/bin/luac5.3 130 \
+  --slave /usr/share/man/man1/luac.1.gz lua-compiler-manual \
+  /usr/share/man/man1/luac5.3.1.gz
+sudo ln -s /usr/lib/x86_64-linux-gnu/liblua5.3-posix.so \
+  /usr/lib/x86_64-linux-gnu/lua/5.3/posix.so
 
-# clone Spack
-cd $SPACK_ROOT
-git clone https://github.com/spack/spack.git .
+# install Lmod
+wget https://sourceforge.net/projects/lmod/files/Lmod-${LMOD_VERSION}.tar.bz2
+tar xf Lmod-${LMOD_VERSION}.tar.bz2
+cd Lmod-${LMOD_VERSION}/
+./configure --prefix=/opt/apps
+sudo make install
+cd ..
 
-# configure shell environment for Spack
-echo ". ${SPACK_ROOT}/share/spack/setup-env.sh" >> $(eval echo ~${USERID})/.bashrc
-. ${SPACK_ROOT}/share/spack/setup-env.sh
+# configure Lmod
+sudo ln -s /opt/apps/lmod/lmod/init/profile /etc/profile.d/z00_lmod.sh
+. /etc/profile.d/z00_lmod.sh
 
-
-# now let's install Lmod through Spack
-# this will take a while ..
-spack install lmod@${LMOD_VER}
-LMOD_DIR="$(spack location -i lmod)"
-echo ". ${LMOD_DIR}/lmod/lmod/init/profile" >> $(eval echo ~${USERID})/.bashrc
-. ${LMOD_DIR}/lmod/lmod/init/profile
