@@ -41,6 +41,7 @@ If you have macOS, you will need [XQuartz](https://www.xquartz.org) installed in
 > >   - Nextflow engine : [script]({{ page.root }}/files/install-nextflow.sh) \| [docs](https://www.nextflow.io/docs/latest/getstarted.html)
 > >   - Environment Modules : [script]({{ page.root }}/files/install-modules.sh) \| [docs](http://modules.sourceforge.net)
 > >   - Lmod module system : [script]({{ page.root }}/files/install-lmod.sh) \| [docs](https://lmod.readthedocs.io)
+> >   - SHPC : [script]({{ page.root }}/files/install-shpc.sh) \| [docs](https://singularity-hpc.readthedocs.io)
 > >   - Docker Compose: [script]({{ page.root }}/files/install-dockercompose.sh) \| [docs](https://docs.docker.com/compose/)
 > >   - HPCCM : [script]({{ page.root }}/files/install-hpccm.sh) \| [docs](https://github.com/NVIDIA/hpc-container-maker/blob/master/docs/getting_started.md)
 > >   - Spack : [script]({{ page.root }}/files/install-spack.sh) \| [docs](https://spack.readthedocs.io)
