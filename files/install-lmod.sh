@@ -28,7 +28,7 @@ echo ". ${SPACK_ROOT}/share/spack/setup-env.sh" >> $(eval echo ~${USERID})/.bash
 . ${SPACK_ROOT}/share/spack/setup-env.sh
 
 
-# now let's install Charliecloud through Spack
+# now let's install Lmod through Spack
 # this will take a while ..
 spack install lmod@${LMOD_VER}
 LMOD_DIR="$(spack location -i lmod)"
