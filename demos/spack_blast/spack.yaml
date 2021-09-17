@@ -1,0 +1,17 @@
+spack:
+  specs:
+  - blast-plus@2.9.0 target="haswell"
+
+  container:
+    format: "docker"
+
+    images:
+      os: "ubuntu:18.04"
+      spack: "0.16"
+
+    os_packages:
+      final:
+      - libgomp
+
+    labels:
+      maintainer: "Pawsey Supercomputing Centre"
