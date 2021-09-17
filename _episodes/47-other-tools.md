@@ -87,6 +87,8 @@ spack:
       spack: "0.16"
 
     os_packages:
+      build:
+      - cpio
       final:
       - libgomp
 
