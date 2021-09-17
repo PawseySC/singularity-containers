@@ -46,8 +46,8 @@ If you have macOS, you will need [XQuartz](https://www.xquartz.org) installed in
 > >   - HPCCM : [script]({{ page.root }}/files/install-hpccm.sh) \| [docs](https://github.com/NVIDIA/hpc-container-maker/blob/master/docs/getting_started.md)
 > >   - Spack : [script]({{ page.root }}/files/install-spack.sh) \| [docs](https://spack.readthedocs.io)
 > >   - Podman : [script]({{ page.root }}/files/install-podman.sh) \| [docs](https://podman.io/getting-started/installation)
+> >   - Charliecloud : [script]({{ page.root }}/files/install-charliecloud.sh) (uses Spack) \| [docs](https://hpc.github.io/charliecloud)
 > >   - Sarus : [script]({{ page.root }}/files/install-sarus.sh) \| [docs](https://sarus.readthedocs.io/en/latest/install/requirements.html)
-> >   - Charliecloud : [script]({{ page.root }}/files/install-charliecloud.sh) (uses [Spack](https://spack.io)) \| [docs](https://hpc.github.io/charliecloud)
 > >   - Enroot : [script]({{ page.root }}/files/install-enroot.sh) \| [docs](https://github.com/NVIDIA/enroot/blob/master/doc/installation.md)
 > > 
 > > **Note:** install scripts have been tested on a Ubuntu machine through a user that can run *sudo* commands without password prompts. There's no warranty they will work in your Linux box, you should consider them as templates.
