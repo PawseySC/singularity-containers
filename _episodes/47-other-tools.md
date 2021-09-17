@@ -8,6 +8,7 @@ objectives:
 - Get an overview of other tools of interest for running containers on HPC
 keypoints:
 - HPCCM can be useful to write image recipes that are compatible both with Docker and Singularity
+- Spack can be useful to automate generation of image recipes, including also micro-architecture optimisations
 - In addition to Singularity, other interesting container engines for HPC exist
 ---
 
@@ -59,6 +60,13 @@ Note how this recipe does not produce exactly the def file and Dockerfile we hav
 A price to pay in using HPCCM is that translating a bash installation into a HPCCM recipe requires a lot of rewrite, as opposed to the smaller edits when porting to Dockerfiles and Singularity def files.
 
 More information on HPCCM can be found in the [HPCCM docs](https://github.com/NVIDIA/hpc-container-maker/tree/master/docs).
+
+
+### Spack
+
+[Spack](https://spack.io) is a package manager for HPC, with the main purpose of automating the build of scientific applications and their dependencies.  
+
+Interestingly, it can also be used to automate the generation of Dockerfiles and Singularity def files.
 
 
 ### Podman
