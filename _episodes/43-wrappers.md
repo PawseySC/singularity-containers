@@ -6,10 +6,12 @@ questions:
 objectives:
 - Simplify containers usage by means of bash wrappers
 - Discuss how to deploy containers and their wrappers using modules
+- Discuss how to deploy container modules using SHPC
 keypoints:
 - It is possible to devise a quite general wrapper template for containerised application
 - The key information to setup the wrappers is the container image, and the commands one needs to run from that image
 - It is possible to write a minimal modulefile, that allows to setup the shell environment to use containerised applications through wrappers
+- SHPC uses bash functions and automates the process of creating container modules
 ---
 
 
@@ -302,15 +304,112 @@ USAGE
 Containerised BLAST with wrappers and modules: the experience looks like a traditional installation!
 
 
+## Latest: SHPC, a tool to the rescue for container modules
+
+[Singularity Registry HPC, or SHPC in short,](https://singularity-hpc.readthedocs.io) is an extremely interesting project by some of the original creators of Singularity.  
+This utility enables the automatic deployment of so called Container Modules, using either Lmod or Environment Modules and a very similar approach to the one we have just presented in this episode.  The main difference is the usage of bash functions within modulefiles, in substitution for bash wrapper files.  
+
+To get an idea of what bash functions look like, let's reuse the BLAST example from the above and, rather than write a bash script, execute some commands (assuming we're still in the directory containing the BLAST container image):
+
+```
+$ image_dir="."
+$ image_name="blast_2.9.0--pl526h3066fca_4.sif"
+$ blastp() { singularity exec $image_dir/$image_name blastp "$@" ; }
+```
+{: .bash}
+
+The last command defines a bash function called `blastp`, that wraps the Singularity execution syntax, and which we can now use as a shell command:
+
+```
+$ blastp -help
+```
+{: .bash}
+
+```
+USAGE
+  blastp [-h] [-help] [-import_search_strategy filename]
+[..]
+ -use_sw_tback
+   Compute locally optimal Smith-Waterman alignments?
+```
+{: .output}
+
+Among the differences with the wrapper script approach above, it's worth mentioning that bash function definitions do not require creating a file, and multiple definitions can fit within a single modulefile.  On the other hand, bash functions cannot be used as an argument for *mpirun* or *srun*, and hence are not usable for MPI applications.
+
+The key advantage of SHPC is that it automates the process of downloading the container and creating the corresponding modulefile with bash function definitions.  It does so by means of a registry of recipes (currently over 300) that are ready for use.  If a recipe for a container does not exist, writing one is relatively straightforward, although out of scope for this episode.
+
+Let's see how we can install BLAST using SHPC.  First, let's look for available BLAST versions with `shpc show`:
+
+```
+$ shpc show --versions -f blast
+```
+{: .bash}
+
+```
+quay.io/biocontainers/blast:2.10.1--pl526he19e7b1_3
+quay.io/biocontainers/blast:2.11.0--pl5262h3289130_1
+quay.io/biocontainers/blast:2.12.0--pl5262h3289130_0
+ncbi/blast:2.11.0
+ncbi/blast:2.12.0
+ncbi/blast:latest
+```
+{: .output}
+
+And now let's install the latest BLAST biocontainer (copy-pasting the image and tag from the output above) with `shpc install`:
+
+```
+$ shpc install quay.io/biocontainers/blast:2.12.0--pl5262h3289130_0
+```
+{: .bash}
+
+```
+singularity pull --name /home/ubuntu/singularity-hpc/containers/quay.io/biocontainers/blast/2.12.0--pl5262h3289130_0/quay.io-biocontainers-blast-2.12.0--pl5262h3289130_0-sha256:a7eb056f5ca6a32551bf9f87b6b15acc45598cfef39bffdd672f59da3847cd18.sif docker://quay.io/biocontainers/blast@sha256:a7eb056f5ca6a32551bf9f87b6b15acc45598cfef39bffdd672f59da3847cd18
+INFO:    Converting OCI blobs to SIF format
+INFO:    Starting build...
+[..]
+INFO:    Creating SIF file...
+/home/ubuntu/singularity-hpc/containers/quay.io/biocontainers/blast/2.12.0--pl5262h3289130_0/quay.io-biocontainers-blast-2.12.0--pl5262h3289130_0-sha256:a7eb056f5ca6a32551bf9f87b6b15acc45598cfef39bffdd672f59da3847cd18.sif
+Module quay.io/biocontainers/blast:2.12.0--pl5262h3289130_0 was created.
+```
+{: .output}
+
+That's it!  We now have a BLAST module:
+
+```
+$ module avail blast
+```
+{: .bash}
+
+```
+
+---------------------------------------------------------------------- /home/ubuntu/singularity-hpc/modules ----------------------------------------------------------------------
+   quay.io/biocontainers/blast/2.12.0--pl5262h3289130_0/module
+
+[..]
+```
+{: .output}
+
+Which we can load and use:
+
+```
+$ module load quay.io/biocontainers/blast/2.12.0--pl5262h3289130_0
+$ blastp -help
+```
+{: .bash}
+
+```
+USAGE
+  blastp [-h] [-help] [-import_search_strategy filename]
+[..]
+ -use_sw_tback
+   Compute locally optimal Smith-Waterman alignments?
+```
+{: .output}
+
+
 ### Final thoughts
 
 So, we've shown you how to effectively hide containers under the hood to provide a simplified user experience, while gaining in reproducibility, portability, productivity and more.
 
 Why bothering with learning the longer story of the Singularity syntax then?  Well, containers are a powerful technology, but also a complex one.  
 Even if you're going to use them through a friendlier interface, it's still crucial to know how thing work underneath, to be aware of the corresponding limitations, and possibly also to be able to fix the setup when things go wrong.
-
-
-### Additional resources
-
-We strongly recommend having a look at [Singularity Registry HPC (SHPC)](https://singularity-hpc.readthedocs.io), an extremely interesting project by some of the original creators of Singularity.  
-This utility allows automatic deployment of so called Container Modules, using a very similar approach to the one presented in this episode.  The main difference is the usage of bash functions within modulefiles, in substitution for bash wrapper files.
