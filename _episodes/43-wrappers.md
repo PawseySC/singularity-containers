@@ -304,7 +304,7 @@ USAGE
 Containerised BLAST with wrappers and modules: the experience looks like a traditional installation!
 
 
-## Latest: SHPC, a tool to the rescue for container modules
+### Latest: SHPC, a tool to the rescue for container modules
 
 [Singularity Registry HPC, or SHPC in short,](https://singularity-hpc.readthedocs.io) is an extremely interesting project by some of the original creators of Singularity.  
 This utility enables the automatic deployment of so called Container Modules, using either Lmod or Environment Modules and a very similar approach to the one we have just presented in this episode.  The main difference is the usage of bash functions within modulefiles, in substitution for bash wrapper files.  
