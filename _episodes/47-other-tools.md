@@ -90,7 +90,7 @@ spack:
       build:
       - cpio
       final:
-      - libgomp
+      - libgomp1
 
     labels:
       maintainer: "Pawsey Supercomputing Centre"
