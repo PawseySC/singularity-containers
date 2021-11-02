@@ -29,7 +29,7 @@ $ cd $TUTO/demos/trinity
 ```
 {: .bash}
 
-and then discuss how to use the Linux tools `dd` and `mkfs.ext3` to create and format an empty *ext3* file system image, which we will call `my_overlay`.  These Linux tools typically require `sudo` privileges to run.  However, we can bypass this requirement by using the ones provided inside a standard *Ubuntu* container.  The following command looks a bit cumbersome, but is indeed just an idiomatic syntax to achieve our goal:
+and then discuss how to use the Linux tools `dd` and `mkfs.ext3` to create and format an empty *ext3* filesystem image, which we will call `my_overlay`.  These Linux tools typically require `sudo` privileges to run.  However, we can bypass this requirement by using the ones provided inside a standard *Ubuntu* container.  The following command looks a bit cumbersome, but is indeed just an idiomatic syntax to achieve our goal with Singularity (up to versions 3.7.x):
 
 ```
 $ export COUNT="200"
@@ -70,6 +70,15 @@ What are the single commands doing?
 We are creating (and then deleting at the end) two service directories, `overlay_tmp/upper` and `overlay_tmp/work`, that will be used by the command `mkfs.ext3`.  
 The `dd` command creates a file named `my_overlay`, made up of blocks of zeros, namely with `count` blocks of size `bs` (the unit here is *megabytes*); the product `count*bs` gives the total file size in bytes, in this case corresponding to *200 MB*.
 The command `mkfs.ext3` is then used to format the file as a *ext3* filesystem image, that will be usable by Singularity.  Here we are using the service directory we created, `my_overlay`, with the flag `-d`, to tell `mkfs` we want the filesystem to be owned by the same owner of this directory, *i.e.* by the current user.  If we skipped this option, we would end up with a filesystem that is writable only by *root*, not very useful.
+
+Note how, starting from version 3.8, Singularity offers a dedicated syntax that wraps arounds the commands above, providing a simpler interface (here size must be in MB):
+
+```
+$ export SIZE="200"
+$ export FILE="my_overlay"
+$ singularity overlay create --size $SIZE $FILE
+```
+{: .bash}
 
 
 ### Mount a persistent overlay filesystem
@@ -152,7 +161,7 @@ A subdirectory in the directory we are in, `trinity_test_data/`, contains sample
 
 > ## Create the output directory within an OverlayFS
 >
-> For this exercise we are going to reuse the file system image file `my_overlay`.  
+> For this exercise we are going to reuse the filesystem image file `my_overlay`.  
 > To begin with, use the Singularity image `ubuntu:18.04` to create the directory `/trinity_out_dir` in the OverlayFS.
 >
 > > ## Solution
