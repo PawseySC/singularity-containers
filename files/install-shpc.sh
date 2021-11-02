@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # essential for reproducibility of installation - leave blank "" to use latest commit
-shpc_checkout="e40b6e75f36d04d78606fa7041035d1922b67c82" # 3 Sep 2021, with our BioC recipes
+shpc_checkout="0.0.34"
 
 # some pre-requisites are assumed available: singularity and lmod - see their install scripts
 #
