@@ -31,7 +31,7 @@ If you have macOS, you will need [XQuartz](https://www.xquartz.org) installed in
 > > ## Linux box: read here
 > > 
 > > * Essential (core of the tutorial)
-> >   - Singularity : [script]({{ page.root }}/files/install-singularity.sh) \| [docs](https://sylabs.io/guides/3.5/user-guide/quick_start.html)
+> >   - Singularity : [script]({{ page.root }}/files/install-singularity.sh) \| [docs](https://singularity.hpcng.org/user-docs/3.5/quick_start.html)
 > > * Desirable (to run all the base episodes)
 > >   - Docker : [script]({{ page.root }}/files/install-docker.sh) \| [docs (unofficial)](https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-docker-on-ubuntu-18-04-lts-bionic-beaver.html)
 > >   - MPICH library : [script]({{ page.root }}/files/install-mpich.sh) \| [docs](https://www.mpich.org/documentation/guides/)
@@ -57,7 +57,7 @@ If you have macOS, you will need [XQuartz](https://www.xquartz.org) installed in
 > 
 > For *Singularity*, you will need to setup a Linux virtual machine, and then follow the same instructions as above.  
 > It's not as bad as it sounds... the main two options are:
->   - Vagrant: follow these instructions by Sylabs on [Setting up Singularity with Vagrant](https://sylabs.io/guides/3.5/admin-guide/installation.html#installation-on-windows-or-mac) (*macOS* users: DO NOT use the proposed *Singularity Desktop*, use Vagrant instead);
+>   - Vagrant: follow these instructions by Sylabs on [Setting up Singularity with Vagrant](https://singularity.hpcng.org/admin-docs/3.5/installation.html#installation-on-windows-or-mac) (*macOS* users: DO NOT use the proposed *Singularity Desktop*, use Vagrant instead);
 >   - Multipass: follow instructions from the [Multipass Homepage](https://multipass.run).
 > 
 > For *Docker*, you can download and run installers for [macOS](https://hub.docker.com/editions/community/docker-ce-desktop-mac/) and [Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows/).
