@@ -80,7 +80,7 @@ What has just happened?
 If time allows, you may want to try out a second simulation example, which models the air flow around a two-dimensional wing profile.  This is the required setup:
 
 ```
-$ cd $TUTO/demos/openfoam_wing/mpirun
+$ cd $TUTO/demos/openfoam_visual/mpirun
 $ ./mpirun.sh
 ```
 {: .bash}
@@ -88,7 +88,7 @@ $ ./mpirun.sh
 **In alternative**, if you're running this example on Pawsey systems (*e.g.* Magnus or Zeus), achieve the same result by using the available Slurm setup:
 
 ```
-$ cd $TUTO/demos/openfoam_wing/pawsey
+$ cd $TUTO/demos/openfoam_visual/pawsey
 $ sbatch mpi_pawsey.sh
 ```
 {: .bash}
