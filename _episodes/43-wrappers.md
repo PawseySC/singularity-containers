@@ -406,6 +406,22 @@ USAGE
 ```
 {: .output}
 
+Finally, we can see that this command is indeed a bash function wrapping the singularity syntax, by using the Linux `type` command:
+
+```
+$ type blastp
+```
+{: .bash}
+
+```
+blastp is a function
+blastp ()
+{
+    singularity ${SINGULARITY_OPTS} exec ${SINGULARITY_COMMAND_OPTS} -B /home/ubuntu/singularity-hpc/modules/quay.io/biocontainers/blast/2.12.0--pl5262h3289130_0/99-shpc.sh:/.singularity.d/env/99-shpc.sh /home/ubuntu/singularity-hpc/containers/quay.io/biocontainers/blast/2.12.0--pl5262h3289130_0/quay.io-biocontainers-blast-2.12.0--pl5262h3289130_0-sha256:a7eb056f5ca6a32551bf9f87b6b15acc45598cfef39bffdd672f59da3847cd18.sif /usr/local/bin/blastp
+}
+```
+{: .output}
+
 
 ### Final thoughts
 
