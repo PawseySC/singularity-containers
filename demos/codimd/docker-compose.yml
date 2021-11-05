@@ -10,7 +10,7 @@ services:
       - database-data:/var/lib/postgresql/data
     restart: always
   codimd:
-    image: nabo.codimd.dev/hackmdio/hackmd:2.1.0-cjk
+    image: hackmdio/hackmd:2.1.0-cjk
     environment:
       - CMD_DB_URL=postgres://codimd:Chang3Th1sPassw0rd@database/codimd
       - CMD_USECDN=false
