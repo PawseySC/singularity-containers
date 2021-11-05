@@ -1,7 +1,8 @@
 #!/bin/bash
 
-CHARLIE_VER="0.15"
+CHARLIE_VER="0.25"
 SPACK_ROOT="/opt/spack"
+SPACK_VER="releases/v0.16"
 
 USERID="$USER"
 
@@ -15,15 +16,16 @@ sudo apt install -y \
   curl \
   unzip
 
-# create install dir
+# create Spack install dir
 sudo mkdir -p $SPACK_ROOT
 sudo chown ${USERID}:${USERID} $SPACK_ROOT
-
 # clone Spack
 cd $SPACK_ROOT
 git clone https://github.com/spack/spack.git .
-
-# configure shell environment for Spack
+cd spack
+git checkout ${SPACK_VER}
+cd ..
+# configure Spack shell environment
 echo ". ${SPACK_ROOT}/share/spack/setup-env.sh" >> $(eval echo ~${USERID})/.bashrc
 . ${SPACK_ROOT}/share/spack/setup-env.sh
 

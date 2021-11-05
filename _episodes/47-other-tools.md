@@ -144,29 +144,33 @@ However, if no Docker is found (always the case in HPC), Charliecloud will fallb
 Charliecloud is not a single binary application, instead it offers a collection of several executables for various purposes.  The same task (pulling, building, ..) can in general be performed in different ways.  
 Here we're just showing one possible sequence of commands to pull and use the Ubuntu image `ubuntu:18.04`:
 
-* Pull Ubuntu with `ch-tug` 
+* Pull Ubuntu with `ch-image pull`
     ```
-    $ ch-tug ubuntu/18.04
+    $ ch-image pull ubuntu:18.04
     ```
     {: .bash}
 
     ```
-    pulling image: ubuntu:18.04
-    manifest: downloading
-    
-    [..]
-    
-    creating new image: /var/tmp/ch-grow/img/ubuntu:18.04
-    
-    [..]
-    
+    initializing storage directory: v2 /var/tmp/ubuntu/ch-image
+    pulling image:    ubuntu:18.04
+    requesting arch:  amd64
+    manifest list: downloading: 100%
+    manifest: downloading: 100%
+    config: downloading: 100%
+    layer 1/1: 2840553: downloading: 25.5/25.5 MiB (100%)
+    flattening image
+    layer 1/1: 2840553: listing
+    validating tarball members
+    resolving whiteouts
+    layer 1/1: 2840553: extracting
+    image arch: amd64
     done
     ```
     {: .output}
 
 * Run a simple command with `ch-run`
     ```
-    $ ch-run /var/tmp/ch-grow/img/ubuntu:18.04 cat /etc/os-release
+    $ ch-run /var/tmp/ubuntu/ch-image/img/ubuntu:18.04 cat /etc/os-release
     ```
     {: .bash}
 
