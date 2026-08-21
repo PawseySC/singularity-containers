@@ -47,8 +47,8 @@ Because containerised applications use the host kernel and CPU architecture, the
 There are a number of reasons for using containers in your daily work:
 
 * Easier software installation and dependency management
+  - Users can often run software directly from a container image provided by developers or software vendors, without installing anything themselves.
   - "I can't get this software stack to install in the cluster" is often what drives people to containers.
-  - Applications can be packaged together with the libraries and tools they require.
 
 * Cross-system portability
   - Run the same software environment on your laptop, in the cloud and on HPC systems.
