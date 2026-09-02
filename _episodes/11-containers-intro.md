@@ -10,8 +10,11 @@ objectives:
 - 'Define other terms like: image and registry'
 - Discuss when you would benefit from using containers in your workflow
 keypoints:
-- Containers enable you to package up an application and its dependencies.
-- By using containers, you can better enforce reproducibility, portability and share-ability of your computational workflows.
+  - Containers allow users to run software directly from pre-built images provided by developers, vendors and collaborators.
+  - Containers package applications together with their software environment.
+  - Containers share the host system's kernel instead of running their own.
+  - Containers simplify software installation, portability and reproducibility.
+
 ---
 
 
@@ -23,7 +26,7 @@ Containers are used to distribute software with its dependencies, avoid conflict
 
 ### Containers vs Virtual Machines
 
-If you have already used a Virtual Machine (VM), either on your own computer (for example, using VirtualBox) or through a cloud provider such as Azure, you're already familiar with some of the concepts needed to understand containers.
+If you understand the general concept of a Virtual Machine (VM), either on your own computer (for example, using VirtualBox) or through a cloud provider such as Azure, you're already familiar with some of the concepts needed to understand containers.
 
 <!-- ![Containers vs. VMs]({{ page.root }}/fig/container_vs_vm.png) -->
 <img class="img-responsive center-block" src="{{ page.root }}/fig/container_vs_vm.png" alt="Architecture of virtual machines and containers" style="width: 60%;"/>
@@ -67,6 +70,14 @@ There are a number of reasons for using containers in your daily work:
   - Test software in an environment that closely matches where it will run.
   - Reduce surprises caused by differences between systems.
 
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <strong>Content update required — start</strong><br>
+    Update the following Pawsey use cases and workflow diagram before publication.
+  </div>
+
+  <div class="panel-body" markdown="1">
+
 A few examples of how containers are being used at Pawsey include:
 
 * Bioinformatics workflows
@@ -82,6 +93,13 @@ Here's an overview of what a typical workflow looks like:
 
 <!-- ![Container Workflow]({{ page.root }}/fig/container_lifecycle.png) -->
 <img src="{{ page.root }}/fig/container_lifecycle.png" alt="Container Workflow" width="716" height="298"/>
+
+  </div>
+
+  <div class="panel-footer">
+    <strong>Content update required — end</strong>
+  </div>
+</div>
 
 ### Terminology
 
@@ -127,6 +145,14 @@ $ export TUTO=$(pwd)
 ```
 {: .source}
 
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <strong>Content update required — start</strong><br>
+    Update the following hands on instructions
+  </div>
+
+  <div class="panel-body" markdown="1">
+
 > ## Want to save time later in the tutorial?
 >
 > > ## Read this
@@ -168,3 +194,9 @@ $ export TUTO=$(pwd)
 > ```
 > {: .output}
 {: .callout}
+  </div>
+
+  <div class="panel-footer">
+    <strong>Content update required — end</strong>
+  </div>
+</div>
