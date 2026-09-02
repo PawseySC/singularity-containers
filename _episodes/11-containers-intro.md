@@ -111,7 +111,9 @@ In abstract, an image corresponds to a file, whereas a container corresponds to 
 
 A **registry** is a service that stores and distributes container images. Registries can be public (for example, *Docker Hub* or *Quay.io*) or private. Users can download images from registries and, where permitted, upload their own images for others to use.
 
-To create an image, we need a recipe describing the software to install and how the image should be assembled. This recipe is called a **Definition File** (or **def file**) in the *Singularity* and *Apptainer* ecosystem, and a **Dockerfile** in the *Docker* ecosystem.
+A **container engine** is the software used to create, download and run containers. Examples include *Docker*, *Singularity* and *Apptainer*.
+
+To build an image, we normally use a recipe describing how the image should be assembled. Most recipes start from an existing image that provides a base software environment, and then specify the additional applications, libraries, tools and configuration to include. This recipe is called a **Definition File** (or **def file**) in the *Singularity* and *Apptainer* ecosystem, and a **Dockerfile** in the *Docker* ecosystem.
 
 
 ### Container engines
@@ -120,16 +122,40 @@ A number of tools are available to create, distribute and run containerised appl
 
 * **Docker**: the most widely used container platform and image ecosystem. Docker is commonly used on personal computers, cloud systems and CI/CD platforms to build and distribute container images. Although Docker itself is not typically used directly on shared HPC systems, Docker images are commonly used as the starting point for HPC container workflows. See the extensive [docker documentation](https://docs.docker.com/) for more information.
 
-* **Singularity**: a container engine designed for HPC environments, allowing users to run containers without requiring elevated privileges. Many existing HPC container workflows and images continue to use the Singularity name and image format. See the extensive [singularity documentation](https://docs.sylabs.io/guides/latest/user-guide/) for more information.
-
-* **Apptainer**: an open-source continuation of the Singularity project. It provides the same core functionality and is becoming the standard open-source container engine on many HPC systems. Throughout this tutorial, most commands and concepts apply equally to Singularity and Apptainer. See the [apptainer documentation](https://apptainer.org/docs/user/main/) for more information.
+* **SingularityCE**: a container engine maintained by Sylabs and designed for HPC environments, allowing users to run containers without requiring elevated privileges. SingularityCE is the container engine used throughout this tutorial. See the [SingularityCE documentation](https://sylabs.io/guides/latest/user-guide/) for more information.
 
 Other container engines (not covered here) include:
 
+* **Podman**: a daemonless, rootless container engine that is increasingly used as an alternative to Docker.
+* **Apptainer**: the Linux Foundation-hosted open-source continuation of the original Singularity project, designed to remain largely compatible with SingularityCE workflows and SIF images.
 * **Shifter/Sarus**: container runtimes designed for HPC systems with support for Docker-compatible images.
 * **Charliecloud**: a lightweight container solution designed for HPC environments.
 * **Enroot**: a lightweight container runtime developed by NVIDIA, commonly used for GPU-focused workloads.
-* **Podman**: a daemonless, rootless container engine that is increasingly used as an alternative to Docker.
+
+
+### Container registries
+
+Most users do not create container images from scratch. Instead, they download images that have already been prepared by software developers, research groups, collaborators or hardware vendors.
+
+Container images are typically stored in **registries**, which are online services used to publish and distribute images. Popular public registries include:
+* [Docker Hub](https://hub.docker.com/)
+* [Quay.io](https://quay.io/)
+* [NVIDIA NGC Catalog](https://catalog.ngc.nvidia.com/)
+
+while organisations may also operate private registries.
+
+A common workflow is:
+
+1. Search a registry for an existing image.
+2. Download (or *pull*) the image.
+3. Run the software directly from the image.
+
+If no existing image fully meets your requirements, you can use a suitable image as a base and build a customised image that includes the additional applications and configuration required for your workflow.
+
+This approach allows researchers to quickly access complex software stacks without having to install and configure them manually.
+
+For example, many bioinformatics applications, AI frameworks and vendor-provided software environments are distributed as container images through public registries. NVIDIA publishes GPU-optimised AI and HPC images through the [NVIDIA NGC Catalog](https://catalog.ngc.nvidia.com/), while AMD publishes official ROCm images through its [ROCm organisation on Docker Hub](https://hub.docker.com/u/rocm/). Users can download suitable images and integrate them directly into their research workflows.
+
 
 ### Get ready for the hands-on
 
