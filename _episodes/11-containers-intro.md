@@ -132,6 +132,11 @@ Other container engines (not covered here) include:
 * **Charliecloud**: a lightweight container solution designed for HPC environments.
 * **Enroot**: a lightweight container runtime developed by NVIDIA, commonly used for GPU-focused workloads.
 
+### Image formats
+
+Most images distributed through registries such as *Docker Hub* and *Quay.io* use the container image structure standardised by the **Open Container Initiative (OCI)**. OCI is an industry project that defines open standards for container images, their distribution through registries and their execution by compatible container runtimes. Modern Docker images are generally OCI-compatible, which allows them to be used by container engines other than Docker.
+
+SingularityCE normally stores containers using the **Singularity Image Format (SIF)**, commonly as a single `.sif` file. SingularityCE can pull Docker/OCI images from compatible registries and convert their contents into SIF for use with its native runtime. Therefore, an image published for Docker can often be pulled and used with SingularityCE, even though the original registry image and the resulting SIF file use different image formats.
 
 ### Container registries
 
@@ -141,6 +146,7 @@ Container images are typically stored in **registries**, which are online servic
 * [Docker Hub](https://hub.docker.com/)
 * [Quay.io](https://quay.io/)
 * [NVIDIA NGC Catalog](https://catalog.ngc.nvidia.com/)
+* [Sylabs Cloud Library](https://cloud.sylabs.io/library/)
 
 while organisations may also operate private registries.
 
