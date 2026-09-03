@@ -57,10 +57,10 @@ There are a number of reasons for using containers in your daily work:
   - Run the same software environment on your laptop, in the cloud and on HPC systems.
   - Greatly reduces the "it works on my machine" problem.
 
-* Data reproducibility and software preservation
-  - Helps ensure analyses can be repeated using the same software environment.
+* Software preservation and data reproducibility
   - Preserve working software environments for months or years.
-  - Useful when revisiting an old project after host operating systems, libraries or compilers have changed.
+  - Help ensure that analyses can be repeated using the same software environment.
+  - Revisit older projects after operating systems, libraries, compilers and tool versions on the host systems have changed.
 
 * Simplified collaboration
   - Share a complete software environment with collaborators
@@ -70,36 +70,23 @@ There are a number of reasons for using containers in your daily work:
   - Test software in an environment that closely matches where it will run.
   - Reduce surprises caused by differences between systems.
 
-<div class="panel panel-warning">
-  <div class="panel-heading">
-    <strong>Content update required — start</strong><br>
-    Update the following Pawsey use cases and workflow diagram before publication.
-  </div>
-
-  <div class="panel-body" markdown="1">
-
 A few examples of how containers are being used at Pawsey include:
 
-* Bioinformatics workflows
-* Machine Learning
-* Python apps in radio astronomy
-* RStudio & Jupyter Notebook sessions
-* Webservers
-* OpenFoam simulations
-* Cloud workflows (via Singularity or Docker)
-* HPC workflows (via Singularity)
+* Use of ready-to-use **bioinformatics** container images that package complex software dependencies, avoid difficult installations and preserve specific software versions for reproducible analyses
 
-Here's an overview of what a typical workflow looks like:
+* Greater control and reproducibility for **radio astronomy** and **quantum computing** software through project-managed containers with specific applications, dependencies, compilers and tool versions
 
-<!-- ![Container Workflow]({{ page.root }}/fig/container_lifecycle.png) -->
-<img src="{{ page.root }}/fig/container_lifecycle.png" alt="Container Workflow" width="716" height="298"/>
+* **Machine learning** with ROCm-based **TensorFlow** and **PyTorch** images provided by AMD or Pawsey for multi-GPU workloads, with Pawsey images also supporting multi-node execution
 
-  </div>
+* Interactive data analysis using **RStudio** and **Jupyter** environments
 
-  <div class="panel-footer">
-    <strong>Content update required — end</strong>
-  </div>
-</div>
+* **OpenFOAM** containers simplify installation, maintenance and customisation, including support for older versions that require legacy compilers and libraries
+
+* Reduced pressure on shared filesystems by handling large numbers of small files within container **overlay filesystems** (for example, ORCA, bioinformatics applications and Python software environments)
+
+* Simplified access to selected containerised applications, including bioinformatics tools, OpenFOAM, TensorFlow and PyTorch, through conventional software modules generated with Singularity Registry HPC (**SHPC**)
+
+* **Pawsey-provided container images** on [Quay.io](https://quay.io/organization/pawsey), including tested base images for building specialised containers and ready-to-use application images
 
 ### Terminology
 
@@ -138,30 +125,53 @@ Most images distributed through registries such as *Docker Hub* and *Quay.io* us
 
 SingularityCE normally stores containers using the **Singularity Image Format (SIF)**, commonly as a single `.sif` file. SingularityCE can pull Docker/OCI images from compatible registries and convert their contents into SIF for use with its native runtime. Therefore, an image published for Docker can often be pulled and used with SingularityCE, even though the original registry image and the resulting SIF file use different image formats.
 
+
 ### Container registries
 
-Most users do not create container images from scratch. Instead, they download images that have already been prepared by software developers, research groups, collaborators or hardware vendors.
+Most users do not create container images from scratch. Instead, they search for images prepared by software developers, research groups, collaborators or hardware vendors.
 
-Container images are typically stored in **registries**, which are online services used to publish and distribute images. Popular public registries include:
+Container images are commonly published through online registries and container libraries. Public services include:
+
 * [Docker Hub](https://hub.docker.com/)
 * [Quay.io](https://quay.io/)
-* [NVIDIA NGC Catalog](https://catalog.ngc.nvidia.com/)
 * [Sylabs Cloud Library](https://cloud.sylabs.io/library/)
 
-while organisations may also operate private registries.
+Organisations may also operate private registries for images intended for internal or restricted use. For example, NVIDIA publishes GPU-optimised AI and HPC images through the [NVIDIA NGC Catalog](https://catalog.ngc.nvidia.com/), while AMD publishes official ROCm images through its [ROCm organisation on Docker Hub](https://hub.docker.com/u/rocm/).
 
 A common workflow is:
 
-1. Search a registry for an existing image.
+1. Search a registry or container library for an existing image.
 2. Download (or *pull*) the image.
-3. Run the software directly from the image.
+3. Run the required software from the image.
+
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <strong>Content update required — start</strong><br>
+    Update the workflow diagram before publication.
+  </div>
+
+  <div class="panel-body" markdown="1">
+
+<!-- ![Container Workflow]({{ page.root }}/fig/container_lifecycle.png) -->
+<img src="{{ page.root }}/fig/container_lifecycle.png" alt="Container Workflow" width="716" height="298"/>
+
+  </div>
+
+  <div class="panel-footer">
+    <strong>Content update required — end</strong>
+  </div>
+</div>
 
 If no existing image fully meets your requirements, you can use a suitable image as a base and build a customised image that includes the additional applications and configuration required for your workflow.
 
-This approach allows researchers to quickly access complex software stacks without having to install and configure them manually.
 
-For example, many bioinformatics applications, AI frameworks and vendor-provided software environments are distributed as container images through public registries. NVIDIA publishes GPU-optimised AI and HPC images through the [NVIDIA NGC Catalog](https://catalog.ngc.nvidia.com/), while AMD publishes official ROCm images through its [ROCm organisation on Docker Hub](https://hub.docker.com/u/rocm/). Users can download suitable images and integrate them directly into their research workflows.
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <strong>Content update required — start</strong><br>
+    Update the following hands on instructions
+  </div>
 
+  <div class="panel-body" markdown="1">
 
 ### Get ready for the hands-on
 
@@ -177,13 +187,6 @@ $ export TUTO=$(pwd)
 ```
 {: .source}
 
-<div class="panel panel-warning">
-  <div class="panel-heading">
-    <strong>Content update required — start</strong><br>
-    Update the following hands on instructions
-  </div>
-
-  <div class="panel-body" markdown="1">
 
 > ## Want to save time later in the tutorial?
 >
