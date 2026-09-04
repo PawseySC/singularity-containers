@@ -7,7 +7,7 @@ questions:
 - Who is using containers in HPC ecosystems?
 objectives:
 - 'Define the term: "container" in contrast to "virtual machine"'
-- 'Define other terms like: image and registry'
+- Define other terms, such as image and registry
 - Discuss when you would benefit from using containers in your workflow
 keypoints:
   - Containers allow users to run software directly from pre-built images provided by developers, vendors and collaborators.
@@ -26,7 +26,7 @@ Containers are used to distribute software with its dependencies, avoid conflict
 
 ### Containers vs Virtual Machines
 
-If you understand the general concept of a Virtual Machine (VM), either on your own computer (for example, using VirtualBox) or through a cloud provider such as Azure, you're already familiar with some of the concepts needed to understand containers.
+If you understand the general concept of a virtual machine (VM), either on your own computer (for example, using VirtualBox) or through a cloud provider such as Azure, you're already familiar with some of the concepts needed to understand containers.
 
 <!-- ![Containers vs. VMs]({{ page.root }}/fig/container_vs_vm.png) -->
 <img class="img-responsive center-block" src="{{ page.root }}/fig/container_vs_vm.png" alt="Architecture of virtual machines and containers" style="width: 60%;"/>
@@ -51,7 +51,7 @@ There are a number of reasons for using containers in your daily work:
 
 * Easier software installation and dependency management
   - Users can often run software directly from a container image provided by developers or software vendors, without installing anything themselves.
-  - "I can't get this software stack to install in the cluster" is often what drives people to containers.
+  - "I can't get this software stack to install on the cluster" is often what drives people to containers.
 
 * Cross-system portability
   - Run the same software environment on your laptop, in the cloud and on HPC systems.
@@ -63,7 +63,7 @@ There are a number of reasons for using containers in your daily work:
   - Revisit older projects after operating systems, libraries, compilers and tool versions on the host systems have changed.
 
 * Simplified collaboration
-  - Share a complete software environment with collaborators
+  - Share a complete software environment with collaborators.
   - Then, avoid sharing lengthy installation instructions and configuration steps.
 
 * Consistent testing environment
@@ -100,14 +100,14 @@ A **registry** is a service that stores and distributes container images. Regist
 
 A **container engine** is the software used to create, download and run containers. Examples include *Docker*, *Singularity* and *Apptainer*.
 
-To build an image, we normally use a recipe describing how the image should be assembled. Most recipes start from an existing image that provides a base software environment, and then specify the additional applications, libraries, tools and configuration to include. This recipe is called a **Definition File** (or **def file**) in the *Singularity* and *Apptainer* ecosystem, and a **Dockerfile** in the *Docker* ecosystem.
+To build an image, we normally use a recipe describing how the image should be assembled. Most recipes start from an existing image that provides a base software environment, and then specify the additional applications, libraries, tools and configuration to include. This recipe is called a **Definition File** (or **def file**) in the *Singularity* and *Apptainer* ecosystems, and a **Dockerfile** in the *Docker* ecosystem.
 
 
 ### Container engines
 
 A number of tools are available to create, distribute and run containerised applications. Some of these will be covered throughout this tutorial:
 
-* **Docker**: the most widely used container platform and image ecosystem. Docker is commonly used on personal computers, cloud systems and CI/CD platforms to build and distribute container images. Although Docker itself is not typically used directly on shared HPC systems, Docker images are commonly used as the starting point for HPC container workflows. See the extensive [docker documentation](https://docs.docker.com/) for more information.
+* **Docker**: the most widely used container platform and image ecosystem. Docker is commonly used on personal computers, cloud systems and CI/CD platforms to build and distribute container images. Although Docker itself is not typically used directly on shared HPC systems, Docker images are commonly used as the starting point for HPC container workflows. See the extensive [Docker documentation](https://docs.docker.com/) for more information.
 
 * **SingularityCE**: a container engine maintained by Sylabs and designed for HPC environments, allowing users to run containers without requiring elevated privileges. SingularityCE is the container engine used throughout this tutorial. See the [SingularityCE documentation](https://sylabs.io/guides/latest/user-guide/) for more information.
 
@@ -144,6 +144,8 @@ A common workflow is:
 2. Download (or *pull*) the image.
 3. Run the required software from the image.
 
+If no existing image fully meets your requirements, you can use a suitable image as a base and build a customised image that includes the additional applications and configuration required for your workflow.
+
 <div class="panel panel-warning">
   <div class="panel-heading">
     <strong>Content update required — start</strong><br>
@@ -162,13 +164,11 @@ A common workflow is:
   </div>
 </div>
 
-If no existing image fully meets your requirements, you can use a suitable image as a base and build a customised image that includes the additional applications and configuration required for your workflow.
-
 
 <div class="panel panel-warning">
   <div class="panel-heading">
     <strong>Content update required — start</strong><br>
-    Update the following hands on instructions
+    Update the following hands-on instructions
   </div>
 
   <div class="panel-body" markdown="1">
@@ -177,7 +177,7 @@ If no existing image fully meets your requirements, you can use a suitable image
 
 Before we start, let us ensure we have the required files to run the tutorials.
 
-If you haven't done it already, download the following Github repo.  Then `cd` into it, and save the current directory into a variable named `TUTO` for later use.
+If you haven't done it already, download the following GitHub repository. Then `cd` into it, and save the current directory into a variable named `TUTO` for later use.
 
 ```bash
 $ cd ~
@@ -215,7 +215,7 @@ $ export TUTO=$(pwd)
 
 > ## Are you running on a shared HPC system?
 >
-> If you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node.  You can get this setup by using an interactive scheduler allocation, for instance on Zeus with Slurm:
+> If you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node.  You can set this up by using an interactive scheduler allocation, for instance on Zeus with Slurm:
 >
 > ```
 > $ salloc -n 1 -t 4:00:00
