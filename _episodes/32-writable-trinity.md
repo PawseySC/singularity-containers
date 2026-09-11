@@ -252,6 +252,96 @@ $ ls -l Trinity.fasta*
 {: .output}
 
 
+### Installing software with Conda/Mamba inside an overlay
+
+Writing large numbers of output files isn't the only scenario where a persistent overlay is useful.  Another common case is *installing software*: package managers such as *Conda* (and its faster drop-in replacement, *Mamba*) typically create installations made up of many thousands of small files.  Installing directly on a host parallel filesystem can therefore run into the same file quota and metadata performance problems we discussed above.  We can instead install the whole Conda/Mamba environment *inside* a persistent overlay, keeping all of those small files neatly packed away in a single image file on the host filesystem.
+
+Let's create a new, empty directory to work in, and a fresh overlay image dedicated to this example.  This time, we'll make it considerably bigger than `my_overlay`, since a Conda/Mamba installation can easily take up a few gigabytes:
+
+```
+$ mkdir -p $TUTO/demos/conda_overlay
+$ cd $TUTO/demos/conda_overlay
+$ export SIZE="5000"
+$ export FILE="my_conda_overlay"
+$ singularity overlay create --size $SIZE $FILE
+```
+{: .bash}
+
+> ## Mind the size!
+>
+> Unlike the SquashFS images we could have used instead (see the [Pawsey documentation on SquashFS](https://pawsey.atlassian.net/wiki/spaces/US/pages/51927678/How+to+use+SquashFS+to+avoid+file+quota+issues) for that alternative approach), a Singularity overlay has its size fixed at creation time.  If you don't reserve enough space, the installation will fail partway through and you will have to create a bigger overlay and start again.  When in doubt, err on the generous side.
+{: .callout}
+
+We're going to use a minimal `ubuntu:18.04` container for this.  Such a small base image doesn't ship with `wget` or `curl`, so rather than downloading the installer *from inside* the container, we download it first on the **host**, in our current directory (which Singularity bind mounts into the container by default):
+
+```
+$ wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+```
+{: .bash}
+
+> ## Which base image?
+>
+> Any Linux container image will do here: the [Miniforge](https://github.com/conda-forge/miniforge) installer is self-contained and only needs `bash` and core utilities, and Conda/Mamba then bring their own Python and SSL libraries.  We stick with `ubuntu:18.04` for consistency with the rest of this episode; 
+{: .callout}
+
+Now, let's open a shell into the container, mounting our new overlay as read-write with the `:rw` suffix (this is the default, but it doesn't hurt to be explicit):
+
+```
+$ singularity shell --overlay $FILE:rw docker://ubuntu:18.04
+```
+{: .bash}
+
+From inside the container, we run the installer, pointing it at a path at the root of the overlay with `-p`.  Note we do **not** create `/opt/conda` beforehand: the installer refuses to write into a directory that already exists.
+
+```
+Singularity> bash Miniforge3-Linux-x86_64.sh -b -p /opt/conda
+```
+{: .bash}
+
+The `-b` flag runs the installer in batch (non-interactive) mode, and `-p /opt/conda` installs into the overlay rather than under `$HOME`.  All the files land inside the overlay image, not on the host filesystem.
+
+Once installed, we can activate the environment and use `mamba` to install whatever packages we need.  Let's add the *bwa* aligner, which lives on the *bioconda* channel:
+
+```
+Singularity> source /opt/conda/etc/profile.d/conda.sh
+Singularity> export PATH=/opt/conda/bin:$PATH
+Singularity> mamba install -y -c bioconda -c conda-forge bwa
+Singularity> mamba clean --all --yes
+Singularity> exit
+```
+{: .bash}
+
+We ran `mamba clean` before exiting to remove downloaded package caches we no longer need, saving some space in the overlay.  Back on the host, we can delete the installer script:
+
+```
+$ rm Miniforge3-Linux-x86_64.sh
+```
+{: .bash}
+
+> ## Use the installed software from a fresh container
+>
+> Once exited, start a **new** `singularity exec` from the *same* Ubuntu image, mounting `my_conda_overlay` again, and check that `bwa` is available and runs.  (**Hint**: you will need to add `/opt/conda/bin` to the `PATH` *inside* the container before calling `bwa`).
+>
+> > ## Solution
+> >
+> > ```
+> > $ singularity exec --overlay my_conda_overlay docker://ubuntu:18.04 bash -c 'export PATH=/opt/conda/bin:$PATH && bwa'
+> > ```
+> > {: .bash}
+> >
+> > ```
+> > Program: bwa (alignment via Burrows-Wheeler transformation)
+> > Version: 0.7.17-r1188
+> > Contact: Heng Li <lh3@sanger.harvard.edu>
+> > ...
+> > ```
+> > {: .output}
+> {: .solution}
+{: .challenge}
+
+Just like with the Trinity example earlier, the software we installed persists inside the overlay image file, and can be reused across different container runs, even from different container images, simply by mounting `my_conda_overlay` again with `--overlay`.  This makes overlays a handy way to keep bulky, many-file software installations off your quota-limited host filesystem, while still being able to bring them along with any Singularity container you like.
+
+
 ### Ephemeral writable containers
 
 In some situations, you might need your container to be writable not to store persistent output files, but just to write temporary service files.  
