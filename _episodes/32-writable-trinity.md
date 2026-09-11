@@ -281,7 +281,7 @@ $ wget https://github.com/conda-forge/miniforge/releases/latest/download/Minifor
 
 > ## Which base image?
 >
-> Any Linux container image will do here: the [Miniforge](https://github.com/conda-forge/miniforge) installer is self-contained and only needs `bash` and core utilities, and Conda/Mamba then bring their own Python and SSL libraries.  We stick with `ubuntu:18.04` for consistency with the rest of this episode; if you'd rather fetch the installer from within the container, pick an image that already includes `curl` or `wget` (for instance a Pawsey base image such as `docker://quay.io/pawsey/mpich-base`).
+> Any Linux container image will do here: the [Miniforge](https://github.com/conda-forge/miniforge) installer is self-contained and only needs `bash` and core utilities, and Conda/Mamba then bring their own Python and SSL libraries.  We stick with `ubuntu:18.04` for consistency with the rest of this episode; 
 {: .callout}
 
 Now, let's open a shell into the container, mounting our new overlay as read-write with the `:rw` suffix (this is the default, but it doesn't hurt to be explicit):
