@@ -24,6 +24,34 @@ keypoints:
 - "For images to be downloaded, prefer versioned image tags over `latest` when they are available"
 ---
 
+### Get ready for the hands-on
+
+Before we start, let us ensure we have got the required files to run the tutorials.
+
+If you haven't done so already, move to a suitable working directory and download the following GitHub repository. On Pawsey systems, use your scratch directory; on other HPC or cloud systems, use the equivalent working directory recommended by the system administrators.
+
+```bash
+$ cd "$MYSCRATCH"    # On Pawsey systems
+$ git clone https://github.com/PawseySC/singularity-containers
+$ export TUTO="$PWD/singularity-containers"
+$ cd "$TUTO"
+```
+{: .source}
+
+Now `cd` to the working directory. In this case:
+```bash
+$ cd demos/basic_use
+$ pwd
+```
+
+The working directory should be something like:
+```text
+/path/to/scratch/singularity-containers/demos/basic_use
+```
+{: .source}
+
+
+
 <div class="panel panel-warning">
   <div class="panel-heading">
     <strong>Content update required — start</strong><br>
@@ -31,21 +59,6 @@ keypoints:
   </div>
 
   <div class="panel-body" markdown="1">
-
-### Get ready for the hands-on
-
-Before we start, let us ensure we have got the required files to run the tutorials.
-
-If you haven't done it already, download the following Github repo.  Then `cd` into it, and save the current directory into a variable named `TUTO` for later use.
-
-```
-$ cd ~
-$ git clone https://github.com/PawseySC/singularity-containers
-$ cd singularity-containers
-$ export TUTO=$(pwd)
-```
-{: .bash}
-
 
 > ## Want to save time later in the tutorial?
 >
