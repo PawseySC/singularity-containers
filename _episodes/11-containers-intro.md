@@ -149,6 +149,21 @@ If no existing image fully meets your requirements, you can use a suitable image
 <!-- ![Container Workflow]({{ page.root }}/fig/container_lifecycle.png) -->
 <img class="img-responsive center-block" src="{{ page.root }}/fig/container_lifecycle.png" alt="Container Workflow" width="716" height="298"/>
 
+
+### Get ready for the hands-on
+
+Before we start, let us ensure we have the required files to run the tutorials.
+
+If you haven't done so already, move to a suitable working directory and download the following GitHub repository. On Pawsey systems, use your scratch directory; on other HPC or cloud systems, use the equivalent working directory recommended by the system administrators.
+
+```bash
+$ cd "$MYSCRATCH"    # On Pawsey systems
+$ git clone https://github.com/PawseySC/singularity-containers
+$ export TUTO="$PWD/singularity-containers"
+$ cd "$TUTO"
+```
+{: .source}
+
 <div class="panel panel-warning">
   <div class="panel-heading">
     <strong>Content update required — start</strong><br>
@@ -156,21 +171,6 @@ If no existing image fully meets your requirements, you can use a suitable image
   </div>
 
   <div class="panel-body" markdown="1">
-
-### Get ready for the hands-on
-
-Before we start, let us ensure we have the required files to run the tutorials.
-
-If you haven't done it already, download the following GitHub repository. Then `cd` into it, and save the current directory into a variable named `TUTO` for later use.
-
-```bash
-$ cd ~
-$ git clone https://github.com/PawseySC/singularity-containers
-$ cd singularity-containers
-$ export TUTO=$(pwd)
-```
-{: .source}
-
 
 > ## Want to save time later in the tutorial?
 >
