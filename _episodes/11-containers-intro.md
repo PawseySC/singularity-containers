@@ -146,24 +146,8 @@ A common workflow is:
 
 If no existing image fully meets your requirements, you can use a suitable image as a base and build a customised image that includes the additional applications and configuration required for your workflow.
 
-<div class="panel panel-warning">
-  <div class="panel-heading">
-    <strong>Content update required — start</strong><br>
-    Update the workflow diagram before publication.
-  </div>
-
-  <div class="panel-body" markdown="1">
-
 <!-- ![Container Workflow]({{ page.root }}/fig/container_lifecycle.png) -->
-<img src="{{ page.root }}/fig/container_lifecycle.png" alt="Container Workflow" width="716" height="298"/>
-
-  </div>
-
-  <div class="panel-footer">
-    <strong>Content update required — end</strong>
-  </div>
-</div>
-
+<img class="img-responsive center-block" src="{{ page.root }}/fig/container_lifecycle.png" alt="Container Workflow" width="716" height="298"/>
 
 <div class="panel panel-warning">
   <div class="panel-heading">
