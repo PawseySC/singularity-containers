@@ -2,14 +2,19 @@
 
 set -euo pipefail
 
-# New settings
+#---  New settings
+# decomposeParDict:
 newNumberOfSubdomains="8"  # Must equal Slurm --ntasks
 newSimpleCoeffs="1 2 4"    # Product must equal newNumberOfSubdomains
-newEndTime="50"
+# controlDict:
+newEndTime="200"
 newWriteInterval="10"
 newRunTimeModifiable="false"
+# slurm job script:
 newMGroup="4"              # I/O rank grouping used by the Slurm script
 
+
+# Files to update
 caseDir="./periodicPlaneChannel"
 decomposeParDict="${caseDir}/system/decomposeParDict"
 controlDict="${caseDir}/system/controlDict"
