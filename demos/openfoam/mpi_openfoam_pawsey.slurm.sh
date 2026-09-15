@@ -13,9 +13,15 @@
 module load singularity/4.1.0-mpi
 
 #--- Using user's own image:
-export SINGULARITY_IMAGE="$MYSOFTWARE/singularity/images/openfoam--v2012.sif"  #Adapt path and name to the correct ones
+export SINGULARITY_IMAGE="$MYSOFTWARE/singularity/images/openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif"  #Adapt path and name to the correct ones
 echo "Using openfoam singularity image:"
 echo "SINGULARITY_IMAGE=$SINGULARITY_IMAGE"
+
+#--- Prepare the case directory:
+caseDir=periodicPlaneChannel
+cd $caseDir
+rm -rf 0
+cp -r 0.orig 0
 
 #--- Specific settings for the cluster you are on
 #(Check the specific guide of the cluster for additional settings)
@@ -49,3 +55,6 @@ srun -N $SLURM_JOB_NUM_NODES -n $SLURM_NTASKS -c 1 \
 #(These post-processing tools are serial by design)
 singularity exec $SINGULARITY_IMAGE \
   postChannel | tee log.postChannel
+
+#--- Final commands
+echo "OpenFOAM script has reached the end"

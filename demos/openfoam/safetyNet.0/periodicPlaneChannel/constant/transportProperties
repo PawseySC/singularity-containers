@@ -1,35 +1,24 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|  \\    /   O peration     | Version:  v2606                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      nuTilda;
+    class       dictionary;
+    object      transportProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -1 0 0 0 0];
+Ubar            (0.1335 0 0);
 
-internalField   uniform 1e-8;
+transportModel  Newtonian;
 
-boundaryField
-{
-    "(inlet|outlet|front|back)"
-    {
-        type            cyclic;
-    }
+nu              2e-05;
 
-    "(top|hills)"
-    {
-        type            fixedValue;
-        value           uniform 0;
-    }
-}
 
 // ************************************************************************* //
