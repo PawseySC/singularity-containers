@@ -45,16 +45,15 @@ singularity exec $SINGULARITY_IMAGE blockMesh | tee log.blockMesh
 singularity exec $SINGULARITY_IMAGE renumberMesh -overwrite -constant | tee log.renumberMesh
 singularity exec $SINGULARITY_IMAGE decomposePar -cellDist -force | tee log.decomposePar
 
-
-#--- Execute the solver:
+#--- Execute the parallel solver:
 #(Solvers use MPI parallelism by design)
 srun -N $SLURM_JOB_NUM_NODES -n $SLURM_NTASKS -c 1 \
   singularity exec $SINGULARITY_IMAGE pimpleFoam -parallel | tee log.pimpleFoam
 
 #--- Execute post-processing tools:
 #(These post-processing tools are serial by design)
-singularity exec $SINGULARITY_IMAGE reconstructPar | tee log.reconstructPar
-singularity exec $SINGULARITY_IMAGE postChannel | tee log.postChannel
+singularity exec $SINGULARITY_IMAGE reconstructPar -latestTime | tee log.reconstructPar
+singularity exec $SINGULARITY_IMAGE postChannel -latestTime | tee log.postChannel
 
 #--- Final commands
 echo "OpenFOAM script has reached the end"

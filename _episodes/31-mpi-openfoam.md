@@ -132,7 +132,7 @@ Alltest     combustion	financial	  lagrangian	  preProcessing
 ```
 {: .output}
 
-(At this point we assume that the selected tutorial is `$FOAM_TUTORIALS/bla`.)
+(At this point we will assume that the selected tutorial is `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicPlaneChannel`.)
 
 Once the tutorial have been selected, copy the case directory into the working directory in the host (we previously saved that path in `HOST_WORKING_DIR` variable):
 
@@ -224,57 +224,26 @@ $ ls -ltr periodicPlaneChannel
 {: .source}
 
 ```
-total 1188
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 18:30 0.orig
--rwxr-xr-x   1 courses01 courses     915 Sep 15 18:31 Allrun
--rwxr-xr-x   1 courses01 courses     340 Sep 15 18:31 Allclean
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 18:52 system
--rw-r--r--   1 courses01 courses    3346 Sep 15 18:53 log.blockMesh
-drwxr-sr-x   3 courses01 courses    4096 Sep 15 18:53 constant
--rw-r--r--   1 courses01 courses    2166 Sep 15 18:53 log.renumberMesh
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 18:53 0
--rw-r--r--   1 courses01 courses    5823 Sep 15 18:53 log.decomposePar
-drwxr-sr-x 104 courses01 courses    4096 Sep 15 18:54 processors8_4-7
-drwxr-sr-x 104 courses01 courses    4096 Sep 15 18:54 processors8_0-3
--rw-r--r--   1 courses01 courses 1160996 Sep 15 18:54 log.pimpleFoam
--rw-r--r--   1 courses01 courses    1737 Sep 15 18:54 log.postChannel
+-rwxr-xr-x   1 courses01 courses     915 Sep 15 19:05 Allrun
+-rwxr-xr-x   1 courses01 courses     340 Sep 15 19:05 Allclean
+drwxr-sr-x   2 courses01 courses    4096 Sep 15 19:05 0.orig
+drwxr-sr-x   2 courses01 courses    4096 Sep 15 19:06 system
+-rw-r--r--   1 courses01 courses    3299 Sep 15 19:08 log.blockMesh
+-rw-r--r--   1 courses01 courses    2167 Sep 15 19:08 log.renumberMesh
+drwxr-sr-x   3 courses01 courses    4096 Sep 15 19:08 constant
+drwxr-sr-x   2 courses01 courses    4096 Sep 15 19:08 0
+-rw-r--r--   1 courses01 courses    5782 Sep 15 19:08 log.decomposePar
+drwxr-sr-x 104 courses01 courses    4096 Sep 15 19:08 processors8_4-7
+drwxr-sr-x 104 courses01 courses    4096 Sep 15 19:08 processors8_0-3
+-rw-r--r--   1 courses01 courses 1160982 Sep 15 19:08 log.pimpleFoam
+-rw-r--r--   1 courses01 courses    2092 Sep 15 19:09 log.reconstructPar
+drwxr-sr-x   3 courses01 courses    4096 Sep 15 19:09 200
+-rw-r--r--   1 courses01 courses    1763 Sep 15 19:09 log.postChannel
+drwxr-sr-x   3 courses01 courses    4096 Sep 15 19:13 graphs
 ```
 {: .output}
 
-We ran using *8 MPI* processes, who created outputs in the directories `processors8_0-3` and `processors8_4-7`.  The final reconstruction creates results in the directory `20` (which stands for the *20th* and last simulation step in this very short demo run).
-
-What has just happened?
-
-
-### Bonus: a second OpenFoam example with visual output
-
-If time allows, you may want to try out a second simulation example, which models the air flow around a two-dimensional wing profile.  This is the required setup:
-
-```
-$ cd $TUTO/demos/openfoam_visual/mpirun
-$ ./mpirun.sh
-```
-{: .bash}
-
-**In alternative**, if you're running this example on Pawsey systems (*e.g.* Magnus or Zeus), achieve the same result by using the available Slurm setup:
-
-```
-$ cd $TUTO/demos/openfoam_visual/pawsey
-$ sbatch mpi_pawsey.sh
-```
-{: .bash}
-
-This run uses 4 MPI processes and takes about 5-6 minutes.  Upon completion, the file `wingMotion2D_pimpleFoam/wingMotion2D_pimpleFoam.foam` can be opened with the visualisation package *Paraview*, if you have access to it (at Pawsey it is available on Topaz).  Here are a couple of snapshots:
-
-<table>
-  <tr>
-    <th><img src="{{ page.root }}/fig/wing_p_pressure.png" alt="Wing pressure map" width="400"/></th>
-    <th><img src="{{ page.root }}/fig/wing_nut_viscosity.png" alt="Wing viscosity map" width="400"/></th>
-  </tr>
-</table>
-
-We have just visualised the results of this containerised simulation!
-
+We ran using *8 MPI* processes, who created outputs in the directories `processors8_0-3` and `processors8_4-7`.  The final reconstruction has only been applied to the latest time and creates results in the directory `200` (which stands for simulation time `200`).
 
 ### A batch script for MPI applications with containers
 
@@ -285,43 +254,133 @@ $ cd $TUTO/demos/openfoam
 ```
 {: .bash}
 
-and have a look at the content of the script `mpi_mpirun.sh`:
+and have a look at the content of the script `mpi_openfoam_pawsey.slurm.sh`:
+
+```bash
+#!/bin/bash --login
+
+#SBATCH --job-name=mpi-openfoam-training
+#SBATCH --partition=work
+#SBATCH --reservation=ContainersTraining
+#SBATCH --nodes=1
+#SBATCH --ntasks=8
+#SBATCH --ntasks-per-node=8
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:05:00
+
+#--- Load the singularity module (Pawsey's mpi-settings flavour):
+module load singularity/4.1.0-mpi
+
+#--- Using user's own image:
+export SINGULARITY_IMAGE="$MYSOFTWARE/singularity/images/openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif"  #Adapt path and name to the correct ones
+echo "Using openfoam singularity image:"
+echo "SINGULARITY_IMAGE=$SINGULARITY_IMAGE"
+
+#--- Prepare the case directory:
+caseDir=periodicPlaneChannel
+cd $caseDir
+rm -rf 0
+cp -r 0.orig 0
+
+#--- Specific settings for the cluster you are on
+#(Check the specific guide of the cluster for additional settings)
+
+#--- Automating the list of IORANKS for collated fileHandler
+echo "Setting the grouping ratio for collated fileHandling"
+nProcs=$SLURM_NTASKS #Number of total processors in decomposition for this case
+mGroup=4             #Size of the groups for collated fileHandling (32 is the initial recommendation for Setonix)
+of_ioRanks="0"
+iC=$mGroup
+while [ $iC -le $nProcs ]; do
+   of_ioRanks="$of_ioRanks $iC"
+   ((iC += $mGroup))
+done
+export FOAM_IORANKS="("${of_ioRanks}")"
+echo "FOAM_IORANKS=$FOAM_IORANKS"
+
+#--- Execute pre-processing tools:
+#(These pre-processing tools are serial by design)
+singularity exec $SINGULARITY_IMAGE blockMesh | tee log.blockMesh
+singularity exec $SINGULARITY_IMAGE renumberMesh -overwrite -constant | tee log.renumberMesh
+singularity exec $SINGULARITY_IMAGE decomposePar -cellDist -force | tee log.decomposePar
+
+#--- Execute the parallel solver:
+#(Solvers use MPI parallelism by design)
+srun -N $SLURM_JOB_NUM_NODES -n $SLURM_NTASKS -c 1 \
+  singularity exec $SINGULARITY_IMAGE pimpleFoam -parallel | tee log.pimpleFoam
+
+#--- Execute post-processing tools:
+#(These post-processing tools are serial by design)
+singularity exec $SINGULARITY_IMAGE reconstructPar -latestTime | tee log.reconstructPar
+singularity exec $SINGULARITY_IMAGE postChannel -latestTime | tee log.postChannel
+
+#--- Final commands
+echo "OpenFOAM script has reached the end"
 
 ```
-#!/bin/bash
+{: .source}
 
-NTASKS="2"
+> ## Important Part 1:
+>
+> ```bash
+> #!/bin/bash --login
+>
+> #SBATCH --job-name=mpi-openfoam-training
+> #SBATCH --partition=work
+> #SBATCH --reservation=ContainersTraining
+> #SBATCH --nodes=1
+> #SBATCH --ntasks=8
+> #SBATCH --ntasks-per-node=8
+> #SBATCH --cpus-per-task=1
+> #SBATCH --time=00:05:00
+>
+> #--- Load the singularity module (Pawsey's mpi-settings flavour):
+> module load singularity/4.1.0-mpi
+>
+> #--- Using user's own image:
+> export SINGULARITY_IMAGE="$MYSOFTWARE/singularity/images/openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif"  #Adapt path and name to the correct ones
+> echo "Using openfoam singularity image:"
+> echo "SINGULARITY_IMAGE=$SINGULARITY_IMAGE"
+> ```
+> {: .source}
+- The job reserves resources for 8 MPI tasks
+- The `singularity/4.1.0-mpi` module is loaded
+- The image to be used is defined in our user defined variable `SINGULARITY_IMAGE`
+{: .solution}
 
-# this configuration depends on the host
-export MPICH_ROOT="/opt/mpich/mpich-3.1.4/apps"
+> ## Important Part 2:
+>
+> ```bash
+> #--- Execute pre-processing tools:
+> #(These pre-processing tools are serial by design)
+> singularity exec $SINGULARITY_IMAGE blockMesh | tee log.blockMesh
+> singularity exec $SINGULARITY_IMAGE renumberMesh -overwrite -constant | tee log.renumberMesh
+> singularity exec $SINGULARITY_IMAGE decomposePar -cellDist -force | tee log.decomposePar
+>
+> ...
+>
+> #--- Execute post-processing tools:
+> #(These post-processing tools are serial by design)
+> singularity exec $SINGULARITY_IMAGE reconstructPar -latestTime | tee log.reconstructPar
+> singularity exec $SINGULARITY_IMAGE postChannel -latestTime | tee log.postChannel
+> ```
+> {: .source}
+- All the required serial tools for pre- and post-processing are called with `singularity exec $SINGULARITY_IMAGE ...`
+- Note that the `tee` commands are running in the host, so there pipe works fine passing the output from the singularity exectution and there's no need to use the `bash -c ` trick
+{: .solution}
 
-export SINGULARITY_BINDPATH="$MPICH_ROOT"
-export SINGULARITYENV_LD_LIBRARY_PATH="$MPICH_ROOT/lib:\$LD_LIBRARY_PATH"
-
-
-# pre-processing
-singularity exec openfoam_v2012.sif \
-  blockMesh | tee log.blockMesh
-
-singularity exec openfoam_v2012.sif \
-  topoSet | tee log.topoSet
-
-singularity exec openfoam_v2012.sif \
-  decomposePar -fileHandler uncollated | tee log.decomposePar
-
-
-# run OpenFoam with MPI
-mpirun -n $NTASKS \
-  singularity exec openfoam_v2012.sif \
-  simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
-
-
-# post-processing
-singularity exec openfoam_v2012.sif \
-  reconstructPar -latestTime -fileHandler uncollated | tee log.reconstructPar
-```
-{: .bash}
-
+> ## Important Part 3:
+>
+> ```bash
+> #--- Execute the parallel solver:
+> #(Solvers use MPI parallelism by design)
+> srun -N $SLURM_JOB_NUM_NODES -n $SLURM_NTASKS -c 1 \
+>   singularity exec $SINGULARITY_IMAGE pimpleFoam -parallel | tee log.pimpleFoam
+> ```
+> {: .source}
+- `srun` launches the 8 MPI tasks in Setonix interconnect
+- The parallel solver `pimpleFoam` is called using `singularity exec $SINGULARITY_IMAGE pimpleFoam -parallel`
+{: .solution}
 
 ### How does Singularity interplay with the MPI launcher?
 
