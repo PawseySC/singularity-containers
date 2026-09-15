@@ -769,7 +769,7 @@ $ singularity shell "$SINGULARITY_IMAGE"
 ```
 {: .source}
 
-The prompt changes to indicate that you are interacting with a shell inside the container environment:
+The prompt changes to `Singularity>` to indicate that you are interacting with a shell inside the container environment:
 
 ```text
 Singularity>
