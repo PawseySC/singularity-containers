@@ -7,7 +7,7 @@
 #SBATCH --ntasks=8
 #SBATCH --ntasks-per-node=8
 #SBATCH --cpus-per-task=1
-#SBATCH --time=00:20:00
+#SBATCH --time=00:05:00
 
 #--- Load the singularity module (Pawsey's mpi-settings flavour):
 module load singularity/4.1.0-mpi
@@ -53,8 +53,8 @@ srun -N $SLURM_JOB_NUM_NODES -n $SLURM_NTASKS -c 1 \
 
 #--- Execute post-processing tools:
 #(These post-processing tools are serial by design)
-singularity exec $SINGULARITY_IMAGE \
-  postChannel | tee log.postChannel
+singularity exec $SINGULARITY_IMAGE reconstructPar | tee log.reconstructPar
+singularity exec $SINGULARITY_IMAGE postChannel | tee log.postChannel
 
 #--- Final commands
 echo "OpenFOAM script has reached the end"
