@@ -90,7 +90,7 @@ $ singularity pull \
 
 This may take some time, so you can go for a coffee in the meantime.
 
-### Prepare the tutorial starting with a copy from the image into the working directory in the host
+### Copy the tutorial files from the image into the working directory in the host
 
 OpenFOAM counts with several examples (tutorials) that can be used as starting point for your research or learning process. Selection of a tutorial is usually performed in an interactive shell inside the container. First, start the interactive shell (you will notice that prompt will change to `Singularity>`):
 
@@ -141,107 +141,60 @@ Singularity> cp -r "${FOAM_TUTORIALS}/incompressible/pimpleFoam/LES/periodicPlan
 ```
 {: .source}
 
-> ## Alternative: copy the tutorial without opening an interactive shell
->
-> The same steps can be performed directly from the host by using `singularity exec`. First, inspect the location and contents of the OpenFOAM tutorials directory:
->
-> ```bash
-> $ singularity exec "$SINGULARITY_IMAGE" \
->     bash -c 'find $FOAM_TUTORIALS -iname "*PlaneChannel*"'
-> ```
-> {: .source}
->
-> The resulting list would look something like this:
->
-> ```text
-> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/incompressible/pimpleFoam/LES/periodicPlaneChannel
-> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/incompressible/pimpleFoam/LES/planeChannel
-> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/verificationAndValidation/turbulenceModels/planeChannel
-> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/verificationAndValidation/turbulentInflow/oneCellThickPlaneChannel
-> ```
-> {: .output}
->
-> Then copy the selected tutorial into the current working directory on the host:
->
-> ```bash
-> $ singularity exec "$SINGULARITY_IMAGE" \
->     bash -c 'cp -r "$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicPlaneChannel" "$PWD"'
-> ```
-> {: .source}
->
-> The command is passed through `bash -c` so that `$FOAM_TUTORIALS` and `$PWD` are expanded inside the container. Singularity makes the host working directory available inside the container at the same path, so the copied `periodicPlaneChannel` directory appears in the directory from which the command was run.
-{: .solution}
 
-Now update the default settings of the OpenFOAM tutorial to preferred settings for this tutorial. This is done by the `update-settings.sh` script.
+
+### Let's run an MPI containerised application in an HPC cluster!
+
+We're going to start this episode with actually running a practical example, and then discuss the way this all works later on.
+We're using OpenFoam, a widely popular package for Computational Fluid Dynamics simulations, which is able to massively scale in parallel architectures up to thousands of processes, by leveraging an MPI library.
+
+(The tutorial example used here is part of the OpenFOAM examples provided by this version: `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicHill/steadyState/`.)
+
+
+
+If you're running this example on Pawsey systems (*e.g.* Setonix), achieve the same result by using the Slurm scheduler to submit the job script `mpi_pawsey.sh`:
 
 ```bash
-$ ./update-settings.sh
+$ sbatch mpi_pawsey.sh
 ```
 {: .source}
 
-> ## If curious: inspect the changes
->
-> If you are curious about what was updated, check the differences of the OpenFOAM dictionaries in `periodicPlaneChannel/system` subdirectory with respect to their original settings now copied to `*.original.00` files.
-{: .solution}
-
-
-### Run the MPI containerised application in an HPC cluster!
-
-Submit the Slurm job script:
+**In alternative**, if you're running this example from a linux computer without slurm scheduler installed, run the script:
 
 ```bash
-$ sbatch --reservation=ContainersTraining mpi_openfoam_pawsey.slurm.sh
+$ ./mpi_mpirun.sh
 ```
 {: .source}
 
-Check the execution status of the job with:
+The run will take a couple of minutes. When it's finished, the directory contents will look a bit like this one:
 
 ```bash
-$ squeue --me
+$ ls -ltr
 ```
 {: .source}
 
-```text
-JOBID        USER ACCOUNT             NAME EXEC_HOST ST  REASON START_TIME   END_TIME  TIME_LEFT NODES   PRIORITY     QOS
-48927321 course01 courses   mpi-openfoam-t nid002604  R    None 18:40:12     19:00:12      19:45     1      75246  normal
+```
+total 80
+-rwxr-xr-x 1 user000 tutorial  1304 Nov 16 17:36 update-settings.sh
+drwxr-xr-x 2 user000 tutorial   141 Nov 16 17:36 system
+-rw-r--r-- 1 user000 tutorial   871 Nov 16 17:36 mpi_pawsey.sh
+-rwxr-xr-x 1 user000 tutorial   789 Nov 16 17:36 mpi_mpirun.sh
+drwxr-xr-x 2 user000 tutorial    59 Nov 16 17:36 0
+drwxr-xr-x 4 user000 tutorial    72 Nov 16 22:45 dynamicCode
+drwxr-xr-x 3 user000 tutorial    77 Nov 16 22:45 constant
+-rw-rw-r-- 1 user000 tutorial  3493 Nov 16 22:45 log.blockMesh
+-rw-rw-r-- 1 user000 tutorial  1937 Nov 16 22:45 log.topoSet
+-rw-rw-r-- 1 user000 tutorial  2300 Nov 16 22:45 log.decomposePar
+drwxr-xr-x 8 user000 tutorial    70 Nov 16 22:47 processor1
+drwxr-xr-x 8 user000 tutorial    70 Nov 16 22:47 processor0
+-rw-rw-r-- 1 user000 tutorial 18569 Nov 16 22:47 log.simpleFoam
+drwxr-xr-x 3 user000 tutorial    76 Nov 16 22:47 20
+-rw-r--r-- 1 user000 tutorial 28617 Nov 16 22:47 slurm-10.out
+-rw-rw-r-- 1 user000 tutorial  1529 Nov 16 22:47 log.reconstructPar
 ```
 {: .output}
 
-Output of the job could be monitored in the slurm output file. For example `slurm-48927321.out`. Use `tail -f` to have a live update of the progress (the name of your file will be different):
-
-```bash
-$ tail -f slurm-48927321.out
-```
-{: .source}
-
-Exit the display with `<Ctrl>-C`
-
-Once the job has finished, the results in the case directory will look something like this:
-
-```bash
-$ ls -ltr periodicPlaneChannel
-```
-{: .source}
-
-```
-total 1188
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 18:30 0.orig
--rwxr-xr-x   1 courses01 courses     915 Sep 15 18:31 Allrun
--rwxr-xr-x   1 courses01 courses     340 Sep 15 18:31 Allclean
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 18:52 system
--rw-r--r--   1 courses01 courses    3346 Sep 15 18:53 log.blockMesh
-drwxr-sr-x   3 courses01 courses    4096 Sep 15 18:53 constant
--rw-r--r--   1 courses01 courses    2166 Sep 15 18:53 log.renumberMesh
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 18:53 0
--rw-r--r--   1 courses01 courses    5823 Sep 15 18:53 log.decomposePar
-drwxr-sr-x 104 courses01 courses    4096 Sep 15 18:54 processors8_4-7
-drwxr-sr-x 104 courses01 courses    4096 Sep 15 18:54 processors8_0-3
--rw-r--r--   1 courses01 courses 1160996 Sep 15 18:54 log.pimpleFoam
--rw-r--r--   1 courses01 courses    1737 Sep 15 18:54 log.postChannel
-```
-{: .output}
-
-We ran using *8 MPI* processes, who created outputs in the directories `processors8_0-3` and `processors8_4-7`.  The final reconstruction creates results in the directory `20` (which stands for the *20th* and last simulation step in this very short demo run).
+We ran using *2 MPI* processes, who created outputs in the directories `processor0` and `processor1`, respectively.  The final reconstruction creates results in the directory `20` (which stands for the *20th* and last simulation step in this very short demo run).
 
 What has just happened?
 
