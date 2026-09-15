@@ -312,19 +312,26 @@ The components of this image reference are:
 
 The `docker://` prefix does not instruct Singularity to start Docker. Singularity communicates directly with the registry and processes the Docker/OCI image manifest and filesystem layers. Docker does not need to be installed or running on the system.
 
-Use `singularity pull` to download the source image, convert it to SIF, and save it with an explicit filename:
+First, create a directory (your local library) where to keep your singularity images:
 
 ```bash
-$ singularity pull \
-    "$MYSOFTWARE/singularity/images/lolcow--latest.sif" \
-    docker://docker.io/sylabsio/lolcow:latest
+$ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
+$ mkdir -p "$MY_LOCAL_LIBRARY"
 ```
 {: .source}
 
-The first argument after `pull` is the SIF file that Singularity creates:
+Then, use `singularity pull` to download the source image, convert it to SIF, and save it with an explicit filename:
+
+```bash
+$ SINGULARITY_IMAGE="${MY_LOCAL_LIBRARY}/lolcow--latest.sif"
+$ singularity pull "$SINGULARITY_IMAGE" docker://docker.io/sylabsio/lolcow:latest
+```
+{: .source}
+
+The first argument after `pull` is the SIF file that Singularity creates (in this case the name that SINGULARITY_IMAGE has):
 
 ```text
-$MYSOFTWARE/singularity/images/lolcow--latest.sif
+${MYSOFTWARE}/singularity/images/lolcow--latest.sif
 ```
 {: .output}
 
@@ -338,7 +345,7 @@ docker://docker.io/sylabsio/lolcow:latest
 Check that the SIF file was created:
 
 ```bash
-$ ls -lh "$MYSOFTWARE/singularity/images/lolcow--latest.sif"
+$ ls -lh "$SINGULARITY_IMAGE"
 ```
 {: .source}
 
@@ -374,7 +381,7 @@ This tutorial uses the explicit `docker.io` hostname to make the registry visibl
 > ```
 > {: .source}
 >
-> `singularity build` would have also worked for this example, but is a more general command. It can also create a SIF image from a registry reference, but it is principally introduced later when building or customising images from definition files.
+> `singularity build` would have also worked for this example, but it is a more general command. It can also create a SIF image from a registry reference, but it is principally introduced later when building or customising images from definition files.
 {: .callout}
 
 ### Running a container's default action
@@ -382,7 +389,7 @@ This tutorial uses the explicit `docker.io` hostname to make the registry visibl
 The image is now available as a SIF file in your personal image library. Define a variable containing its path so that it can be referenced more conveniently in subsequent commands:
 
 ```bash
-$ SINGULARITY_IMAGE="$MYSOFTWARE/singularity/images/lolcow--latest.sif"
+$ SINGULARITY_IMAGE="${MYSOFTWARE}/singularity/images/lolcow--latest.sif"
 ```
 {: .source}
 
@@ -594,6 +601,22 @@ $ singularity exec "$SINGULARITY_IMAGE" cowsay -l
 > {: .source}
 {: .challenge}
 
+> ## Running `cowsay` without a message
+>
+> If you run `cowsay` without providing a message:
+>
+> ```bash
+> $ singularity exec "$SINGULARITY_IMAGE" cowsay
+> ```
+> {: .source}
+>
+> the program waits for input from the terminal. Type your message, press <kbd>Enter</kbd>, and then press <kbd>Ctrl</kbd>+<kbd>D</kbd> to indicate the end of the input. `cowsay` will then display the message.
+>
+> Pressing <kbd>Ctrl</kbd>+<kbd>C</kbd> interrupts and cancels the command instead.
+>
+> Providing the message as a command-line argument is usually simpler.
+{: .callout}
+
 ### Inspecting the container environment
 
 The image packages both its applications and the user-space environment required by them. Compare the operating-system information visible on the host with that inside the container.
@@ -628,20 +651,20 @@ $ singularity exec "$SINGULARITY_IMAGE" which date cowsay lolcat
 ```
 {: .output}
 
-These paths belong to the container's filesystem. The commands do not need to be installed on the host.
+These paths belong to the container's filesystem. The commands do not need to be installed on the host. This output is different from that obtained when trying to locate the programs in the host.
 
 ### Running shell expressions with `bash -c`
 
 The command passed directly to `singularity exec` must be an executable that Singularity can start. Some useful shell operations are not separate executable files.
 
-For example, `command -v` reports how a shell would resolve one or more command names. It may be tempting to invoke it directly:
+For example, if we invoque `command -v` directly as another mean to locate the important tools in the image, we would get an error:
 
 ```bash
 $ singularity exec "$SINGULARITY_IMAGE" command -v date cowsay lolcat
 ```
 {: .source}
 
-This fails because `command` is a shell built-in, not a separate executable that Singularity can start.
+This fails because `command` is a shell built-in that reports how a shell would resolve one or more command names. But it is not a separate executable that Singularity can start.
 
 To use a shell built-in like this one, start Bash inside the container and use its `-c` option:
 
@@ -664,7 +687,7 @@ This pattern is useful whenever the operation to execute inside a container incl
 - shell built-ins
 - pipelines
 - redirections
-- variable expansion
+- internal variable expansion
 - multiple commands
 
 > ## Add colour to the cow
@@ -787,27 +810,6 @@ Similarly, you can provide your own colourful message:
 Singularity> cowsay "Running interactively" | lolcat
 ```
 {: .source}
-
-> ## Running `cowsay` without a message
->
-> If you run `cowsay` without providing a message:
->
-> ```bash
-> Singularity> cowsay
-> ```
-> {: .source}
->
-> the program waits for input from the terminal. Type your message, press <kbd>Enter</kbd>, and then press <kbd>Ctrl</kbd>+<kbd>D</kbd> to indicate the end of the input. `cowsay` will then display the message.
->
-> Pressing <kbd>Ctrl</kbd>+<kbd>C</kbd> interrupts and cancels the command instead.
->
-> Providing the message as a command-line argument is usually simpler:
->
-> ```bash
-> Singularity> cowsay "Hello from the container"
-> ```
-> {: .source}
-{: .callout}
 
 The important difference is that the interactive container shell now interprets the commands and pipe operators. There is no need to start another shell with `bash -c`.
 
