@@ -4,8 +4,8 @@
 #SBATCH --partition=work
 #SBATCH --reservation=ContainersTraining
 #SBATCH --nodes=1
-#SBATCH --ntasks=2
-#SBATCH --ntasks-per-node=2
+#SBATCH --ntasks=8
+#SBATCH --ntasks-per-node=8
 #SBATCH --cpus-per-task=1
 #SBATCH --time=00:20:00
 
@@ -20,19 +20,32 @@ echo "SINGULARITY_IMAGE=$SINGULARITY_IMAGE"
 #--- Specific settings for the cluster you are on
 #(Check the specific guide of the cluster for additional settings)
 
-#--- Execute pre-processing tools: (Note that in this example, we are using uncollated writing)
+#--- Automating the list of IORANKS for collated fileHandler
+echo "Setting the grouping ratio for collated fileHandling"
+nProcs=$SLURM_NTASKS #Number of total processors in decomposition for this case
+mGroup=4             #Size of the groups for collated fileHandling (32 is the initial recommendation for Setonix)
+of_ioRanks="0"
+iC=$mGroup
+while [ $iC -le $nProcs ]; do
+   of_ioRanks="$of_ioRanks $iC"
+   ((iC += $mGroup))
+done
+export FOAM_IORANKS="("${of_ioRanks}")"
+echo "FOAM_IORANKS=$FOAM_IORANKS"
+
+#--- Execute pre-processing tools:
 #(These pre-processing tools are serial by design)
 singularity exec $SINGULARITY_IMAGE blockMesh | tee log.blockMesh
-singularity exec $SINGULARITY_IMAGE topoSet | tee log.topoSet
-singularity exec $SINGULARITY_IMAGE decomposePar -fileHandler uncollated -force | tee log.topoSet
+singularity exec $SINGULARITY_IMAGE renumberMesh -overwrite -constant | tee log.renumberMesh
+singularity exec $SINGULARITY_IMAGE decomposePar -cellDist -force | tee log.decomposePar
 
-#--- Execute the solver: (Note that in this example, we are using uncollated writing)
+
+#--- Execute the solver:
 #(Solvers use MPI parallelism by design)
 srun -N $SLURM_JOB_NUM_NODES -n $SLURM_NTASKS -c 1 \
-     singularity exec $SINGULARITY_IMAGE simpleFoam -parallel \
-     -fileHandler uncollated | tee log.simpleFoam
+  singularity exec $SINGULARITY_IMAGE pimpleFoam -parallel | tee log.pimpleFoam
 
-#--- Execute post-processing tools: (Note that in this example, we are using uncollated writing)
+#--- Execute post-processing tools:
 #(These post-processing tools are serial by design)
 singularity exec $SINGULARITY_IMAGE \
-  reconstructPar -latestTime -fileHandler uncollated | tee log.reconstructPar
+  postChannel | tee log.postChannel

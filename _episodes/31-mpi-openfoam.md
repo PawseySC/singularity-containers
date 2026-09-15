@@ -13,6 +13,22 @@ keypoints:
 - MPI performance of containerised applications almost coincide with those of a native run
 ---
 
+### Are you running on a shared HPC system?
+
+If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node.  You can set this up by using an interactive scheduler allocation, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
+
+```
+$ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 4:00:00
+```
+{: .source}
+
+```text
+salloc: Granted job allocation 3453895
+salloc: Waiting for resource configuration
+salloc: Nodes nid000152 are ready for job
+```
+{: .output}
+
 ### Get ready for the hands-on
 
 Before we start, let us ensure we have the required files to run the tutorials.
@@ -37,11 +53,26 @@ The working directory should be something like:
 ```text
 /path/to/scratch/singularity-containers/demos/openfoam
 ```
+{: .output}
+
+Load the singularity module (in this case, Pawsey's mpi-ready flavour):
+
+```bash
+$ module load singularity/4.1.0-mpi
+```
 {: .source}
+
+### Choose an OpenFOAM image provided by Pawsey in the quay.io registry
+
+In your own webbrowser, go to `https://quay.io/pawsey`.
+
+Pawsey provides several images useful for maby different research areas. From there you should be able to see a repository named `pawsey/openfoam`. Click on it and then in the tags icon (second icon top to bottom on the left side of the screen). (**Do not confuse with the other flavour named `openfoam-org`.**)
+
+You should be able to see the openfoam image with the tag: `v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04`. You should be able click the fetch tag ico on the right and then choose the format `Docker Pull (by tag)`. Then, copy just the tag (**NOT THE DOCKER COMMAND**) and close the prompt.
 
 ### Pull the image to be used into your personal library
 
-Define your personal library directory (and create the directory if not done yet):
+In the interactive shell terminal connected to the salloc session in Setonix, define your personal library directory (and create the directory if not done yet):
 
 ```bash
 $ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
@@ -51,17 +82,66 @@ $ mkdir -p "$MY_LOCAL_LIBRARY"
 Pull the image to use for this example into your personal library directory:
 
 ```bash
-$ SINGULARITY_IMAGE="${MY_LOCAL_LIBRARY}/openfoam--v2012.sif"
-$ singularity pull "$SINGULARITY_IMAGE" docker://quay.io/pawsey/openfoam:v2012
+$ singularity pull \
+  "${MY_LOCAL_LIBRARY}/openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif" \
+   docker://quay.io/pawsey/openfoam:v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04
 ```
 {: .source}
 
+This may take some time, so you can go for a coffee in the meantime.
+
 ### Copy the tutorial files from the image into the working directory in the host
 
-OpenFOAM counts with several examples (tutorials) that can be used as starting point for your research learning process. This kind of selection of a tutorial is usually performed in an interactive shell inside the container. First, start the interactive shell (you will notice that prompt will change to `Singularity>`):
+OpenFOAM counts with several examples (tutorials) that can be used as starting point for your research or learning process. Selection of a tutorial is usually performed in an interactive shell inside the container. First, start the interactive shell (you will notice that prompt will change to `Singularity>`):
 
 ```bash
+$ SINGULARITY_IMAGE="${MY_LOCAL_LIBRARY}/openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif"
+$ singularity shell "$SINGULARITY_IMAGE"
 ```
+{: .source}
+
+```text
+Singularity>
+```
+{: .output}
+
+Check that, at entrance, the working directory is the same from which the singularity shell was invoked (and save that path in a variable):
+
+```bash
+Singularity> pwd
+Singularity> HOST_WORKING_DIR="$(pwd)"
+Singularity> echo "$HOST_WORKING_DIR"
+```
+{: .source}
+
+OpenFOAM defines several environment variables to make your life easier. In this case you can explore the available tutorials under the directory defined by `FOAM_TUTORIALS`. Go into that directory using `cd` and list its content:
+
+```bash
+Singularity> echo "$FOAM_TUTORIALS"
+Singularity> cd "$FOAM_TUTORIALS"
+Singularity> pwd
+Singularity> ls
+```
+{: .source}
+
+```text
+Allclean    DNS		compressible	  finiteArea	  mesh		 resources
+Allcollect  IO		discreteMethods   heatTransfer	  modules	 stressAnalysis
+Allrun	    basic	electromagnetics  incompressible  multiphase	 verificationAndValidation
+Alltest     combustion	financial	  lagrangian	  preProcessing
+```
+{: .output}
+
+(At this point we assume that the selected tutorial is `$FOAM_TUTORIALS/bla`.)
+
+Once the tutorial have been selected, copy the case directory into the working directory in the host (we previously saved that path in `HOST_WORKING_DIR` variable):
+
+```bash
+Singularity> cp -r "${FOAM_TUTORIALS}/incompressible/pimpleFoam/LES/periodicPlaneChannel" "$HOST_WORKING_DIR"
+```
+{: .source}
+
+
 
 ### Let's run an MPI containerised application in an HPC cluster!
 
