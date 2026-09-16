@@ -106,7 +106,7 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 
 ### 3. Linux
 
-The instructions below use *Ubuntu* as an example.  If you're on another distribution, Docker provides [installation instructions for several distributions](https://docs.docker.com/engine/install/); for Ubuntu specifically, follow the [Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/) guide for your version.
+The instructions below use *Ubuntu* as an example.  If you're on another distribution, Docker provides [installation instructions for several distributions](https://docs.docker.com/engine/install/).  For Ubuntu specifically, we recommend following the [Install using the `apt` repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) section of the [Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/) guide for your version.
 
 After installation, open a terminal and run:
 
