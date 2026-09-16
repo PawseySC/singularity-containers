@@ -16,9 +16,9 @@ keypoints:
 
 At the start of this workshop, we'll be using **Docker** to build container images on your own computer.  Later on, we'll switch to **Singularity/Apptainer**, which is used on Setonix.  So, Docker is the one piece of software you need to install *before* the session.
 
-> ## No prior experience needed
+> ## Administrator permissions required
 >
-> You do not need any previous experience with containers or Docker to complete this setup.  
+> Installing WSL and Docker requires administrator permissions on your computer.  If you do not have these permissions, contact your system administrator or IT support before the workshop.  Alternatively, use a personal laptop on which you can install software.
 {: .callout}
 
 Pick the section below that matches your operating system.  In all cases, the goal is the same: get the `docker` command working, and confirm it by running a small test container called `hello-world`.
