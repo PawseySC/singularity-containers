@@ -1,21 +1,32 @@
 ---
-title: "Using MPI-capable containers (with OpenFOAM as an example)"
-teaching: 10
-exercises: 10
+title: "Running MPI Applications in Containers: An OpenFOAM Example"
+teaching: 45
+exercises: 40
+
 questions:
+- How can an MPI application packaged in a container run across HPC compute nodes?
+- How are host MPI and interconnect libraries made available inside a container?
+- What performance overhead can MPI containers introduce compared with native execution?
+
 objectives:
-- Discuss the steps required to configure and run MPI applications from a container
-- Discuss the performance of parallel applications inside containers *versus* regular runs
+- Copy files from a container image to the writable host filesystem using an OpenFOAM tutorial as an example.
+- Run a containerised MPI application using Singularity and the Slurm scheduler.
+- Explain how Slurm launches containerised MPI applications to run in parallel.
+- Describe the roles of the host and container MPI installations in the hybrid MPI model, and why MPI ABI compatibility and access to host interconnect libraries are required.
+- Identify how Pawsey's MPI-enabled Singularity module configures host integration.
+
 keypoints:
-- You need to build your application in the container with an MPI version which is ABI compatible with MPI libraries in the host
-- Appropriate environment variables and bind mounts are required at runtime to make the most out of MPI applications (sys admins can help)
-- Singularity interfaces almost transparently with HPC schedulers such as Slurm
-- MPI performance of containerised applications almost coincide with those of a native run
+- Files packaged inside a read-only container image can be copied to the writable host filesystem for modification and use.
+- Launchers such as `srun` start `singularity exec`, creating one container process for each task in the parallel job step.
+- In the hybrid MPI model, the host launches the MPI tasks while the container provides the MPI application and an MPI implementation used to build it.
+- The container MPI must be compatible with the host MPI, and efficient multi-node execution requires access to the host interconnect libraries.
+- On Pawsey systems, the `singularity/4.1.0-mpi` module configures the required bind mounts, library paths, and preloaded host libraries.
+- A correctly configured MPI container can achieve communication performance close to native execution, but performance must be validated on the target system.
 ---
 
-### Are you running on a shared HPC system?
+### Request an interactive allocation
 
-If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node.  You can set this up by using an interactive scheduler allocation, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
+If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
 
 ```
 $ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 4:00:00
@@ -29,9 +40,9 @@ salloc: Nodes nid000152 are ready for job
 ```
 {: .output}
 
-### Get ready for the hands-on
+### Prepare for the hands-on exercise
 
-Before we start, let us ensure we have the required files to run the tutorials.
+Before we start, let us ensure that we have the files required for this tutorial.
 
 If you haven't done so already, move to a suitable working directory and download the following GitHub repository. On Pawsey systems, use your scratch directory; on other HPC or cloud systems, use the equivalent working directory recommended by the system administrators.
 
@@ -43,56 +54,62 @@ $ cd "$TUTO"
 ```
 {: .source}
 
-Now `cd` to the working directory. In this case:
+Now move to the working directory for this episode:
+
 ```bash
 $ cd demos/openfoam
 $ pwd
 ```
+{: .source}
 
 The working directory should be something like:
+
 ```text
 /path/to/scratch/singularity-containers/demos/openfoam
 ```
 {: .output}
 
-Load the singularity module (in this case, Pawsey's mpi-ready flavour):
+Load the Singularity module, using Pawsey's MPI-enabled flavour:
 
 ```bash
 $ module load singularity/4.1.0-mpi
 ```
 {: .source}
 
-### Choose an OpenFOAM image provided by Pawsey in the quay.io registry
+### Choose an OpenFOAM image from Pawsey's Quay registry
 
-In your own webbrowser, go to `https://quay.io/pawsey`.
+In your web browser, go to `https://quay.io/pawsey`.
 
-Pawsey provides several images useful for maby different research areas. From there you should be able to see a repository named `pawsey/openfoam`. Click on it and then in the tags icon (second icon top to bottom on the left side of the screen). (**Do not confuse with the other flavour named `openfoam-org`.**)
+Pawsey provides container images for several research applications. Find and select the `pawsey/openfoam` repository, then select the **Tags** icon on the left side of the page. (**Do not confuse this repository with `pawsey/openfoam-org`.**)
 
-You should be able to see the openfoam image with the tag: `v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04`. You should be able click the fetch tag ico on the right and then choose the format `Docker Pull (by tag)`. Then, copy just the tag (**NOT THE DOCKER COMMAND**) and close the prompt.
+Find the OpenFOAM image with the tag `v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04`. Select the **Fetch Tag** icon on the right, then select **Docker Pull (by tag)**. Copy only the image tag, **not the complete Docker command**, and close the window.
 
-### Pull the image to be used into your personal library
+### Pull the OpenFOAM image into your personal library
 
-In the interactive shell terminal connected to the salloc session in Setonix, define your personal library directory (and create the directory if not done yet):
+In the terminal running within the interactive allocation on Setonix, define your personal library directory and create it if it does not already exist:
 
 ```bash
 $ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
 $ mkdir -p "$MY_LOCAL_LIBRARY"
 ```
+{: .source}
 
-Pull the image to use for this example into your personal library directory:
+Pull the image for this example into your personal library directory:
 
 ```bash
 $ singularity pull \
   "${MY_LOCAL_LIBRARY}/openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif" \
-   docker://quay.io/pawsey/openfoam:v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04
+  docker://quay.io/pawsey/openfoam:v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04
 ```
 {: .source}
 
-This may take some time, so you can go for a coffee in the meantime.
+Pulling the OCI image and converting it into a SIF image may take a few minutes.
 
-### Prepare the tutorial starting with a copy from the image into the working directory in the host
+### Copy an OpenFOAM tutorial from the image to the host
 
-OpenFOAM counts with several examples (tutorials) that can be used as starting point for your research or learning process. Selection of a tutorial is usually performed in an interactive shell inside the container. First, start the interactive shell (you will notice that prompt will change to `Singularity>`):
+Container images are normally read-only, but the files they contain can be copied to the writable host filesystem. This is useful when an image includes examples, templates, configuration files, or other resources that need to be inspected or modified before use. In this section, we use an OpenFOAM tutorial case to demonstrate this general container workflow.
+
+OpenFOAM includes numerous tutorial cases that can be used as starting points for simulations. We will first open an interactive shell inside the container to explore these files and copy one of the tutorial cases to the host. Start the interactive shell and notice that the prompt changes to `Singularity>`:
 
 ```bash
 $ SINGULARITY_IMAGE="${MY_LOCAL_LIBRARY}/openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif"
@@ -105,7 +122,7 @@ Singularity>
 ```
 {: .output}
 
-Check that, at entrance, the working directory is the same from which the singularity shell was invoked (and save that path in a variable):
+When the shell starts, confirm that the current working directory is the directory from which `singularity shell` was invoked, then save that path in a variable:
 
 ```bash
 Singularity> pwd
@@ -114,7 +131,9 @@ Singularity> echo "$HOST_WORKING_DIR"
 ```
 {: .source}
 
-OpenFOAM defines several environment variables to make your life easier. In this case you can explore the available tutorials under the directory defined by `FOAM_TUTORIALS`. Go into that directory using `cd` and list its content:
+By default, Singularity makes the host current working directory available inside the container at the same path. This allows commands running in the container to read from and write to the episode directory on the host.
+
+OpenFOAM defines several environment variables to make its installation easier to navigate. The `FOAM_TUTORIALS` variable points to the collection of tutorial cases. Move to that directory and list its contents:
 
 ```bash
 Singularity> echo "$FOAM_TUTORIALS"
@@ -125,16 +144,16 @@ Singularity> ls
 {: .source}
 
 ```text
-Allclean    DNS		compressible	  finiteArea	  mesh		 resources
-Allcollect  IO		discreteMethods   heatTransfer	  modules	 stressAnalysis
-Allrun	    basic	electromagnetics  incompressible  multiphase	 verificationAndValidation
-Alltest     combustion	financial	  lagrangian	  preProcessing
+Allclean    DNS         compressible      finiteArea    mesh         resources
+Allcollect  IO          discreteMethods   heatTransfer  modules      stressAnalysis
+Allrun      basic       electromagnetics   incompressible multiphase  verificationAndValidation
+Alltest     combustion  financial          lagrangian    preProcessing
 ```
 {: .output}
 
-(At this point we will assume that the selected tutorial is `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicPlaneChannel`.)
+For this episode, we will use the tutorial at `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicPlaneChannel`.
 
-Once the tutorial have been selected, copy the case directory into the working directory in the host (we previously saved that path in `HOST_WORKING_DIR` variable):
+Once the tutorial has been selected, copy the case directory into the working directory on the host, whose path was saved in `HOST_WORKING_DIR`:
 
 ```bash
 Singularity> cp -r "${FOAM_TUTORIALS}/incompressible/pimpleFoam/LES/periodicPlaneChannel" "$HOST_WORKING_DIR"
@@ -143,15 +162,15 @@ Singularity> cp -r "${FOAM_TUTORIALS}/incompressible/pimpleFoam/LES/periodicPlan
 
 > ## Alternative: copy the tutorial without opening an interactive shell
 >
-> The same steps can be performed directly from the host by using `singularity exec`. First, inspect the location and contents of the OpenFOAM tutorials directory:
+> The same steps can be performed directly from the host by using `singularity exec`. First, search the OpenFOAM tutorials directory for matching plane-channel cases:
 >
 > ```bash
 > $ singularity exec "$SINGULARITY_IMAGE" \
->     bash -c 'find $FOAM_TUTORIALS -iname "*PlaneChannel*"'
+>     bash -c 'find "$FOAM_TUTORIALS" -iname "*PlaneChannel*"'
 > ```
 > {: .source}
 >
-> The resulting list would look something like this:
+> The output should look something like this:
 >
 > ```text
 > /opt/OpenFOAM/OpenFOAM-v2606/tutorials/incompressible/pimpleFoam/LES/periodicPlaneChannel
@@ -169,10 +188,10 @@ Singularity> cp -r "${FOAM_TUTORIALS}/incompressible/pimpleFoam/LES/periodicPlan
 > ```
 > {: .source}
 >
-> The command is passed through `bash -c` so that `$FOAM_TUTORIALS` and `$PWD` are expanded inside the container. Singularity makes the host working directory available inside the container at the same path, so the copied `periodicPlaneChannel` directory appears in the directory from which the command was run.
+> The commands are passed through `bash -c` so that `$FOAM_TUTORIALS` and `$PWD` are expanded inside the container. Singularity normally makes the host current working directory available inside the container at the same path, so the copied `periodicPlaneChannel` directory appears in the directory from which the command was run.
 {: .solution}
 
-Now update the default settings of the OpenFOAM tutorial to preferred settings for this tutorial. This is done by the `update-settings.sh` script.
+Now update the default OpenFOAM dictionaries and the Slurm job script to the settings used in this episode:
 
 ```bash
 $ ./update-settings.sh
@@ -181,11 +200,21 @@ $ ./update-settings.sh
 
 > ## If curious: inspect the changes
 >
-> If you are curious about what was updated, check the differences of the OpenFOAM dictionaries in `periodicPlaneChannel/system` subdirectory with respect to their original settings now copied to `*.original.00` files.
+> Each time `update-settings.sh` modifies a file, it first creates a numbered backup with a name ending in `.original.00`, `.original.01`, and so on. After the first execution, inspect the changes to the OpenFOAM dictionaries with:
+>
+> ```bash
+> $ diff -u \
+>   periodicPlaneChannel/system/controlDict.original.00 \
+>   periodicPlaneChannel/system/controlDict
+> $ diff -u \
+>   periodicPlaneChannel/system/decomposeParDict.original.00 \
+>   periodicPlaneChannel/system/decomposeParDict
+> ```
+> {: .source}
 {: .solution}
 
 
-### Run the MPI containerised application in an HPC cluster!
+### Run the containerised MPI application with Slurm
 
 Submit the Slurm job script:
 
@@ -207,14 +236,14 @@ JOBID        USER ACCOUNT             NAME EXEC_HOST ST  REASON START_TIME   END
 ```
 {: .output}
 
-Output of the job could be monitored in the slurm output file. For example `slurm-48927321.out`. Use `tail -f` to have a live update of the progress (the name of your file will be different):
+The job output can be monitored in the Slurm output file, for example `slurm-48927321.out`. Use `tail -f` to follow the output as the job progresses. The name of your file will be different:
 
 ```bash
 $ tail -f slurm-48927321.out
 ```
 {: .source}
 
-Exit the display with `<Ctrl>-C`
+Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop following the file.
 
 Once the job has finished, the results in the case directory will look something like this:
 
@@ -223,7 +252,7 @@ $ ls -ltr periodicPlaneChannel
 ```
 {: .source}
 
-```
+```text
 -rwxr-xr-x   1 courses01 courses     915 Sep 15 19:05 Allrun
 -rwxr-xr-x   1 courses01 courses     340 Sep 15 19:05 Allclean
 drwxr-sr-x   2 courses01 courses    4096 Sep 15 19:05 0.orig
@@ -243,18 +272,18 @@ drwxr-sr-x   3 courses01 courses    4096 Sep 15 19:13 graphs
 ```
 {: .output}
 
-We ran using *8 MPI* processes, who created outputs in the directories `processors8_0-3` and `processors8_4-7`.  The final reconstruction has only been applied to the latest time and creates results in the directory `200` (which stands for simulation time `200`).
+The job ran with eight MPI processes and produced collated parallel output in `processors8_0-3` and `processors8_4-7`. Each directory stores the results for a group of four MPI ranks. The `reconstructPar -latestTime` command then reconstructed the latest simulation time, `200`, in the host case directory.
 
-### A batch script for MPI applications with containers
+Although OpenFOAM ran inside the container, the logs and simulation results were written to the case directory on the host because that directory was available inside the container.
 
-Let's get back to the directory path for the first example:
+### Examine the Slurm script for the containerised MPI application
 
+Now inspect the Slurm job script used for the run:
+
+```bash
+$ cat mpi_openfoam_pawsey.slurm.sh
 ```
-$ cd $TUTO/demos/openfoam
-```
-{: .bash}
-
-and have a look at the content of the script `mpi_openfoam_pawsey.slurm.sh`:
+{: .source}
 
 ```bash
 #!/bin/bash --login
@@ -291,7 +320,7 @@ nProcs=$SLURM_NTASKS #Number of total processors in decomposition for this case
 mGroup=4             #Size of the groups for collated fileHandling (32 is the initial recommendation for Setonix)
 of_ioRanks="0"
 iC=$mGroup
-while [ $iC -le $nProcs ]; do
+while [ $iC -lt $nProcs ]; do
    of_ioRanks="$of_ioRanks $iC"
    ((iC += $mGroup))
 done
@@ -316,11 +345,14 @@ singularity exec $SINGULARITY_IMAGE postChannel -latestTime | tee log.postChanne
 
 #--- Final commands
 echo "OpenFOAM script has reached the end"
-
 ```
 {: .source}
 
-> ## Important Part 1:
+The script also contains settings and commands that are specific to OpenFOAM, including case preparation, domain decomposition, collated file handling, reconstruction, and post-processing. We will not explain those parts in detail because this episode focuses on running MPI applications in containers. For more information about running OpenFOAM on Pawsey systems, refer to the Pawsey user documentation.
+
+Instead of reviewing the complete script line by line, we will focus on the parts that illustrate how Slurm, Singularity, and an MPI application work together.
+
+> ## Important Part 1: request resources and select the image
 >
 > ```bash
 > #!/bin/bash --login
@@ -338,184 +370,244 @@ echo "OpenFOAM script has reached the end"
 > module load singularity/4.1.0-mpi
 >
 > #--- Using user's own image:
-> export SINGULARITY_IMAGE="$MYSOFTWARE/singularity/images/openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif"  #Adapt path and name to the correct ones
+> export SINGULARITY_IMAGE="$MYSOFTWARE/singularity/images/openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif"
 > echo "Using openfoam singularity image:"
 > echo "SINGULARITY_IMAGE=$SINGULARITY_IMAGE"
 > ```
 > {: .source}
-- The job reserves resources for 8 MPI tasks
-- The `singularity/4.1.0-mpi` module is loaded
-- The image to be used is defined in our user defined variable `SINGULARITY_IMAGE`
+>
+> * The job requests one node with eight Slurm tasks and one CPU per task. These tasks are later used to run eight MPI processes.
+> * The `singularity/4.1.0-mpi` module is loaded.
+> * The image path is stored in the user-defined `SINGULARITY_IMAGE` variable.
 {: .solution}
 
-> ## Important Part 2:
+> ## Important Part 2: run serial tools inside the container
 >
 > ```bash
 > #--- Execute pre-processing tools:
 > #(These pre-processing tools are serial by design)
-> singularity exec $SINGULARITY_IMAGE blockMesh | tee log.blockMesh
-> singularity exec $SINGULARITY_IMAGE renumberMesh -overwrite -constant | tee log.renumberMesh
-> singularity exec $SINGULARITY_IMAGE decomposePar -cellDist -force | tee log.decomposePar
+> singularity exec "$SINGULARITY_IMAGE" blockMesh | tee log.blockMesh
+> singularity exec "$SINGULARITY_IMAGE" renumberMesh -overwrite -constant | tee log.renumberMesh
+> singularity exec "$SINGULARITY_IMAGE" decomposePar -cellDist -force | tee log.decomposePar
 >
 > ...
 >
 > #--- Execute post-processing tools:
 > #(These post-processing tools are serial by design)
-> singularity exec $SINGULARITY_IMAGE reconstructPar -latestTime | tee log.reconstructPar
-> singularity exec $SINGULARITY_IMAGE postChannel -latestTime | tee log.postChannel
+> singularity exec "$SINGULARITY_IMAGE" reconstructPar -latestTime | tee log.reconstructPar
+> singularity exec "$SINGULARITY_IMAGE" postChannel -latestTime | tee log.postChannel
 > ```
 > {: .source}
-- All the required serial tools for pre- and post-processing are called with `singularity exec $SINGULARITY_IMAGE ...`
-- Note that the `tee` commands are running in the host, so there pipe works fine passing the output from the singularity exectution and there's no need to use the `bash -c ` trick
+>
+> * The required serial pre-processing and post-processing tools are run with `singularity exec "$SINGULARITY_IMAGE" ...`.
+> * Each pipeline is interpreted by the host shell. Therefore, `tee` runs on the host and writes the log file into the host case directory. There is no need to pass the pipeline through `bash -c` inside the container.
 {: .solution}
 
-> ## Important Part 3:
+> ## Important Part 3: launch the parallel solver
 >
 > ```bash
 > #--- Execute the parallel solver:
 > #(Solvers use MPI parallelism by design)
-> srun -N $SLURM_JOB_NUM_NODES -n $SLURM_NTASKS -c 1 \
->   singularity exec $SINGULARITY_IMAGE pimpleFoam -parallel | tee log.pimpleFoam
+> srun -N "$SLURM_JOB_NUM_NODES" -n "$SLURM_NTASKS" -c 1 \
+>   singularity exec "$SINGULARITY_IMAGE" pimpleFoam -parallel | tee log.pimpleFoam
 > ```
 > {: .source}
-- `srun` launches the 8 MPI tasks in Setonix interconnect
-- The parallel solver `pimpleFoam` is called using `singularity exec $SINGULARITY_IMAGE pimpleFoam -parallel`
+>
+> * `srun` launches eight Slurm tasks. Each task starts `singularity exec`, which runs one instance of the parallel OpenFOAM solver inside the container.
+> * The MPI-enabled Singularity module provides the host MPI and interconnect configuration required by the containerised application on Setonix.
 {: .solution}
 
-### How does Singularity interplay with the MPI launcher?
 
-We'll comment on the environment variable definitions soon, now let's focus on the set of commands that make the simulation happen.
+### Understand how Slurm launches the containerised MPI application
 
-In particular, the fourth command is the only one using multiple processors through MPI:
+The central command in the job script is:
 
+```bash
+srun -N "$SLURM_JOB_NUM_NODES" -n "$SLURM_NTASKS" -c 1 \
+  singularity exec "$SINGULARITY_IMAGE" pimpleFoam -parallel
 ```
-mpirun -n $NTASKS \
-  singularity exec openfoam_v2012.sif \
-  simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
-```
-{: .bash}
+{: .source}
 
-Here, `mpirun` is the MPI launcher, *i.e.* the tool that is in charge for spawning the multiple MPI processes that will make the workflow run in parallel.
-Note how `singularity` can be executed through the launcher as any other application would.
+This command combines three layers of execution:
 
-Under the hood, the MPI processes outside of the container (spawned by `mpirun`) will work in tandem with the containerized MPI code to instantiate the job.
-There are a few implications here...
+1. Slurm allocates the resources requested by the job.
+2. `srun`, the Slurm parallel task launcher, starts one task for each requested MPI process.
+3. Each task starts `singularity exec`, which runs one instance of `pimpleFoam` inside the container.
 
+This execution pattern is commonly called the **hybrid MPI model**. The launcher and system MPI support are provided by the host, while the MPI application and a compatible MPI implementation are present inside the container. Once launched, the MPI processes communicate through the host MPI and interconnect configuration made available inside the container.
 
-### Requirements for the MPI + container combo
+The nesting is important: `srun` launches `singularity`, rather than `singularity` launching `srun`. As a result, Slurm creates one container process for each task in the job step.
 
-Let's discuss what the above mentioned implications are.
-
-* A host MPI installation must be present to spawn the MPI processes.
-
-* An MPI installation is required in the container, to compile the application.  Also, during build the application must be linked *dynamically* to the MPI libraries, so as to have the capability of using the host ones at runtime.  Note how dynamic linking is typically the default behaviour on Linux systems.
-A specific section of the recipe file needs to take care of this, or in alternative the base image for the recipe needs to have the MPI libraries.  Either way, if we take the example of a *def file* for the *MPICH* flavour of MPI, the code would look like:
-
-```
-%post
-
-[..]
-
-MPICH_VERSION="3.1.4"
-MPICH_CONFIGURE_OPTIONS="--enable-fast=all,O3 --prefix=/usr"
-
-mkdir -p /tmp/mpich-build
-cd /tmp/mpich-build
-
-wget http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz
-tar xvzf mpich-${MPICH_VERSION}.tar.gz
-
-cd mpich-${MPICH_VERSION}
-
-./configure ${MPICH_CONFIGURE_OPTIONS}
-make
-make install
-
-ldconfig
-
-[..]
-```
-{: .bash}
-
-
-> ## Base MPI image at Pawsey
+> ## What about `mpirun`?
 >
-> Pawsey maintains an MPICH base image at [pawsey/mpich-base](https://hub.docker.com/r/pawsey/mpich-base).
-> At the moment, only a Docker image is provided, which of course can also be used by Singularity.
-{: .callout}
-
-
-* The container and host MPI installations need to be *ABI* (Application Binary Interface) *compatible*. This is because the application in the container is built with the former but runs with the latter.
-At present, there are just two families of MPI implementations, not ABI compatible with each other: MPICH (with IntelMPI and MVAPICH) and OpenMPI.
-If you anticipate your application will run in systems with non ABI compatible libraries, you will need to build variants of the image for the two MPI families.
-
-
-> ## MPI implementations at Pawsey
+> On systems where MPI jobs are launched directly with `mpirun` or `mpiexec`, the same pattern can be used:
 >
-> At present, all Pawsey systems have installed at least one MPICH ABI compatible implementation: CrayMPICH on the Crays (*Magnus* and *Galaxy), IntelMPI on *Zeus* and *Topaz*.  Therefore, MPICH is the recommended MPI library to install in container images.
-> Zeus and Topaz also have OpenMPI, so images built over this MPI family can run in these clusters, upon appropriate configuration of the shell environment (see below).
-{: .callout}
-
-
-* Bind mounts and environment variables need to be setup so that the containerised MPI application can use the host MPI libraries at runtime.  Bind mounts can be configured by the administrators, or set up through variables. We're discussing the latter way here.
-In the current example we have:
-
-```
-export MPICH_ROOT="/opt/mpich/mpich-3.1.4/apps"
-
-export SINGULARITY_BINDPATH="$MPICH_ROOT"
-export SINGULARITYENV_LD_LIBRARY_PATH="$MPICH_ROOT/lib:\$LD_LIBRARY_PATH"
-```
-{: .bash}
-
-Here, `SINGULARITY_BINDPATH` bind mounts the host path where the MPI installation is (MPICH in this case).
-The second variable, SINGULARITYENV_LD_LIBRARY_PATH, ensures that at runtime the container's `LD_LIBRARY_PATH` has the path to the MPICH libraries.
-
-> ## Interconnect libraries and containers
->
-> If the HPC system you're using has high speed interconnect infrastructure, than it will also have some system libraries to handle that at the application level.  These libraries will need to be exposed to the containers, too, similar to the MPI libraries, to ensure maximum performance are achieved.
-> This can be a challenging task for a user, as it requires knowing details on the installed software stack.  System administrators should be able to assist in this regard.
-{: .callout}
-
-> ## Singularity environment variables at Pawsey
->
-> In all Pawsey systems, the Singularity module sets up all of the required variables for MPI and interconnect libraries.  So this will do the job:
->
+> ```bash
+> mpirun -n 8 \
+>   singularity exec "$SINGULARITY_IMAGE" application-command
 > ```
-> $ module load singularity
-> ```
-> {: .bash}
+> {: .source}
+>
+> The appropriate launcher and options depend on the HPC system. Always follow the guidance provided by the system administrators.
 {: .callout}
 
+### Build an image for the hybrid MPI model
 
-### Singularity interface to Slurm
+The practical example in this episode uses the **hybrid MPI model**. In this model, the host provides the MPI launcher and the system-optimised MPI libraries used at runtime, while the container includes an MPI implementation used to compile and link the application when the image is built.
 
-Now, if we have a look at the script variant for the Slurm scheduler, `mpi_pawsey.sh`, we'll see the key difference is that every OpenFoam command is executed via `srun`:
+Because MPI components are present on both sides, the MPI implementation inside the container must be compatible with the MPI implementation provided by the host.
 
+At image build time:
+
+* The image must provide an MPI implementation so that the application can be compiled and linked against MPI.
+* The application should be dynamically linked to the MPI libraries.
+* The container MPI implementation must be compatible with the host MPI implementation that will be made available at runtime.
+
+At runtime:
+
+* The host scheduler or MPI launcher starts the container instances.
+* Compatible host MPI libraries and communication libraries are made available inside the container.
+* The application uses the host-optimised MPI stack to communicate between processes and nodes.
+
+The MPI implementation can be installed directly in the application image or inherited from an MPI-enabled base image. The following simplified Dockerfile excerpt illustrates how MPICH can be built from source. It is intended to show the main build steps, rather than serve as an optimised production recipe:
+
+```dockerfile
+#--- Define the image to build from
+FROM ubuntu:24.04
+
+#--- Install prerequisites
+RUN set -eux; \
+    export DEBIAN_FRONTEND=noninteractive; \
+    apt-get update; \
+    apt-get -y --no-install-recommends install \
+        build-essential \
+        ca-certificates \
+        gfortran \
+        wget; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
+
+#--- Define the MPICH version and compilation options
+ARG MPICH_VERSION="4.2.2"
+ARG MPICH_CONFIGURE_OPTIONS="--enable-fast=O2 --enable-fortran --enable-romio --prefix=/usr --with-device=ch4:ofi CC=gcc CXX=g++ FC=gfortran FFLAGS=-fallow-argument-mismatch FCFLAGS=-fallow-argument-mismatch"
+
+#--- Download MPICH source
+WORKDIR /tmp/mpich-build
+RUN set -eux; \
+    wget --no-hsts \
+        "https://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz"; \
+    tar xzf "mpich-${MPICH_VERSION}.tar.gz"
+
+#--- Compile and install MPICH
+WORKDIR /tmp/mpich-build/mpich-${MPICH_VERSION}
+RUN set -eux; \
+    ./configure ${MPICH_CONFIGURE_OPTIONS}; \
+    make -j16; \
+    make install; \
+    ldconfig
+
+WORKDIR /
+RUN rm -rf /tmp/mpich-build
 ```
-srun -n $SLURM_NTASKS \
-  singularity exec openfoam_v2012.sif \
-  simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
+{: .source}
+
+This example installs the build tools, downloads MPICH, and installs it under `/usr`. Applications added in later Dockerfile instructions can then be compiled using MPI compiler wrappers such as `mpicc`, `mpicxx`, and `mpifort`.
+
+> ## Why not install MPICH with `apt-get`?
+>
+> MPICH can be installed from the Ubuntu repositories using the `mpich` and `libmpich-dev` packages. Building from source provides tighter control over the MPICH version, compiler selection, optimisation options, and communication device. That control is useful when preparing an MPI base image for a specific HPC environment.
+{: .callout}
+
+#### Match the host MPI family
+
+Applications compiled against one MPI implementation cannot generally be assumed to run with libraries from another implementation. However, several MPICH-derived implementations participate in the [MPICH ABI Compatibility Initiative](https://www.mpich.org/abi/), including MPICH, Cray MPICH, Intel MPI, and MVAPICH2. Open MPI does not share this ABI.
+
+For this reason, an application intended for systems from different MPI families may require separate container-image variants. Compatibility must also be tested with the specific host software stack because non-standard interfaces and some language bindings may fall outside an ABI compatibility agreement.
+
+> ## MPI compatibility on Setonix
+>
+> Setonix provides Cray MPICH, which is derived from MPICH and optimised for the Slingshot interconnect. Pawsey's MPICH-based container images are prepared and tested for use with the host MPI environment on Setonix.
+>
+> Pawsey also maintains an MPICH base image at [quay.io/pawsey/mpich-base](https://quay.io/pawsey/mpich-base). It can be used as the starting point for containerising other MPI applications.
+{: .callout}
+
+### Use the host MPI and interconnect libraries at runtime
+
+MPI ABI compatibility is necessary, but it is not sufficient for efficient multi-node execution. The application must also be able to use the host communication libraries that provide access to the high-speed interconnect.
+
+On Pawsey systems, the MPI-enabled Singularity module configures this integration:
+
+```bash
+$ module load singularity/4.1.0-mpi
 ```
-{: .bash}
+{: .source}
 
-`srun` is the Slurm wrapper for the MPI launcher, `mpirun`.  Other schedulers will require a different command.
-In practice, all we had to do was to replace `mpirun` with `srun`.  This is because Singularity implements a native interface to schedulers, so it can be executed through `srun` as other packages would.
+Among other settings, the module defines:
 
-Note in the script how, when using schedulers, it is good practice to execute all application commands through `srun`, even those that only use one core.
+* `SINGULARITY_BINDPATH`, which makes the required Pawsey filesystems, Cray software directories, and host libraries available inside the container.
+* `SINGULARITYENV_LD_LIBRARY_PATH`, which adds the compatible host MPI and communication libraries to the library search path inside the container.
+* `SINGULARITYENV_LD_PRELOAD`, which preloads selected host libraries required to use the MPI and interconnect environment.
 
+Variables whose names begin with `SINGULARITYENV_` are passed into the container without that prefix. For example, `SINGULARITYENV_LD_LIBRARY_PATH` defines `LD_LIBRARY_PATH` inside the container.
 
-### MPI performance: container *vs* bare metal
+This is why the practical example does not manually define MPI library paths, preload libraries, or additional bind mounts. Those system-specific settings are supplied by the Pawsey module.
 
-What's the performance overhead in running an MPI application through containers?
+> ## Inspect the settings provided by the module
+>
+> The configuration applied by a module can be inspected using `module show`:
+>
+> ```bash
+> $ module show singularity/4.1.0-mpi
+> ```
+> {: .source}
+>
+> The complete output is intentionally not reproduced here. It contains long, system-specific lists of directories and libraries, and may change when the Setonix software environment is updated.
+>
+> To inspect only the main Singularity variables after loading the module, use:
+>
+> ```bash
+> $ env | grep '^SINGULARITY' | sort
+> ```
+> {: .source}
+{: .solution}
 
-Well, the benchmark figures just below reveal it's quite small...good news!
+> ## Configuration differs between HPC systems
+>
+> On another HPC system, the module name, host MPI implementation, supported container MPI versions, bind mounts, preloaded libraries, and environment variables may differ. Follow the container and MPI documentation for the system where the application will run. For Pawsey-specific guidance, see the [Singularity user documentation](https://pawsey.atlassian.net/wiki/spaces/US/pages/51925894/Singularity).
+{: .callout}
 
-<!-- ![OSU bandwidth test]({{ page.root }}/fig/OSU_Bandwidth.png) -->
-<img src="{{ page.root }}/fig/OSU_Bandwidth.png" alt="OSU bandwidth test" width="651" height="489"/>
+### Compare container and native MPI performance
 
-<!-- ![OSU point-to-point latency test]({{ page.root }}/fig/OSU_Latency_P2P.png) -->
-<img src="{{ page.root }}/fig/OSU_Latency_P2P.png" alt="OSU point-to-point latency test" width="651" height="489"/>
+MPI containers are useful only if the host MPI and interconnect can be used without introducing unacceptable overhead. The following figures compare container and native executions of three OSU Micro-Benchmarks.
 
-<!-- ![OSU collective latency test]({{ page.root }}/fig/OSU_Latency_Coll.png) -->
-<img src="{{ page.root }}/fig/OSU_Latency_Coll.png" alt="OSU collective latency test" width="651" height="489"/>
+The figures show results for a particular system and MPI configuration. They provide a qualitative comparison for that tested environment, not a guarantee for every MPI application, container image, or HPC system.
+
+#### Point-to-point bandwidth
+
+<img src="{{ page.root }}/fig/OSU_Bandwidth.png" alt="OSU MPI bandwidth results comparing container and native execution on two nodes" width="651" height="489"/>
+
+Native bandwidth is slightly higher across the displayed measurements. The difference is small for most measurements, although the first displayed measurement shows a more noticeable gap.
+
+#### Point-to-point latency
+
+<img src="{{ page.root }}/fig/OSU_Latency_P2P.png" alt="OSU MPI point-to-point latency results comparing container and native execution on two nodes" width="651" height="489"/>
+
+Container and native point-to-point latency are nearly indistinguishable at the scale shown.
+
+#### Collective latency
+
+<img src="{{ page.root }}/fig/OSU_Latency_Coll.png" alt="OSU MPI Allgather latency results comparing container and native execution across four nodes and 96 MPI ranks" width="651" height="489"/>
+
+The Allgather results are also very similar, including at the largest displayed message size.
+
+Together, these microbenchmarks indicate that the tested container configuration introduces little MPI communication overhead. Real applications should still be validated on the target system because performance also depends on application behaviour, process placement, filesystem access, MPI configuration, and the communication patterns used.
+
+> ## Main MPI container workflow
+>
+> To run a containerised MPI application efficiently on an HPC system:
+>
+> 1. Build the application against an MPI implementation compatible with the target host MPI.
+> 2. Use the host scheduler or MPI launcher to start one container instance per task.
+> 3. Expose the host MPI and interconnect libraries using the configuration supported by the HPC system.
+> 4. Validate correctness and performance on the target system.
+{: .callout}

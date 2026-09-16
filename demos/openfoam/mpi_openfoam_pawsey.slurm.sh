@@ -32,7 +32,7 @@ nProcs=$SLURM_NTASKS #Number of total processors in decomposition for this case
 mGroup=4             #Size of the groups for collated fileHandling (32 is the initial recommendation for Setonix)
 of_ioRanks="0"
 iC=$mGroup
-while [ $iC -le $nProcs ]; do
+while [ $iC -lt $nProcs ]; do
    of_ioRanks="$of_ioRanks $iC"
    ((iC += $mGroup))
 done
