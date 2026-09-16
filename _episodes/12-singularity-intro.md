@@ -35,7 +35,7 @@ keypoints:
 If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
 
 ```
-$ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 4:00:00
+$ salloc -N 1 -n 1 -c 4 --reservation=ContainersTraining -t 4:00:00
 ```
 {: .source}
 
@@ -292,10 +292,11 @@ Singularity uses the Singularity Image Format (SIF) for its native container ima
 
 For images that you intend to keep and reuse, we recommend storing named SIF files in an organised personal or project image library.
 
-First, create a directory for your Singularity images:
+First, create a directory (your local library) where to keep your singularity images:
 
 ```bash
-$ mkdir -p "$MYSOFTWARE/singularity/images"
+$ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
+$ mkdir -p "$MY_LOCAL_LIBRARY"
 ```
 {: .source}
 
@@ -316,26 +317,17 @@ The components of this image reference are:
 
 The `docker://` prefix does not instruct Singularity to start Docker. Singularity communicates directly with the registry and processes the Docker/OCI image manifest and filesystem layers. Docker does not need to be installed or running on the system.
 
-First, create a directory (your local library) where to keep your singularity images:
-
-```bash
-$ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
-$ mkdir -p "$MY_LOCAL_LIBRARY"
-```
-{: .source}
-
 Then, use `singularity pull` to download the source image, convert it to SIF, and save it with an explicit filename:
 
 ```bash
-$ SINGULARITY_IMAGE="${MY_LOCAL_LIBRARY}/lolcow--latest.sif"
-$ singularity pull "$SINGULARITY_IMAGE" docker://docker.io/sylabsio/lolcow:latest
+$ singularity pull "${MY_LOCAL_LIBRARY}/lolcow--latest.sif" docker://docker.io/sylabsio/lolcow:latest
 ```
 {: .source}
 
-The first argument after `pull` is the SIF file that Singularity creates (in this case the name that SINGULARITY_IMAGE has):
+The first argument after `pull` is the SIF file that Singularity creates:
 
 ```text
-${MYSOFTWARE}/singularity/images/lolcow--latest.sif
+${MY_LOCAL_LIBRARY}/lolcow--latest.sif
 ```
 {: .output}
 
@@ -349,7 +341,7 @@ docker://docker.io/sylabsio/lolcow:latest
 Check that the SIF file was created:
 
 ```bash
-$ ls -lh "$SINGULARITY_IMAGE"
+$ ls -lh "$MY_LOCAL_LIBRARY"
 ```
 {: .source}
 
