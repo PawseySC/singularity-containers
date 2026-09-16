@@ -66,7 +66,7 @@ Singularity offers a feature to achieve this, called *OverlayFS* and has a dedic
 Now let's create the overlay file with `SIZE=200MB`:
 
 ```bash
-$ module load singularity/4.1.0-nohost
+$ module load singularity/4.1.0-nompi
 $ export SIZE="200"
 $ export FILE="my_overlay.ext3"
 $ singularity overlay create --size $SIZE $FILE
@@ -88,8 +88,8 @@ $ singularity pull "${MY_LOCAL_LIBRARY}/ubuntu--24.04.sif" docker://docker.io/ub
 {: .source}
 
 ```bash
-$ SINGULARITY_IMAGE="${MY_LOCAL_LIBRARY}/ubuntu--24.04.sif"
-$ singularity shell --overlay my_overlay.ext3 $SINGULARITY_IMAGE
+$ UBUNTU_IMAGE="${MY_LOCAL_LIBRARY}/ubuntu--24.04.sif"
+$ singularity shell --overlay my_overlay.ext3 $UBUNTU_IMAGE
 ```
 {: .source}
 
@@ -170,8 +170,8 @@ A subdirectory in the directory we are in, `trinity_test_data/`, contains sample
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec --overlay my_overlay.ext3 $SINGULARITY_IMAGE mkdir /trinity_out_dir
-> > $ singularity exec --overlay my_overlay.ext3 $SINGULARITY_IMAGE ls -ltd /trinity_out_dir
+> > $ singularity exec --overlay my_overlay.ext3 $UBUNTU_IMAGE mkdir /trinity_out_dir
+> > $ singularity exec --overlay my_overlay.ext3 $UBUNTU_IMAGE ls -ltd /trinity_out_dir
 > > ```
 > > {: .bash}
 > {: .solution}
@@ -181,8 +181,8 @@ A subdirectory in the directory we are in, `trinity_test_data/`, contains sample
 Now, let's download the Trinity image from Docker hub, `trinityrnaseq/trinityrnaseq:2.8.6`:
 
 ```
-$ singularity pull docker://trinityrnaseq/trinityrnaseq:2.8.6
-$ singularity pull "${MY_LOCAL_LIBRARY}/trinityrnaseq--2.15.2.sif" docker://docker.io/trinityrnaseq/trinityrnaseq:2.15.2
+$ singularity pull docker://trinityrnaseq/trinityrnaseq:2.15.2
+$ singularity pull "${MY_LOCAL_LIBRARY}/trinityrnaseq--2.8.6.sif" docker://docker.io/trinityrnaseq/trinityrnaseq:2.8.6
 ```
 {: .bash}
 
@@ -207,7 +207,9 @@ Now, we're going to run a test assembly with our sample dataset, using the direc
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec --overlay my_overlay trinityrnaseq_2.8.6.sif \
+> > $ TRINITY_IMAGE="${MY_LOCAL_LIBRARY}/trinityrnaseq--2.8.6.sif"
+> > $ ls -lth "$TRINITY_IMAGE"
+> > $ singularity exec --overlay my_overlay.ext3 "$TRINITY_IMAGE" \
 > >     Trinity \
 > >     --seqType fq --left trinity_test_data/reads.left.fq.gz \
 > >     --right trinity_test_data/reads.right.fq.gz \
@@ -220,26 +222,29 @@ Now, we're going to run a test assembly with our sample dataset, using the direc
 
 All of our outputs are stored in the OverlayFS, so we need to use a Singularity container to inspect them:
 
+```bash
+$ singularity exec --overlay my_overlay.ext3 "$UBUNTU_IMAGE" ls /trinity_out_dir
 ```
-$ singularity exec --overlay my_overlay docker://ubuntu:18.04 ls /trinity_out_dir
-```
-{: .bash}
+{: .source}
 
-```
-Trinity.fasta		      both.fa.read_count	       insilico_read_normalization   partitioned_reads.files.list.ok   recursive_trinity.cmds.ok
-Trinity.fasta.gene_trans_map  chrysalis			       jellyfish.kmers.fa	     pipeliner.18881.cmds	       right.fa.ok
-Trinity.timing		      inchworm.K25.L25.DS.fa	       jellyfish.kmers.fa.histo      read_partitions		       scaffolding_entries.sam
-both.fa			      inchworm.K25.L25.DS.fa.finished  left.fa.ok		     recursive_trinity.cmds
-both.fa.ok		      inchworm.kmer_count	       partitioned_reads.files.list  recursive_trinity.cmds.completed
+```text
+Trinity.fasta		      inchworm.K25.L25.DS.fa.finished  pipeliner.1217836.cmds
+Trinity.fasta.gene_trans_map  inchworm.kmer_count	       read_partitions
+Trinity.timing		      insilico_read_normalization      recursive_trinity.cmds
+both.fa			      jellyfish.kmers.fa	       recursive_trinity.cmds.completed
+both.fa.ok		      jellyfish.kmers.fa.histo	       recursive_trinity.cmds.ok
+both.fa.read_count	      left.fa.ok		       right.fa.ok
+chrysalis		      partitioned_reads.files.list     scaffolding_entries.sam
+inchworm.K25.L25.DS.fa	      partitioned_reads.files.list.ok
 ```
 {: .output}
 
 Now let's copy the assembled sequence and transcripts, `Trinity.fasta*`, in the current directory:
 
+```bash
+$ singularity exec --overlay my_overlay.ext3 "$UBUNTU_IMAGE" bash -c 'cp -p /trinity_out_dir/Trinity.fasta* ./'
 ```
-$ singularity exec --overlay my_overlay docker://ubuntu:18.04 bash -c 'cp -p /trinity_out_dir/Trinity.fasta* ./'
-```
-{: .bash}
+{: .source}
 
 Note how we're wrapping the copy command within `bash -c`; this is to defer the evaluation of the `*` wildcard to when the container runs the command.
 
@@ -251,8 +256,8 @@ $ ls -l Trinity.fasta*
 {: .bash}
 
 ```
--rw-r--r-- 1 ubuntu ubuntu 171507 Nov  4 05:49 Trinity.fasta
--rw-r--r-- 1 ubuntu ubuntu   2818 Nov  4 05:49 Trinity.fasta.gene_trans_map
+-rw-r--r-- 1 courses01 courses 171507 Nov  4 05:49 Trinity.fasta
+-rw-r--r-- 1 courses01 courses   2818 Nov  4 05:49 Trinity.fasta.gene_trans_map
 ```
 {: .output}
 
@@ -261,40 +266,42 @@ $ ls -l Trinity.fasta*
 
 Writing large numbers of output files isn't the only scenario where a persistent overlay is useful.  Another common case is *installing software*: package managers such as *Conda* (and its faster drop-in replacement, *Mamba*) typically create installations made up of many thousands of small files.  Installing directly on a host parallel filesystem can therefore run into the same file quota and metadata performance problems we discussed above.  We can instead install the whole Conda/Mamba environment *inside* a persistent overlay, keeping all of those small files neatly packed away in a single image file on the host filesystem.
 
-Let's create a new, empty directory to work in, and a fresh overlay image dedicated to this example.  This time, we'll make it considerably bigger than `my_overlay`, since a Conda/Mamba installation can easily take up a few gigabytes:
+Let's create a new, empty directory to work in, and a fresh overlay image dedicated to this example.  This time, we'll make it considerably bigger than `my_overlay.ext3`, since a Conda/Mamba installation can easily take up a few gigabytes (note that size is in MB):
 
 ```
-$ mkdir -p $TUTO/demos/conda_overlay
 $ cd $TUTO/demos/conda_overlay
 $ export SIZE="5000"
-$ export FILE="my_conda_overlay"
+$ export FILE="my_conda_overlay.ext3"
 $ singularity overlay create --size $SIZE $FILE
+$ ls -lat
 ```
 {: .bash}
 
 > ## Mind the size!
 >
-> Unlike the SquashFS images we could have used instead (see the [Pawsey documentation on SquashFS](https://pawsey.atlassian.net/wiki/spaces/US/pages/51927678/How+to+use+SquashFS+to+avoid+file+quota+issues) for that alternative approach), a Singularity overlay has its size fixed at creation time.  If you don't reserve enough space, the installation will fail partway through and you will have to create a bigger overlay and start again.  When in doubt, err on the generous side.
+> Singularity overlays have a fixed size that must be chosen at creation time. If you do not reserve enough space, the installation will fail partway through and you will need to create a larger overlay and start again. When in doubt, err on the generous side.
+>
+> An alternative approach for storing large collections of small files is to package them into a SquashFS file (see the [Pawsey documentation on SquashFS](https://pawsey.atlassian.net/wiki/spaces/US+to+avoid+file+quota+issues). Unlike overlays, SquashFS files do not require preallocating storage space. As SquashFS is a filesystem packaging technology rather than a container technology, it is outside the scope of this lesson.
 {: .callout}
 
-We're going to use a minimal `ubuntu:18.04` container for this.  Such a small base image doesn't ship with `wget` or `curl`, so rather than downloading the installer *from inside* the container, we download it first on the **host**, in our current directory (which Singularity bind mounts into the container by default):
+We're going to use again `ubuntu--24.04.sif` image for this.  Such a small image doesn't ship with `wget` or `curl`, so rather than downloading the miniconda installer *from inside* the container, we download it first directly with **host** command into our current directory (which Singularity will bind mount later by default when using the container):
 
-```
+```bash
 $ wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
 ```
-{: .bash}
+{: .source}
 
 > ## Which base image?
 >
-> Any Linux container image will do here: the [Miniforge](https://github.com/conda-forge/miniforge) installer is self-contained and only needs `bash` and core utilities, and Conda/Mamba then bring their own Python and SSL libraries.  We stick with `ubuntu:18.04` for consistency with the rest of this episode;
+> Any Linux container image will do here: the [Miniforge](https://github.com/conda-forge/miniforge) installer is self-contained and only needs `bash` and core utilities, and Conda/Mamba then bring their own Python and SSL libraries.  We stick with `ubuntu--24.04.sif` for consistency with the rest of this episode;
 {: .callout}
 
 Now, let's open a shell into the container, mounting our new overlay as read-write with the `:rw` suffix (this is the default, but it doesn't hurt to be explicit):
 
+```bash
+$ singularity shell --overlay $FILE:rw "$UBUNTU_IMAGE"
 ```
-$ singularity shell --overlay $FILE:rw docker://ubuntu:18.04
-```
-{: .bash}
+{: .source}
 
 From inside the container, we run the installer, pointing it at a path at the root of the overlay with `-p`.  Note we do **not** create `/opt/conda` beforehand: the installer refuses to write into a directory that already exists.
 
@@ -325,14 +332,14 @@ $ rm Miniforge3-Linux-x86_64.sh
 
 > ## Use the installed software from a fresh container
 >
-> Once exited, start a **new** `singularity exec` from the *same* Ubuntu image, mounting `my_conda_overlay` again, and check that `bwa` is available and runs.  (**Hint**: you will need to add `/opt/conda/bin` to the `PATH` *inside* the container before calling `bwa`).
+> Once exited, start a **new** `singularity exec` from the *same* Ubuntu image, mounting `my_conda_overlay.ext3` again, and check that `bwa` is available and runs.  (**Hint**: you will need to add `/opt/conda/bin` to the `PATH` *inside* the container before calling `bwa`).
 >
 > > ## Solution
 > >
+> > ```bash
+> > $ singularity exec --overlay my_conda_overlay.ext3 "$UBUNTU_IMAGE" bash -c 'export PATH=/opt/conda/bin:$PATH && bwa'
 > > ```
-> > $ singularity exec --overlay my_conda_overlay docker://ubuntu:18.04 bash -c 'export PATH=/opt/conda/bin:$PATH && bwa'
-> > ```
-> > {: .bash}
+> > {: .source}
 > >
 > > ```
 > > Program: bwa (alignment via Burrows-Wheeler transformation)
@@ -344,42 +351,62 @@ $ rm Miniforge3-Linux-x86_64.sh
 > {: .solution}
 {: .challenge}
 
-Just like with the Trinity example earlier, the software we installed persists inside the overlay image file, and can be reused across different container runs, even from different container images, simply by mounting `my_conda_overlay` again with `--overlay`.  This makes overlays a handy way to keep bulky, many-file software installations off your quota-limited host filesystem, while still being able to bring them along with any Singularity container you like.
+Just like with the Trinity example earlier, the software we installed persists inside the overlay image file, and can be reused across different container runs, even from different container images, simply by mounting `my_conda_overlay.ext3` again with `--overlay`.  This makes overlays a handy way to keep bulky, many-file software installations off your quota-limited host filesystem, while still being able to bring them along with any Singularity container you like.
 
 
 ### Ephemeral writable containers
 
-In some situations, you might need your container to be writable not to store persistent output files, but just to write temporary service files.
-*E.g.* this can happen with applications that want to write a dot-file in your home, such as a Python package, or containerised Jupyter notebooks that need to write runtime information under `/run`.
-In this context, a persistent overlay filesystem might require more work than is desired.  There are alternative, simpler ways to set this up.
+Sometimes an application needs to create temporary files within the container filesystem, but you do not need those changes to persist after the run. Examples include software that creates cache files, lock files, runtime state under `/run`, temporary data under `/tmp`, or configuration files that are only needed while the application is running.
 
-Singularity has a flag for rendering containers from SIF image files ephemerally writable.  `--writable-tmpfs` will allocate a small amount of RAM for this purpose (configured by the sys admins, by default just a bunch of MB), *e.g.*:
+In these situations, creating a persistent overlay may be unnecessary. Instead, Singularity can make a SIF container temporarily writable using the `--writable-tmpfs` flag. Any changes made to the container filesystem are stored in a temporary writable layer and are discarded when the container exits.
 
-```
-$ singularity exec --writable-tmpfs docker://ubuntu:18.04 touch ~/write-to-home
-```
-{: .bash}
+For example, let's create a file under `/tmp`:
 
-Unless `$HOME` is bind mounted to the container (for security reasons it shouldn't be), the newly created file will be gone after the container exits:
+```bash
+$ singularity exec --writable-tmpfs "$UBUNTU_IMAGE" touch /tmp/temporary-file
+```
+{: .source}
 
-```
-$ ls ~/write-to-home
-```
-{: .bash}
+The command succeeds because the container filesystem is writable for the duration of the run.
 
+To verify that the change did not persist, launch a fresh container and check for the file:
+
+```bash
+$ singularity exec "$UBUNTU_IMAGE" ls /tmp/temporary-file
 ```
-ls: /home/ubuntu/write-to-home: No such file or directory
+{: .source}
+
+The output should be:
+
+```text
+ls: cannot access '/tmp/temporary-file': No such file or directory
 ```
 {: .output}
 
-There are situations where `--writable-tmpfs` is not usable, in particular if you are trying to write to a directory owned by *root*, such as `/run`.
-In this case, the solution is to create a host directory and bind mount it as the path you need to write into, *e.g.*:
+The file disappeared because it was created in the temporary writable layer provided by `--writable-tmpfs`.
 
-```
-$ mkdir ~/my_run
-$ SINGULARITY_BINDPATH="~/my_run:/run,$SINGULARITY_BINDPATH"
-$ singularity exec docker://ubuntu:18.04 touch /run/running-file
-```
-{: .bash}
+#### When `--writable-tmpfs` is not enough
 
-In this case, the file will also persist in the host directory after the container exits.
+Some applications need more writable space than is available in the temporary writable layer, or need their changes to persist across multiple container runs. In these situations, use a persistent overlay instead.
+
+Another common approach is to bind mount a host directory at the location where the application needs write access. For example:
+
+```bash
+$ mkdir -p "$PWD/my_run"
+$ singularity exec --bind "$PWD/my_run:/run" "$UBUNTU_IMAGE" touch /run/running-file
+```
+{: .source}
+
+The file is written into the host directory `my_run` and therefore remains available after the container exits:
+
+```bash
+$ ls my_run
+```
+{: .source}
+
+```text
+running-file
+```
+{: .output}
+
+Use `--writable-tmpfs` for temporary, disposable changes, and use persistent overlays when changes need to survive across container runs.
