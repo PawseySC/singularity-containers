@@ -1,12 +1,13 @@
 ---
 title: "Basic Use of Containers (with Singularity)"
-teaching: 35
-exercises: 25
+teaching: 45
+exercises: 30
 questions:
 - "How can I find and run an existing container image with Singularity?"
 - "How can I save and organise container images as SIF files?"
 - "What is the difference between `singularity run`, `exec`, and `shell`?"
 - "How can I execute pipelines and other shell expressions inside a container?"
+- "How can a containerised application read and write files on the host?"
 objectives:
 - "Identify the components of a Docker/OCI image reference"
 - "Download and organise an image as a local SIF file"
@@ -14,6 +15,8 @@ objectives:
 - "Inspect the software environment packaged inside a container"
 - "Run pipelines and other shell expressions inside a container with `bash -c`"
 - "Open an interactive shell inside a container"
+- "Read and write host files from a container"
+- "Copy a file packaged inside an image to the host filesystem"
 keypoints:
 - "Singularity can retrieve Docker/OCI images from compatible registries without using the Docker engine"
 - "`singularity run` executes the action defined by the image publisher"
@@ -22,7 +25,26 @@ keypoints:
 - "Use `bash -c` when commands executed with `singularity exec` require shell built-ins, pipelines, redirections, or other shell syntax"
 - "Use `singularity pull` to create explicitly named SIF files that you can organise and reuse"
 - "For images to be downloaded, prefer versioned image tags over `latest` when they are available"
+- "SIF images are normally read-only; containerised applications write persistent data through host directories made available inside the container"
+- "Files packaged inside an image can be copied to a writable host directory"
 ---
+
+
+### Request an interactive allocation
+
+If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
+
+```
+$ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 4:00:00
+```
+{: .source}
+
+```text
+salloc: Granted job allocation 3453895
+salloc: Waiting for resource configuration
+salloc: Nodes nid000152 are ready for job
+```
+{: .output}
 
 ### Get ready for the hands-on
 
@@ -83,24 +105,6 @@ The working directory should be something like:
 > >
 > {: .solution}
 {: .challenge}
-
-
-> ## Are you running on a shared HPC system?
->
-> If you're running this tutorial on a shared system (*e.g.* on Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can get this setup by using an interactive scheduler allocation, for instance on Setonix with Slurm:
->
-> ```
-> $ salloc -N 1 -n 1 -c 1 --reservation=ContainersTraining -t 4:00:00
-> ```
-> {: .bash}
->
-> ```
-> salloc: Granted job allocation 3453895
-> salloc: Waiting for resource configuration
-> salloc: Nodes nid002604 are ready for job
-> ```
-> {: .output}
-{: .callout}
 
   </div>
 
@@ -351,26 +355,24 @@ $ ls -lh "$SINGULARITY_IMAGE"
 
 A filesystem directory containing SIF files is not technically a container registry. It is an organised local collection, or image library, that you manage yourself.
 
-<details markdown="1">
-<summary class="alert alert-info"><strong>Optional: Docker Hub shorthand</strong></summary>
-
-Docker Hub is the default registry for `docker://` references. Therefore:
-
-```text
-docker://sylabsio/lolcow:latest
-```
-{: .output}
-
-is equivalent to:
-
-```text
-docker://docker.io/sylabsio/lolcow:latest
-```
-{: .output}
-
-This tutorial uses the explicit `docker.io` hostname to make the registry visible. You will commonly encounter the abbreviated form in documentation and existing workflows.
-
-</details>
+> ## Optional: Docker Hub shorthand
+>
+> Docker Hub is the default registry for `docker://` references. Therefore:
+>
+> ```text
+> docker://sylabsio/lolcow:latest
+> ```
+> {: .output}
+>
+> is equivalent to:
+>
+> ```text
+> docker://docker.io/sylabsio/lolcow:latest
+> ```
+> {: .output}
+>
+> This tutorial uses the explicit `docker.io` hostname to make the registry visible. You will commonly encounter the abbreviated form in documentation and existing workflows.
+{: .solution}
 
 > ## `pull` or `build`?
 >
@@ -462,72 +464,70 @@ In the following sections, we will use:
 - `singularity exec` to choose a particular command to run from the image
 - `singularity shell` to explore the container environment interactively
 
-<details markdown="1">
-<summary class="alert alert-info"><strong>Optional: Running an image using an online registry reference</strong></summary>
-
-Creating a named SIF file with `singularity pull` gives you control over where the image is stored and how it is named. This is the recommended approach for images that you intend to manage and reuse.
-
-For a quick test, Singularity can also retrieve and run an image using its reference in an online registry:
-
-```bash
-$ singularity run docker://docker.io/sylabsio/lolcow:latest
-```
-{: .source}
-
-The first time this remote reference is used, Singularity may display informational messages while it retrieves and prepares the image:
-
-```text
-INFO:    Converting OCI blobs to SIF format
-INFO:    Starting build...
-[...]
-INFO:    Creating SIF file...
-```
-{: .output}
-
-Singularity then starts a container and executes the runscript provided by the image.
-
-When Singularity processes the command, it:
-
-1. reads the online registry reference
-2. retrieves the Docker/OCI image manifest and filesystem layers from Docker Hub
-3. converts the image into the Singularity Image Format
-4. stores the converted image in its internal cache
-5. starts a container from the cached image
-6. executes the runscript defined by the image publisher
-
-Run the same command again:
-
-```bash
-$ singularity run docker://docker.io/sylabsio/lolcow:latest
-```
-{: .source}
-
-The second execution should start sooner because Singularity can reuse the converted image stored in its internal cache. In both executions, the container runs locally. The online registry reference tells Singularity where to retrieve the image, but it does not mean that the image is executed remotely.
-
-> ## Local SIF file or online image reference?
+> ## Optional: Running an image using an online registry reference
 >
-> The two commands use the same published image, but they manage it differently.
+> Creating a named SIF file with `singularity pull` gives you control over where the image is stored and how it is named. This is the recommended approach for images that you intend to manage and reuse.
 >
-> Run the SIF file stored in your personal image library:
->
-> ```bash
-> $ singularity run "$SINGULARITY_IMAGE"
-> ```
-> {: .source}
->
-> Run the image using its Docker Hub reference:
+> For a quick test, Singularity can also retrieve and run an image using its reference in an online registry:
 >
 > ```bash
 > $ singularity run docker://docker.io/sylabsio/lolcow:latest
 > ```
 > {: .source}
 >
-> Using an online registry reference is convenient for quickly testing an image. Singularity manages the converted image in its internal cache, where cached objects may be identified by content-based hashes rather than recognisable image names.
+> The first time this remote reference is used, Singularity may display informational messages while it retrieves and prepares the image:
 >
-> For images that you intend to retain and use in research workflows, prefer an explicitly named SIF file stored in your personal or project image library.
-{: .callout}
-
-</details>
+> ```text
+> INFO:    Converting OCI blobs to SIF format
+> INFO:    Starting build...
+> [...]
+> INFO:    Creating SIF file...
+> ```
+> {: .output}
+>
+> Singularity then starts a container and executes the runscript provided by the image.
+>
+> When Singularity processes the command, it:
+>
+> 1. reads the online registry reference
+> 2. retrieves the Docker/OCI image manifest and filesystem layers from Docker Hub
+> 3. converts the image into the Singularity Image Format
+> 4. stores the converted image in its internal cache
+> 5. starts a container from the cached image
+> 6. executes the runscript defined by the image publisher
+>
+> Run the same command again:
+>
+> ```bash
+> $ singularity run docker://docker.io/sylabsio/lolcow:latest
+> ```
+> {: .source}
+>
+> The second execution should start sooner because Singularity can reuse the converted image stored in its internal cache. In both executions, the container runs locally. The online registry reference tells Singularity where to retrieve the image, but it does not mean that the image is executed remotely.
+>
+> > ## Local SIF file or online image reference?
+> >
+> > The two commands use the same published image, but they manage it differently.
+> >
+> > Run the SIF file stored in your personal image library:
+> >
+> > ```bash
+> > $ singularity run "$SINGULARITY_IMAGE"
+> > ```
+> > {: .source}
+> >
+> > Run the image using its Docker Hub reference:
+> >
+> > ```bash
+> > $ singularity run docker://docker.io/sylabsio/lolcow:latest
+> > ```
+> > {: .source}
+> >
+> > Using an online registry reference is convenient for quickly testing an image. Singularity manages the converted image in its internal cache, where cached objects may be identified by content-based hashes rather than recognisable image names.
+> >
+> > For images that you intend to retain and use in research workflows, prefer an explicitly named SIF file stored in your personal or project image library.
+> {: .callout}
+{: .solution}
 
 > ## Docker/OCI image, SIF image, Docker Hub, Docker, and Singularity
 >
@@ -833,6 +833,198 @@ For repeatable workflows and batch jobs, prefer `singularity exec`. Commands pas
 
 A normal SIF image is read-only during execution. Exploring the image or attempting to modify its packaged files from an interactive shell does not permanently change the original SIF image.
 
+### Working with files
+
+**Container images are normally immutable.** Running a container does not modify the original image. A standard SIF image contains a read-only packaged filesystem, so containerised applications normally write persistent input and output to host directories made available inside the container. Writable overlays, temporary writable filesystems, and sandbox directories can provide a writable container environment without modifying the standard read-only SIF filesystem. These advanced mechanisms are covered in later episodes.
+
+Containerised applications still need to read input data and write results. Singularity supports this by making selected directories from the host filesystem available inside the container through **bind mounts**. A bound directory remains part of the host filesystem even though applications inside the container can access it through the container's directory tree.
+
+#### Host directories available inside the container
+
+There are two relevant sources of bind mounts:
+
+1. directories that Singularity normally binds automatically
+2. additional directories configured by the system administrators or the loaded module
+
+By default, Singularity normally makes several host locations available inside the container, including:
+
+- the user's home directory, `$HOME`
+- the current working directory
+- `/tmp` and `/var/tmp`
+- system interfaces such as `/proc`, `/sys`, and `/dev`
+- selected host configuration files
+
+The exact defaults depend on the Singularity installation and its system configuration.
+
+> ## Additional bind paths on Setonix
+>
+> On Setonix, the `singularity/4.1.0-nohost` module configures these additional host filesystems:
+>
+> ```text
+> /scratch
+> /software
+> /data/references
+> ```
+> {: .output}
+>
+> You can see this configuration with:
+>
+> ```bash
+> $ module show singularity/4.1.0-nohost
+> ```
+> {: .source}
+>
+> The relevant line sets:
+>
+> ```text
+> SINGULARITY_BINDPATH=,/scratch,/software,/data/references
+> ```
+> {: .output}
+>
+> These paths are normally available at the same locations inside the container. For example, a host directory under `/scratch/pawsey0001/` remains accessible under `/scratch/pawsey0001/` inside the container.
+>
+> The user's home directory does not need to appear in `SINGULARITY_BINDPATH` because Singularity normally handles the home-directory bind automatically.
+>
+> The `nohost` suffix does not mean that all host filesystems are hidden. It selects a Pawsey module variant that avoids injecting specialised host software stacks, such as host MPI libraries, into the container. Configured host filesystems can still be available.
+{: .callout}
+
+Check the current working directory on the host:
+
+```bash
+$ pwd
+```
+{: .source}
+
+Run the same command inside the container:
+
+```bash
+$ singularity exec "$SINGULARITY_IMAGE" pwd
+```
+{: .source}
+
+The two commands should report the same path.
+
+#### Attempting to write into the container image
+
+First, try to create a file in a directory provided by the container image:
+
+```bash
+$ singularity exec "$SINGULARITY_IMAGE" touch /usr/local/container-test.txt
+```
+{: .source}
+
+The command should fail with a message similar to:
+
+```text
+touch: cannot touch '/usr/local/container-test.txt': Read-only file system
+```
+{: .error}
+
+Depending on the system configuration, the error may instead report `Permission denied`. A normal SIF image is mounted read-only, and container processes run with your normal user identity rather than with administrative privileges. Consequently, applications cannot normally create or modify files in protected locations supplied by the image.
+
+Now create a file in the current working directory instead:
+
+```bash
+$ singularity exec "$SINGULARITY_IMAGE" touch ./container-test.txt
+```
+{: .source}
+
+Check the file from the host:
+
+```bash
+$ ls -l container-test.txt
+```
+{: .source}
+
+This succeeds because the current working directory is a host directory made available inside the container. The file is created on the host filesystem, not inside the SIF image.
+
+#### Creating a file from inside the container
+
+Use a command running inside the container to create a file in the current working directory:
+
+```bash
+$ singularity exec "$SINGULARITY_IMAGE" bash -c 'date | cowsay > message.txt'
+```
+{: .source}
+
+The pipeline and redirection are interpreted by Bash inside the container. However, `message.txt` is created in the current working directory, which is a host directory made available inside the container.
+
+After the container command finishes, inspect the file from the host:
+
+```bash
+$ cat message.txt
+```
+{: .source}
+
+The file remains available because it was written to the host filesystem, not into the SIF image.
+
+> ## Where was the file written?
+>
+> Although the command ran inside the container, the output file was not added to `lolcow--latest.sif`.
+>
+> ```text
+> Containerised command
+>         |
+>         | writes message.txt
+>         v
+> Host current working directory
+> ```
+> {: .output}
+{: .callout}
+
+#### Copying a file from the image to the host
+
+Files packaged inside an image can also be copied to a writable host directory. The `cowsay` program is stored inside this image as `/usr/games/cowsay`.
+
+Copy it from the image into the current host directory:
+
+```bash
+$ singularity exec "$SINGULARITY_IMAGE" cp /usr/games/cowsay ./cowsay.copy
+```
+{: .source}
+
+Check the copied file from the host:
+
+```bash
+$ ls -l cowsay.copy
+$ head cowsay.copy
+```
+{: .source}
+
+The source path, `/usr/games/cowsay`, refers to a file packaged inside the image. The destination path, `./cowsay.copy`, refers to the current working directory shared with the host.
+
+> ## Optional: Binding additional host directories
+>
+> If a required host directory is not already available inside the container, use the `--bind` option:
+>
+> ```bash
+> $ singularity exec --bind HOST_PATH:CONTAINER_PATH[:OPTIONS] "$SINGULARITY_IMAGE" COMMAND
+> ```
+> {: .source}
+>
+> For example:
+>
+> ```bash
+> $ singularity exec --bind "$HOME/my-data:/data:ro" "$SINGULARITY_IMAGE" ls /data
+> ```
+> {: .source}
+>
+> This makes the host directory `$HOME/my-data` available as `/data` inside the container. The `ro` option makes the directory read-only. Use `rw` when the containerised application must write to the directory.
+>
+> On Setonix, the main filesystems used in this training are already available through Singularity's default configuration and the loaded module. Therefore, additional `--bind` options are normally required only when:
+>
+> - a host path is not already available inside the container
+> - the host path should appear at a different location inside the container
+> - the bind should explicitly be read-only or read-write
+{: .solution}
+
+> ## Modifying the image itself
+>
+> A normal SIF image is read-only during execution. Installing software or persistently writing files into its packaged filesystem requires a different workflow, such as rebuilding the image from a definition file, using a writable sandbox, or attaching a persistent overlay.
+>
+> These mechanisms are not needed for normal input and output files and will be covered separately.
+{: .callout}
+
 ### Image tags and reproducibility
 
 An image tag identifies a published image variant. The `latest` tag is only a conventional name. It does not guarantee that an image contains the newest application version, and its contents may change when the publisher updates it.
@@ -881,7 +1073,9 @@ $ singularity exec "$SINGULARITY_IMAGE" cowsay -h
 > 3. Pull it into a named SIF file for regular use.
 > 4. Use `run`, `exec`, and `shell` for different interactions with the image.
 > 5. Use `bash -c` when an operation requires shell syntax.
-> 6. Optionally, use an online registry reference for a quick test.
+> 6. Read and write persistent files through host directories made available inside the container.
+> 7. Copy files packaged inside an image to a writable host directory.
+> 8. Optionally, use an online registry reference for a quick test.
 >
 > For your own workflows, store reusable SIF files in an organised location and record the original registry reference and tag from which each file was obtained.
 {: .callout}
