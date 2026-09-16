@@ -14,7 +14,7 @@ keypoints:
 
 ### Why do I need this?
 
-At the start of this workshop, we'll be using **Docker** to build container images on your own computer.  Later on, we'll switch to **Singularity/Apptainer**, which is used on Setonix.  So, Docker is the one piece of software you need to install *before* the session.
+We will be using **Docker** to build container images on your own computer.  Later on, we'll switch to **Singularity/Apptainer**, which is used on Setonix.  So, Docker is the one piece of software you need to install *before* the session.
 
 > ## Administrator permissions required
 >
