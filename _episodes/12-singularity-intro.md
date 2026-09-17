@@ -1001,13 +1001,15 @@ The source path, `/usr/games/cowsay`, refers to a file packaged inside the image
 > ```
 > {: .source}
 >
-> This makes the host directory `$HOME/my-data` available as `/data` inside the container. The `ro` option makes the directory read-only. Use `rw` when the containerised application must write to the directory.
+> This makes the host directory `$HOME/my-data` available as `/data` inside the container. The `ro` option makes the directory read-only; use `rw` when the containerised application must write to the host directory.
 >
-> On Setonix, the main filesystems used in this training are already available through Singularity's default configuration and the loaded module. Therefore, additional `--bind` options are normally required only when:
+> On Setonix, the main filesystems used in this training are already available through Singularity's default configuration and the loaded module. Therefore, explicit `--bind` options are normally required only when:
 >
 > - a host path is not already available inside the container
 > - the host path should appear at a different location inside the container
 > - the bind should explicitly be read-only or read-write
+>
+> Using a writable bind mount to provide write access at a normally read-only container path, including what happens to existing content at that path, is covered in the `"Writable" containers` episode.
 {: .solution}
 
 > ## Modifying the image itself
