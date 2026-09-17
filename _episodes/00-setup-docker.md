@@ -88,7 +88,14 @@ Install [Docker Desktop for Mac](https://docs.docker.com/desktop/setup/install/m
 > If you're not sure which one you have, check via the Apple menu → *About This Mac*.
 {: .callout}
 
-After installation, start Docker Desktop, then open *Terminal* and run:
+After installation, start Docker Desktop from the *Applications* folder or run:
+
+```
+open -a Docker
+```
+{: .bash}
+
+Wait until Docker Desktop reports that the engine is running.  Then open *Terminal* and run:
 
 ```
 docker --version
@@ -102,7 +109,7 @@ docker run hello-world
 ```
 {: .bash}
 
-This downloads (if needed) and runs a small test image.  See the [Final check](#final-check) section below for the output you should expect.
+This downloads (if needed) and runs a small test image.  See the [Final check](#final-check) section below for the output you should expect
 
 > ## Additional check for Apple silicon Macs
 >
