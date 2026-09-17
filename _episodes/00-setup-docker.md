@@ -3,22 +3,23 @@ title: "Setup Docker on your computer"
 teaching: 10
 exercises: 5
 questions:
+- How can I install Docker and verify that it works on my computer?
 objectives:
 - Install Docker on your own computer, on Windows, macOS or Linux
 - Verify the installation by running a test container
 keypoints:
 - We will use Docker to build container images
-- Installing Docker requires *admin*/*sudo* privileges on your machine
-- The 'docker run hello-world' command is the quickest way to check that your installation works
+- Installing Docker may require *admin*/*sudo* privileges, depending on your operating system and computer configuration
+- The `docker run hello-world` command verifies that Docker can obtain an image and run a container
 ---
 
 ### Why do I need this?
 
-We will be using **Docker** to build container images on your own computer.  Later on, we'll switch to **Singularity/Apptainer**, which is used on Setonix.  So, Docker is the one piece of software you need to install *before* the session.
+We will be using **Docker** to build Linux container images on your own computer.  Later on, we'll switch to **Singularity/Apptainer**, which is used on Setonix.  Docker is the main workshop software that you need to install *before* the session.  On Windows, the recommended Docker Desktop setup also uses WSL 2.
 
-> ## Administrator permissions required
+> ## Administrator permissions may be required
 >
-> Installing WSL and Docker requires administrator permissions on your computer.  If you do not have these permissions, contact your system administrator or IT support before the workshop.  Alternatively, use a personal laptop on which you can install software.
+> Installing Docker, enabling WSL 2, or configuring required system features may require administrator permissions, depending on your operating system and computer configuration.  If you use a managed computer, contact your system administrator or IT support before the workshop.  Alternatively, use a personal computer on which you are permitted to install software.
 {: .callout}
 
 Pick the section below that matches your operating system.  In all cases, the goal is the same: get the `docker` command working, and confirm it by running a small test container called `hello-world`.
@@ -26,7 +27,7 @@ Pick the section below that matches your operating system.  In all cases, the go
 
 ### 1. Windows
 
-We recommend *Docker Desktop* with the *WSL 2* backend (WSL stands for *Windows Subsystem for Linux*, and lets you run a real Linux environment alongside Windows).
+We recommend *Docker Desktop* with the *WSL 2* backend.  WSL stands for *Windows Subsystem for Linux*.  WSL 2 provides a Linux environment using a Linux kernel inside a lightweight virtual machine managed automatically by Windows.  Docker Desktop uses this environment to run Linux containers on Windows.
 
 #### Step 1: Install WSL 2
 
@@ -51,7 +52,7 @@ This should print your installed WSL version, with no errors.
 #### Step 2: Install Docker Desktop
 
 Download and install [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/).  
-During installation, make sure you select the **WSL 2 based engine** when prompted.
+During installation, use the **WSL 2 based engine** if prompted.  After installation, verify that Docker Desktop is configured to use WSL 2.  This training uses **Linux container images**, so Docker Desktop must run in Linux container mode, not Windows container mode.
 
 Once installed, start Docker Desktop (it needs to be running in the background for the `docker` command to work).
 
@@ -64,7 +65,7 @@ docker --version
 ```
 {: .bash}
 
-This checks that Docker is installed and that the command is available. Then run the test container:
+This confirms that the Docker command-line client is installed.  It does not confirm that the Docker engine is running.  To test the complete installation, run:
 
 ```
 docker run hello-world
@@ -94,7 +95,7 @@ docker --version
 ```
 {: .bash}
 
-This checks that Docker is installed and that the command is available. Then run the test container:
+This confirms that the Docker command-line client is installed.  It does not confirm that the Docker engine is running.  To test the complete installation, run:
 
 ```
 docker run hello-world
@@ -102,6 +103,27 @@ docker run hello-world
 {: .bash}
 
 This downloads (if needed) and runs a small test image.  See the [Final check](#final-check) section below for the output you should expect.
+
+> ## Additional check for Apple silicon Macs
+>
+> Setonix uses the `linux/amd64` platform for this training.  Apple silicon Macs use the `arm64` architecture, so Docker Desktop must use emulation to run the images used in the training.
+>
+> Run:
+>
+> ```
+> docker run --rm --platform linux/amd64 alpine uname -m
+> ```
+> {: .bash}
+>
+> The expected output is:
+>
+> ```
+> x86_64
+> ```
+> {: .output}
+>
+> If you see `x86_64`, Docker Desktop can pull and run `linux/amd64` containers on your Apple silicon Mac.
+{: .callout}
 
 
 ### 3. Linux
@@ -115,7 +137,7 @@ docker --version
 ```
 {: .bash}
 
-This checks that Docker is installed and that the command is available. Then run the test container:
+This confirms that the Docker command-line client is installed.  It does not confirm that the Docker engine is running.  To test the complete installation, run:
 
 ```
 sudo docker run hello-world
@@ -126,8 +148,8 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 
 > ## Running Docker without `sudo`
 >
-> Depending on your setup, you can configure Docker so that you don't need `sudo` for every command (by adding your user to the `docker` group).  
-> This is **not required** for this training — `sudo docker ...` works just as well — so feel free to skip it for now.
+> On many Linux installations, Docker commands require `sudo`.  It is possible to run Docker without `sudo` by adding your account to the `docker` group, but membership in that group grants root-equivalent access to the system.  
+> This is **not required** for this training, so you can continue using `sudo docker ...`.
 {: .callout}
 
 
@@ -135,7 +157,7 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 
 > ## Confirm your installation works
 >
-> Run the following command (`sudo docker run hello-world` on Linux, `docker run hello-world` on Windows/macOS), and check that your output looks like the one below.
+> Run the following command (`sudo docker run hello-world` on Linux, `docker run hello-world` on Windows/macOS).  The exact output may vary depending on your Docker version and computer architecture, but it should include a message beginning with `Hello from Docker!`.
 >
 > ```
 > $ docker run hello-world
@@ -147,24 +169,6 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 > > ```
 > > Hello from Docker!
 > > This message shows that your installation appears to be working correctly.
-> >
-> > To generate this message, Docker took the following steps:
-> >  1. The Docker client contacted the Docker daemon.
-> >  2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
-> >     (amd64)
-> >  3. The Docker daemon created a new container from that image which runs the
-> >     executable that produces the output you are currently reading.
-> >  4. The Docker daemon streamed that output to the Docker client, which sent it
-> >     to your terminal.
-> >
-> > To try something more ambitious, you can run an Ubuntu container with:
-> >  $ docker run -it ubuntu bash
-> >
-> > Share images, automate workflows, and more with a free Docker ID:
-> >  https://hub.docker.com/
-> >
-> > For more examples and ideas, visit:
-> >  https://docs.docker.com/get-started/
 > > ```
 > > {: .output}
 > >
