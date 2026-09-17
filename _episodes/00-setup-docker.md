@@ -15,7 +15,7 @@ keypoints:
 
 ### Why do I need this?
 
-We will be using **Docker** to build Linux container images on your own computer.  Later on, we'll switch to **Singularity/Apptainer**, which is used on Setonix.  Docker is the main workshop software that you need to install *before* the session.  On Windows, the recommended Docker Desktop setup also uses WSL 2.
+We will be using **Docker** to build Linux container images on your own computer.  Later on, we'll switch to **Singularity**, which is used on Setonix.  Docker is the main workshop software that you need to install *before* the session.  On Windows, the recommended Docker Desktop setup also uses WSL 2.
 
 > ## Administrator permissions may be required
 >
@@ -51,7 +51,7 @@ This should print your installed WSL version, with no errors.
 
 #### Step 2: Install Docker Desktop
 
-Download and install [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/).  
+Download and install [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/).
 During installation, use the **WSL 2 based engine** if prompted.  After installation, verify that Docker Desktop is configured to use WSL 2.  This training uses **Linux container images**, so Docker Desktop must run in Linux container mode, not Windows container mode.
 
 Once installed, start Docker Desktop (it needs to be running in the background for the `docker` command to work).
@@ -148,7 +148,7 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 
 > ## Running Docker without `sudo`
 >
-> On many Linux installations, Docker commands require `sudo`.  It is possible to run Docker without `sudo` by adding your account to the `docker` group, but membership in that group grants root-equivalent access to the system.  
+> On many Linux installations, Docker commands require `sudo`.  It is possible to run Docker without `sudo` by adding your account to the `docker` group, but membership in that group grants root-equivalent access to the system.
 > This is **not required** for this training, so you can continue using `sudo docker ...`.
 {: .callout}
 
@@ -187,5 +187,5 @@ You can also refer to the official Docker documentation:
 
 ### Optional: further reading
 
-If you'd like some additional background, Docker offers an introductory, self-paced workshop: [Getting Started with Docker](https://docs.docker.com/get-started/).  
+If you'd like some additional background, Docker offers an introductory, self-paced workshop: [Getting Started with Docker](https://docs.docker.com/get-started/).
 This is entirely optional — you do not need to complete it before attending this training.
