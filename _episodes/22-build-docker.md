@@ -24,6 +24,36 @@ keypoints:
 - "Singularity can pull a Docker/OCI image from a registry and convert it into a named SIF file"
 ---
 
+### Prepare for the hands-on exercise
+
+Perform the Docker sections of this episode on the local computer where Docker was installed and tested in the installation episode. Do not run these Docker commands on a Setonix login or compute node.
+
+Open a terminal on your local computer and clone the training repository if you have not already done so:
+
+```bash
+$ git clone https://github.com/PawseySC/singularity-containers
+$ export TUTO="$PWD/singularity-containers"
+$ cd "$TUTO"
+```
+{: .source}
+
+Now move to the working directory for this episode:
+
+```bash
+$ cd demos/lolcow_docker
+$ pwd
+```
+{: .source}
+
+The working directory should end with:
+
+```text
+singularity-containers/demos/lolcow_docker
+```
+{: .output}
+
+### Use of Docker and Singularity
+
 In the introductory episodes, we used Singularity to find, pull, and run existing Docker/OCI images on an HPC system. We also saw that Singularity converts registry images into read-only SIF files and runs container processes with the user's normal identity.
 
 This episode introduces the other side of the workflow: creating a Docker/OCI image with Docker on a workstation, testing it, publishing it to a registry, and then pulling it with Singularity on the cluster.
@@ -49,26 +79,25 @@ Named SIF image on the HPC system
 
 #### Why build with Docker for an HPC workflow?
 
-Singularity is the container engine used to run images throughout this training because it is designed for shared HPC systems and integrates with host filesystems, schedulers, MPI libraries, GPUs, and high-speed interconnects.
+Singularity is the container engine used to run images throughout this training because it is designed for shared HPC systems and integrates containerised applications with host filesystems, schedulers, MPI libraries, GPUs, and high-speed interconnects.
 
-Docker is widely used to build Docker/OCI images on personal computers, workstations, cloud systems, and CI/CD services. Its layered image format and build cache make repeated development builds convenient. Docker/OCI images can also be distributed through standard registries and consumed by several container engines, including Singularity.
+For building images, this training uses Docker and Dockerfiles. The first important advantage is Docker's layered build model. Docker records filesystem changes from build instructions in image layers and can reuse unchanged layers from its build cache. During development, editing a later Dockerfile instruction may therefore require rebuilding only that instruction and the instructions that follow it, rather than repeating the complete build. This makes the iterative cycle of editing, building, and testing more efficient.
+
+Singularity also caches downloaded Docker/OCI layers and converted images, so repeated pulls do not necessarily download the same content again. However, that is different from Docker's instruction-level build cache: a Singularity definition-file build does not provide the same Dockerfile layer-by-layer workflow for incrementally rebuilding a customised image.
+
+The second important advantage is interoperability. Docker builds images in the widely supported Docker/OCI ecosystem. These images can be stored in standard OCI-compatible registries and used by many container tools. Depending on the tool, an image may be run directly, imported, or converted into its native format. Singularity, for example, can retrieve a Docker/OCI image from a registry, assemble its layers, and convert it into a SIF image for execution on an HPC system.
+
+In this sense, Docker/OCI images are a broadly interoperable distribution format. This does not mean that every image behaves identically with every container engine. Runtime features, image metadata, security models, CPU architecture, and host integration can differ. The final image must still be tested with Singularity on the target HPC system.
 
 The tools therefore have complementary roles in this training:
 
-- **Docker builds and tests the image** on a system where Docker is available.
-- **A container registry distributes the image** between systems.
-- **Singularity converts and runs the image** on the HPC system.
+- **Docker builds and tests the Docker/OCI image** on the participant's local computer.
+- **A container registry stores and distributes the image** in a widely supported format.
+- **Singularity retrieves, converts, and runs the image** on the HPC system.
 
-Docker is not used to run the workload on Setonix. The final execution still uses Singularity and follows the cluster-specific practices introduced in the other episodes.
+Docker is not used to run the workload on Setonix. The final execution uses Singularity and follows the cluster-specific practices introduced in the other episodes.
 
-> ## Build privileges and available alternatives
->
-> A conventional Docker Engine installation uses a privileged daemon, although Docker Desktop and rootless Docker provide different deployment models. In all cases, build images only on systems where container building is supported and authorised.
->
-> Shared HPC login and compute nodes normally do not provide Docker to users. Singularity can also build images from definition files, including with supported remote-build or fakeroot configurations, but those workflows are separate from the Docker-based workflow in this episode.
-{: .callout}
-
-#### Prepare the Docker build directory
+### Prepare the Docker build directory
 
 Perform the Docker sections of this episode on the computer where Docker was installed and tested in the installation episode. Do not run these commands on a Setonix login or compute node.
 
@@ -80,36 +109,29 @@ $ pwd
 ```
 {: .source}
 
-The directory should contain a `Dockerfile`:
+List the files in the directory:
 
 ```bash
-$ ls -la
+$ ls -l
 ```
 {: .source}
 
-A Docker build uses a **build context**. The context is the directory, URL, or other source made available to the builder. In this episode, the final `.` in the build command selects the current directory as the build context.
-
-Keep the context small. Files in it can be sent to the builder and may become available to `COPY` and `ADD` instructions. Unrelated data, Git history, generated output, credentials, and large files should not be included.
-
-Create a `.dockerignore` file for common files that the example does not need:
+The relevant entries should look like:
 
 ```text
-.git
-.gitignore
-*.sif
-*.tar
-*.tar.gz
+Dockerfile -> lolcow.dockerfile
+lolcow.dockerfile
 ```
-{: .source}
+{: .output}
 
-A `.dockerignore` file works similarly to `.gitignore`: matching paths are excluded from the build context.
+The actual recipe is named `lolcow.dockerfile` so that its purpose remains clear when it is viewed outside this directory or alongside recipes for other images. The symbolic link named `Dockerfile` points to that recipe. `Dockerfile` is the default filename used by Docker, so the link allows the standard `docker build ... .` command to find the recipe without an additional option.
 
-#### Read the Dockerfile
+### Read the Dockerfile
 
-The Dockerfile for the example is:
+The `lolcow.dockerfile` recipe is:
 
 ```dockerfile
-FROM ubuntu:24.04
+FROM docker.io/ubuntu:24.04
 
 LABEL org.opencontainers.image.title="lolcow training image" \
       org.opencontainers.image.description="Small image used to teach Docker builds for HPC" \
@@ -137,18 +159,18 @@ CMD ["bash", "-c", "fortune | cowsay | lolcat"]
 
 Docker reads the instructions from top to bottom. Each instruction describes part of the resulting image or its default runtime configuration.
 
-##### `FROM`: select a base image
+#### `FROM`: select a base image
 
 ```dockerfile
-FROM ubuntu:24.04
+FROM docker.io/ubuntu:24.04
 ```
 {: .source}
 
-`FROM` begins a build stage and selects its base image. This example starts from the versioned `ubuntu:24.04` image rather than `ubuntu:latest`.
+`FROM` begins a build stage and selects its base image. This example starts from the versioned `docker.io/ubuntu:24.04` image rather than `docker.io/ubuntu:latest`. The explicit `docker.io` component identifies Docker Hub as the registry.
 
 Choose base images from trusted publishers and prefer a supported, suitably small image that provides what the application needs. A versioned tag communicates the intended base more clearly, although tags can still be updated by their publisher. For stricter provenance, production builds may pin the base image by digest and update that digest deliberately.
 
-##### `LABEL`: record image metadata
+#### `LABEL`: record image metadata
 
 ```dockerfile
 LABEL org.opencontainers.image.title="lolcow training image" \
@@ -157,9 +179,9 @@ LABEL org.opencontainers.image.title="lolcow training image" \
 ```
 {: .source}
 
-`LABEL` adds metadata to the image. OCI annotation names are used here so that the purpose and publisher of the image can be identified with image-inspection tools.
+`LABEL` adds metadata to the image and accepts one or more key-value pairs. This example uses predefined annotation keys from the [OCI Image Specification](https://specs.opencontainers.org/image-spec/annotations/), including `org.opencontainers.image.title`, `org.opencontainers.image.description`, and `org.opencontainers.image.vendor`. Using these standard keys makes the metadata easier for OCI-compatible tools to interpret consistently.
 
-##### `RUN`: execute build-time commands
+#### `RUN`: execute build-time commands
 
 ```dockerfile
 RUN set -eux; \
@@ -187,7 +209,7 @@ The package-index update, installation, and cleanup are performed in the same `R
 
 Using fewer `RUN` instructions does not by itself guarantee a good Dockerfile. Combine commands when their changes belong in one filesystem layer, but keep the result readable and ensure failures stop the build.
 
-##### `ENV`: define a runtime environment variable
+#### `ENV`: define a runtime environment variable
 
 ```dockerfile
 ENV PATH="/usr/games:${PATH}"
@@ -198,7 +220,7 @@ ENV PATH="/usr/games:${PATH}"
 
 An `export` performed inside one `RUN` instruction affects only the shell used for that build step. Use `ENV` when the setting should form part of the image's runtime environment.
 
-##### `USER`: avoid running the application as root
+#### `USER`: avoid running the application as root
 
 ```dockerfile
 RUN useradd --create-home --uid 1000 training
@@ -210,7 +232,7 @@ Build steps that install operating-system packages require root inside the Docke
 
 This is a useful default for testing an image with Docker. On the HPC system, Singularity applies its own runtime identity model and normally runs the containerised process as the invoking cluster user.
 
-##### `WORKDIR`: select the default directory
+#### `WORKDIR`: select the default directory
 
 ```dockerfile
 WORKDIR /home/training
@@ -221,7 +243,7 @@ WORKDIR /home/training
 
 The working directory selected by a Dockerfile does not prevent Singularity from starting in a host directory that it bind mounts into the container. As seen in the basic Singularity episode, Singularity normally starts a containerised command in the host current working directory.
 
-##### `CMD`: define the default action
+#### `CMD`: define the default action
 
 ```dockerfile
 CMD ["bash", "-c", "fortune | cowsay | lolcat"]
@@ -237,7 +259,7 @@ The pipeline must be interpreted by a shell, so the Dockerfile explicitly starts
 > `RUN` executes while the image is built. `CMD` records the default command to execute later when a container is started. A Dockerfile can contain only one effective `CMD`; if several are present, the last one takes effect.
 {: .callout}
 
-#### Build the image for the target HPC architecture
+### Build the image for the target HPC architecture
 
 Set a meaningful image tag for the exercise:
 
@@ -253,7 +275,35 @@ $ docker build --platform linux/amd64 -t "$IMAGE_TAG" .
 ```
 {: .source}
 
-The `-t` option assigns the repository name `lolcow` and tag `2026.09`. The final `.` selects the current directory as the build context.
+The `-t` option assigns the repository name `lolcow` and tag `2026.09`. Docker finds the recipe through the symbolic link named `Dockerfile`.
+
+The final `.` selects the current directory as the **build context**. The build context is the collection of files and directories made available to the Docker builder. Files in the context can be used by instructions such as `COPY` and `ADD`, so the context should contain only what the build requires. Unrelated data, Git history, generated output, credentials, and large files should not be included.
+
+Create a `.dockerignore` file to exclude common files that this build does not need:
+
+```text
+.git
+.gitignore
+*.sif
+*.tar
+*.tar.gz
+```
+{: .source}
+
+A `.dockerignore` file works similarly to `.gitignore`: matching paths are excluded from the build context before it is sent to the builder.
+
+The same recipe can be selected explicitly with the `-f` option instead of relying on the `Dockerfile` symbolic link:
+
+```bash
+$ docker build \
+    --platform linux/amd64 \
+    -f lolcow.dockerfile \
+    -t "$IMAGE_TAG" \
+    .
+```
+{: .source}
+
+Both commands build from `lolcow.dockerfile`. The first demonstrates Docker's conventional default filename, while the second names the recipe explicitly.
 
 On an `amd64` Linux or Windows system, the requested architecture matches the host. On an Apple Silicon or other `arm64` system, Docker Desktop normally uses emulation to perform this build, so it may take longer.
 
@@ -360,7 +410,7 @@ This is the reproducible development loop:
 3. test the image
 4. repeat until the Dockerfile reliably produces the required environment
 
-#### Basic practices for research and HPC images
+### Basic practices for research and HPC images
 
 A working Dockerfile is only the starting point. When preparing an image for a research workflow:
 
@@ -378,7 +428,7 @@ A working Dockerfile is only the starting point. When preparing an image for a r
 
 For compiled applications, consider a **multi-stage build**. A build stage can contain compilers and development packages, while a later runtime stage receives only the installed application and required runtime libraries. This can substantially reduce the final image size and software surface. The MPI episode includes an example of the build-time requirements for an HPC application linked against MPI.
 
-#### Publish the image to Docker Hub
+### Publish the image to Docker Hub
 
 A registry is the normal way to move a Docker/OCI image from the build computer to the HPC system. This section uses Docker Hub, which was introduced in the basic Singularity episode.
 
@@ -429,7 +479,7 @@ After the push completes, inspect the repository and tag in Docker Hub. For this
 > For a reproducible workflow, record the registry, namespace, repository, tag, digest, Dockerfile revision, and relevant build inputs. A retained SIF file also preserves the exact content that was pulled at that time.
 {: .callout}
 
-#### Pull the image as a SIF file on Setonix
+### Pull the image as a SIF file on Setonix
 
 Return to the terminal connected to Setonix and request an interactive allocation if you are not already working on a compute node:
 
