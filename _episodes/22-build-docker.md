@@ -9,7 +9,7 @@ questions:
 - "How can I publish an image to a registry and convert it to a SIF file?"
 objectives:
 - "Explain the roles of Docker and Singularity in an HPC container workflow"
-- "Read and write a basic Dockerfile using `FROM`, `RUN`, `ENV`, `WORKDIR`, `USER`, and `CMD`"
+- "Read and write a basic Dockerfile using `FROM`, `LABEL`, `RUN`, `ENV`, and `CMD`"
 - "Build and test an `amd64` Docker/OCI image"
 - "Apply basic practices for build contexts, package installation, image tags, and runtime users"
 - "Publish an image to Docker Hub and pull it as a named SIF file on an HPC system"
@@ -131,28 +131,30 @@ The actual recipe is named `lolcow.dockerfile` so that its purpose remains clear
 The `lolcow.dockerfile` recipe is:
 
 ```dockerfile
+# Start from a versioned Ubuntu image on Docker Hub
 FROM docker.io/ubuntu:24.04
 
+# Record standard OCI image metadata
 LABEL org.opencontainers.image.title="lolcow training image" \
       org.opencontainers.image.description="Small image used to teach Docker builds for HPC" \
       org.opencontainers.image.vendor="Pawsey Supercomputing Research Centre"
 
+# Install the applications and remove package-manager cache files
 RUN set -eux; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         cowsay \
         fortune-mod \
+        fortunes-min \
         lolcat; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
+# Make the installed commands available by name at runtime
 ENV PATH="/usr/games:${PATH}"
 
-RUN useradd --create-home --uid 1000 training
-USER training
-WORKDIR /home/training
-
+# Define the default action for docker run and singularity run
 CMD ["bash", "-c", "fortune | cowsay | lolcat"]
 ```
 {: .source}
@@ -205,6 +207,8 @@ This instruction:
 3. installs the three required packages without additional recommended packages
 4. removes cached package data that is not needed at runtime
 
+The `fortune-mod` package provides the `fortune` command, while `fortunes-min` supplies a small database of messages for it to print.
+
 The package-index update, installation, and cleanup are performed in the same `RUN` instruction. Removing files in a later layer would not remove them from the earlier layer in which they were created.
 
 Using fewer `RUN` instructions does not by itself guarantee a good Dockerfile. Combine commands when their changes belong in one filesystem layer, but keep the result readable and ensure failures stop the build.
@@ -220,28 +224,6 @@ ENV PATH="/usr/games:${PATH}"
 
 An `export` performed inside one `RUN` instruction affects only the shell used for that build step. Use `ENV` when the setting should form part of the image's runtime environment.
 
-#### `USER`: avoid running the application as root
-
-```dockerfile
-RUN useradd --create-home --uid 1000 training
-USER training
-```
-{: .source}
-
-Build steps that install operating-system packages require root inside the Docker build. The image then creates an unprivileged account and uses `USER` to select it for subsequent instructions and for Docker containers started from the image.
-
-This is a useful default for testing an image with Docker. On the HPC system, Singularity applies its own runtime identity model and normally runs the containerised process as the invoking cluster user.
-
-#### `WORKDIR`: select the default directory
-
-```dockerfile
-WORKDIR /home/training
-```
-{: .source}
-
-`WORKDIR` sets the working directory for later Dockerfile instructions and for the default container execution. Unlike `RUN cd ...`, it remains in effect after the build step has ended.
-
-The working directory selected by a Dockerfile does not prevent Singularity from starting in a host directory that it bind mounts into the container. As seen in the basic Singularity episode, Singularity normally starts a containerised command in the host current working directory.
 
 #### `CMD`: define the default action
 
@@ -261,21 +243,21 @@ The pipeline must be interpreted by a shell, so the Dockerfile explicitly starts
 
 ### Build the image for the target HPC architecture
 
-Set a meaningful image tag for the exercise:
+Define the complete local image reference, including its repository name and tag:
 
 ```bash
-$ IMAGE_TAG="lolcow:2026.09"
+$ IMAGE="lolcow:2026.09"
 ```
 {: .source}
 
 Setonix compute nodes use the `amd64` architecture, also called `x86_64`. Build explicitly for that target:
 
 ```bash
-$ docker build --platform linux/amd64 -t "$IMAGE_TAG" .
+$ docker build --platform linux/amd64 -t "$IMAGE" .
 ```
 {: .source}
 
-The `-t` option assigns the repository name `lolcow` and tag `2026.09`. Docker finds the recipe through the symbolic link named `Dockerfile`.
+The `IMAGE` variable contains the local repository name `lolcow` and tag `2026.09`. The `-t` option assigns that complete reference to the image. Docker finds the recipe through the symbolic link named `Dockerfile`.
 
 The final `.` selects the current directory as the **build context**. The build context is the collection of files and directories made available to the Docker builder. Files in the context can be used by instructions such as `COPY` and `ADD`, so the context should contain only what the build requires. Unrelated data, Git history, generated output, credentials, and large files should not be included.
 
@@ -298,7 +280,7 @@ The same recipe can be selected explicitly with the `-f` option instead of relyi
 $ docker build \
     --platform linux/amd64 \
     -f lolcow.dockerfile \
-    -t "$IMAGE_TAG" \
+    -t "$IMAGE" \
     .
 ```
 {: .source}
@@ -312,7 +294,7 @@ On an `amd64` Linux or Windows system, the requested architecture matches the ho
 > Some Docker installations use a `buildx` builder whose output is not loaded automatically. In that case, build with:
 >
 > ```bash
-> $ docker buildx build --platform linux/amd64 --load -t "$IMAGE_TAG" .
+> $ docker buildx build --platform linux/amd64 --load -t "$IMAGE" .
 > ```
 > {: .source}
 {: .callout}
@@ -320,14 +302,14 @@ On an `amd64` Linux or Windows system, the requested architecture matches the ho
 List the local image:
 
 ```bash
-$ docker image ls "$IMAGE_TAG"
+$ docker image ls "$IMAGE"
 ```
 {: .source}
 
 Inspect the architecture recorded for the image:
 
 ```bash
-$ docker image inspect "$IMAGE_TAG" --format '{{.Os}}/{{.Architecture}}'
+$ docker image inspect "$IMAGE" --format '{{.Os}}/{{.Architecture}}'
 ```
 {: .source}
 
@@ -343,7 +325,7 @@ linux/amd64
 Run the same build command a second time:
 
 ```bash
-$ docker build --platform linux/amd64 -t "$IMAGE_TAG" .
+$ docker build --platform linux/amd64 -t "$IMAGE" .
 ```
 {: .source}
 
@@ -361,7 +343,7 @@ Which steps are reused from the build cache? Why is the second build normally fa
 Run the image's default command:
 
 ```bash
-$ docker run --rm "$IMAGE_TAG"
+$ docker run --rm "$IMAGE"
 ```
 {: .source}
 
@@ -372,16 +354,16 @@ The `--rm` option removes the stopped container after it exits. It does not remo
 Override the default `CMD` by supplying another command after the image name:
 
 ```bash
-$ docker run --rm "$IMAGE_TAG" id
+$ docker run --rm "$IMAGE" cat /etc/os-release
 ```
 {: .source}
 
-The output should identify the unprivileged `training` user rather than root.
+Docker runs the selected command instead of the image's default `CMD`.
 
 Open an interactive shell for inspection:
 
 ```bash
-$ docker run --rm -it "$IMAGE_TAG" bash
+$ docker run --rm -it "$IMAGE" bash
 ```
 {: .source}
 
@@ -394,10 +376,10 @@ The options have the following roles:
 Inside the container, inspect the environment:
 
 ```bash
-training@CONTAINER-ID:~$ cat /etc/os-release
-training@CONTAINER-ID:~$ command -v fortune cowsay lolcat
-training@CONTAINER-ID:~$ pwd
-training@CONTAINER-ID:~$ exit
+root@CONTAINER-ID:/# cat /etc/os-release
+root@CONTAINER-ID:/# command -v fortune cowsay lolcat
+root@CONTAINER-ID:/# pwd
+root@CONTAINER-ID:/# exit
 ```
 {: .source}
 
@@ -421,7 +403,6 @@ A working Dockerfile is only the starting point. When preparing an image for a r
 - Install only required packages and remove package-manager caches in the same layer.
 - Put frequently changing instructions and copied source files after stable dependency-installation steps when practical, so the build cache can be reused.
 - Use `COPY` for ordinary file and directory copies. Use `ADD` only when its additional behaviour is specifically required.
-- Use an unprivileged runtime user unless the application has a documented reason not to.
 - Do not place passwords, private keys, access tokens, licence files, or other secrets in the Dockerfile, build arguments, environment variables, or copied build context. Use the build system's supported secret mechanism when a build must access protected resources.
 - Rebuild and test images regularly so that base-image and package security updates are incorporated.
 - Test the final SIF image on the target HPC system, including MPI, GPU, filesystem, and performance behaviour where relevant.
@@ -452,7 +433,7 @@ Follow the authentication instructions shown by Docker. Do not put the password 
 Add the registry-qualified tag to the existing local image:
 
 ```bash
-$ docker tag "$IMAGE_TAG" "$REMOTE_IMAGE"
+$ docker tag "$IMAGE" "$REMOTE_IMAGE"
 ```
 {: .source}
 
@@ -544,13 +525,13 @@ $ singularity exec "$SINGULARITY_IMAGE" id
 ```
 {: .source}
 
-Notice that the identity differs from the Docker test. Under Docker, the Dockerfile's `USER training` instruction selected the runtime user. Under the normal Singularity execution model on the cluster, the process runs with your cluster user identity rather than becoming the image's `training` user.
+Under the normal Singularity execution model on the cluster, the containerised process runs with your cluster user identity. The Docker image does not need to contain a user account matching each possible HPC user.
 
 ### Confirm the complete workflow
 
 Using the commands from this episode, identify the artefact or service produced at each stage:
 
-1. `docker build --platform linux/amd64 -t "$IMAGE_TAG" .`
+1. `docker build --platform linux/amd64 -t "$IMAGE" .`
 2. `docker push "$REMOTE_IMAGE"`
 3. `singularity pull OUTPUT.sif docker://REGISTRY/NAMESPACE/IMAGE:TAG`
 4. `singularity run OUTPUT.sif`
@@ -568,7 +549,7 @@ Using the commands from this episode, identify the artefact or service produced 
 A registry is normally the simplest and most traceable distribution method. If a registry cannot be used, Docker can export a local image to an archive:
 
 ```bash
-$ docker image save -o lolcow--2026.09.tar "$IMAGE_TAG"
+$ docker image save -o lolcow--2026.09.tar "$IMAGE"
 ```
 {: .source}
 

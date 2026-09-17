@@ -1,23 +1,25 @@
+# Start from a versioned Ubuntu image on Docker Hub
 FROM docker.io/ubuntu:24.04
 
+# Record standard OCI image metadata
 LABEL org.opencontainers.image.title="lolcow training image" \
       org.opencontainers.image.description="Small image used to teach Docker builds for HPC" \
       org.opencontainers.image.vendor="Pawsey Supercomputing Research Centre"
 
+# Install the applications and remove package-manager cache files
 RUN set -eux; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         cowsay \
         fortune-mod \
+        fortunes-min \
         lolcat; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
+# Make the installed commands available by name at runtime
 ENV PATH="/usr/games:${PATH}"
 
-RUN useradd --create-home --uid 1000 training
-USER training
-WORKDIR /home/training
-
+# Define the default action for docker run and singularity run
 CMD ["bash", "-c", "fortune | cowsay | lolcat"]
