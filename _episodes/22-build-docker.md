@@ -9,13 +9,14 @@ questions:
 - "How can I publish an image to a registry and convert it to a SIF file?"
 objectives:
 - "Explain the roles of Docker and Singularity in an HPC container workflow"
-- "Read and write a basic Dockerfile using `FROM`, `LABEL`, `RUN`, `ENV`, and `CMD`"
+- "Read and write a basic Dockerfile using `FROM`, `LABEL`, `RUN`, `ENV`, `COPY`, and `CMD`"
 - "Build and test an `amd64` Docker/OCI image"
 - "Apply basic practices for build contexts, package installation, image tags, and runtime users"
 - "Publish an image to Docker Hub and pull it as a named SIF file on an HPC system"
 keypoints:
 - "Docker is commonly used to build and test Docker/OCI images on a workstation, while Singularity runs the resulting images on the HPC system"
 - "A Dockerfile records the base image and the instructions used to assemble a new image"
+- "`COPY` adds files from the build context to the image"
 - "Docker image layers support build caching, but Dockerfile instruction order and cleanup affect build efficiency and image size"
 - "Use a small build context, a `.dockerignore` file, a trusted base image, and a meaningful image tag"
 - "Build for the CPU architecture of the target HPC system"
@@ -121,10 +122,13 @@ The relevant entries should look like:
 ```text
 Dockerfile -> lolcow.dockerfile
 lolcow.dockerfile
+lolcow-message.txt
 ```
 {: .output}
 
 The actual recipe is named `lolcow.dockerfile` so that its purpose remains clear when it is viewed outside this directory or alongside recipes for other images. The symbolic link named `Dockerfile` points to that recipe. `Dockerfile` is the default filename used by Docker, so the link allows the standard `docker build ... .` command to find the recipe without an additional option.
+
+The `lolcow-message.txt` file contains the message that will be copied into the image and displayed by the default container action.
 
 ### Read the Dockerfile
 
@@ -145,8 +149,6 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         cowsay \
-        fortune-mod \
-        fortunes-min \
         lolcat; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
@@ -154,8 +156,11 @@ RUN set -eux; \
 # Make the installed commands available by name at runtime
 ENV PATH="/usr/games:${PATH}"
 
+# Copy the message displayed by the default container action
+COPY lolcow-message.txt /usr/local/share/lolcow/message.txt
+
 # Define the default action for docker run and singularity run
-CMD ["bash", "-c", "fortune | cowsay | lolcat"]
+CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat"]
 ```
 {: .source}
 
@@ -191,7 +196,6 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         cowsay \
-        fortune-mod \
         lolcat; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
@@ -204,10 +208,8 @@ This instruction:
 
 1. enables strict and verbose shell behaviour for the build step
 2. updates the Ubuntu package index
-3. installs the three required packages without additional recommended packages
+3. installs the two required packages without additional recommended packages
 4. removes cached package data that is not needed at runtime
-
-The `fortune-mod` package provides the `fortune` command, while `fortunes-min` supplies a small database of messages for it to print.
 
 The package-index update, installation, and cleanup are performed in the same `RUN` instruction. Removing files in a later layer would not remove them from the earlier layer in which they were created.
 
@@ -220,21 +222,32 @@ ENV PATH="/usr/games:${PATH}"
 ```
 {: .source}
 
-`ENV` defines an environment variable that persists in the image and is normally present when a container is started. Ubuntu installs `cowsay` and `fortune` under `/usr/games`, so this instruction adds that directory to `PATH`.
+`ENV` defines an environment variable that persists in the image and is normally present when a container is started. Ubuntu installs `cowsay` under `/usr/games`, so this instruction adds that directory to `PATH`.
 
 An `export` performed inside one `RUN` instruction affects only the shell used for that build step. Use `ENV` when the setting should form part of the image's runtime environment.
 
 
+#### `COPY`: add a file from the build context
+
+```dockerfile
+COPY lolcow-message.txt /usr/local/share/lolcow/message.txt
+```
+{: .source}
+
+`COPY` adds files or directories from the build context to the image. Here, the source is `lolcow-message.txt` in the Docker build directory, and the destination is `/usr/local/share/lolcow/message.txt` inside the image. Docker creates the required destination directories when it performs the copy.
+
+The source must be present in the build context and must not be excluded by `.dockerignore`. Unlike a bind mount, the copied file becomes part of the built image and remains available when the image is transferred to another system.
+
 #### `CMD`: define the default action
 
 ```dockerfile
-CMD ["bash", "-c", "fortune | cowsay | lolcat"]
+CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat"]
 ```
 {: .source}
 
 `CMD` defines the default command used when a Docker container is started without another command. The JSON, or exec, form preserves the command and arguments as separate values.
 
-The pipeline must be interpreted by a shell, so the Dockerfile explicitly starts `bash -c`. This is the same shell-expression principle used with `singularity exec` in the basic Singularity episode.
+The redirection and pipeline must be interpreted by a shell, so the Dockerfile explicitly starts `bash -c`. `cowsay` reads the copied message through standard input, and `lolcat` colours the resulting output. This is the same shell-expression principle used with `singularity exec` in the basic Singularity episode.
 
 > ## `CMD` is a default, not a build command
 >
@@ -320,23 +333,51 @@ linux/amd64
 ```
 {: .output}
 
-### Build the image again
+### Modify the copied message and rebuild the image
 
-Run the same build command a second time:
+Display the message file on the local computer:
+
+```bash
+$ cat lolcow-message.txt
+```
+{: .source}
+
+Its initial content is:
+
+```text
+Built with Docker and ready to run with Singularity!
+```
+{: .output}
+
+Replace the message with one of your own:
+
+```bash
+$ printf '%s\n' 'My updated container message' > lolcow-message.txt
+```
+{: .source}
+
+Rebuild the image using the same name and tag:
 
 ```bash
 $ docker build --platform linux/amd64 -t "$IMAGE" .
 ```
 {: .source}
 
-Which steps are reused from the build cache? Why is the second build normally faster?
+Which build steps are reused from the cache, and which step runs again?
 
 > ## Solution
 >
-> Docker can reuse layers when the instruction and the files on which it depends have not changed. Because neither the Dockerfile nor the build context changed, most or all build steps should report that cached results were used.
+> Docker can reuse the unchanged base-image and package-installation layers. The `COPY` step runs again because `lolcow-message.txt`, one of its inputs, changed. Instructions after that changed step are also reconsidered.
 >
-> If an early instruction changes, Docker must rebuild that step and later steps that depend on it. Dockerfile instruction order therefore affects how effectively the build cache can be reused.
+> Placing stable and expensive installation steps before frequently changing application files allows Docker to reuse more of the build cache during development.
 {: .solution}
+
+Run the rebuilt image and confirm that it displays the new message:
+
+```bash
+$ docker run --rm "$IMAGE"
+```
+{: .source}
 
 #### Test the image with Docker
 
@@ -347,7 +388,7 @@ $ docker run --rm "$IMAGE"
 ```
 {: .source}
 
-The output should contain a fortune displayed by `cowsay` and coloured by `lolcat`. The exact message and colours vary between runs.
+The output should contain the message from `lolcow-message.txt`, displayed by `cowsay` and coloured by `lolcat`.
 
 The `--rm` option removes the stopped container after it exits. It does not remove the image.
 
@@ -377,7 +418,7 @@ Inside the container, inspect the environment:
 
 ```bash
 root@CONTAINER-ID:/# cat /etc/os-release
-root@CONTAINER-ID:/# command -v fortune cowsay lolcat
+root@CONTAINER-ID:/# command -v cowsay lolcat
 root@CONTAINER-ID:/# pwd
 root@CONTAINER-ID:/# exit
 ```
@@ -401,7 +442,7 @@ A working Dockerfile is only the starting point. When preparing an image for a r
 - Record the Dockerfile and related build files in version control.
 - Keep the build context small and use `.dockerignore`.
 - Install only required packages and remove package-manager caches in the same layer.
-- Put frequently changing instructions and copied source files after stable dependency-installation steps when practical, so the build cache can be reused.
+- Put frequently changing `COPY` instructions after stable dependency-installation steps when practical, so the build cache can be reused.
 - Use `COPY` for ordinary file and directory copies. Use `ADD` only when its additional behaviour is specifically required.
 - Do not place passwords, private keys, access tokens, licence files, or other secrets in the Dockerfile, build arguments, environment variables, or copied build context. Use the build system's supported secret mechanism when a build must access protected resources.
 - Rebuild and test images regularly so that base-image and package security updates are incorporated.
