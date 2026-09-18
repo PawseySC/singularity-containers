@@ -138,7 +138,7 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 
 > ## Additional check for Apple silicon Macs
 >
-> Setonix uses the `linux/amd64` platform for this training.  Apple silicon Macs use the `arm64` architecture, so Docker Desktop must use emulation to run the images used in the training.W
+> Setonix uses the `linux/amd64` platform for this training.  Apple silicon Macs use the `arm64` architecture, so Docker Desktop must use emulation to run the images used in the training.
 >
 > Run:
 >
