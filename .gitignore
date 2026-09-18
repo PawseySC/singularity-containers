@@ -1,5 +1,7 @@
 *.sif
 *.pyc
+*.out
+slurm*.*
 *~
 .DS_Store
 .ipynb_checkpoints
@@ -7,3 +9,9 @@
 __pycache__
 _site
 .vscode
+
+#Openfoam demos
+processors*/
+0/
+log.*
+demos/openfoam/periodicPlaneChannel/

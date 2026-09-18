@@ -1,25 +1,72 @@
 #!/bin/bash
 
-# Gloabl settings
-aeg_numberOfSubdomains="2" # must equal $SLURM_NTASKS in the main run
-aeg_simpleCoeffs="2 1 1" # product must equal numberOfSubdomains above
-# Applying global settings
-sed -i -e "s,^ *numberOfSubdomains.*,numberOfSubdomains  $aeg_numberOfSubdomains;," \
-       -e "/^ *simpleCoeffs/ { n; n; s,^ *n *(.*,    n           ($aeg_simpleCoeffs);,}" system/decomposeParDict
+set -euo pipefail
 
-# Settings for main run
-aeg_startFrom="startTime" # "latestTime" # for a restart
-aeg_startTime="0"
-aeg_endTime="20"
-aeg_writeInterval="5"
-aeg_purgeWrite="0"
-# Applying settings for main run
-sed -i -e "s,^ *startFrom.*,startFrom    $aeg_startFrom;," \
-       -e "s,^ *startTime.*,startTime    $aeg_startTime;," \
-       -e "s,^ *endTime.*,endTime    $aeg_endTime;," \
-       -e "s,^ *writeInterval.*,writeInterval    $aeg_writeInterval;," \
-       -e "s,^ *purgeWrite.*,purgeWrite    $aeg_purgeWrite;," system/controlDict
+#---  New settings
+# decomposeParDict:
+newNumberOfSubdomains="8"  # Must equal Slurm --ntasks
+newSimpleCoeffs="1 2 4"    # Product must equal newNumberOfSubdomains
+# controlDict:
+newEndTime="200"
+newWriteInterval="10"
+newRunTimeModifiable="false"
+# slurm job script:
+newMGroup="4"              # I/O rank grouping used by the Slurm script
 
-# Editing SLURM scripts as well
-sed -i -e "s/ntasks=.*/ntasks=$aeg_numberOfSubdomains/" -e "s/ntasks\-per\-node=.*/ntasks\-per\-node=$aeg_numberOfSubdomains/" mpi_pawsey.sh
-sed -i "s/NTASKS=.*/NTASKS=\"$aeg_numberOfSubdomains\"/" mpi_mpirun.sh
+
+# Files to update
+caseDir="./periodicPlaneChannel"
+decomposeParDict="${caseDir}/system/decomposeParDict"
+controlDict="${caseDir}/system/controlDict"
+slurmScript="./mpi_openfoam_pawsey.slurm.sh"
+
+backup_file() {
+    local file=$1
+    local index=0
+    local backup
+
+    while :; do
+        printf -v backup '%s.original.%02d' "$file" "$index"
+        if [[ ! -e $backup ]]; then
+            cp -p -- "$file" "$backup"
+            printf 'Backup created: %s\n' "$backup"
+            return
+        fi
+        ((index += 1))
+    done
+}
+
+# Validate all inputs before creating backups or changing files.
+for file in "$decomposeParDict" "$controlDict" "$slurmScript"; do
+    if [[ ! -f $file ]]; then
+        printf 'Error: required file not found: %s\n' "$file" >&2
+        exit 1
+    fi
+done
+
+for file in "$decomposeParDict" "$controlDict" "$slurmScript"; do
+    backup_file "$file"
+done
+
+# Update decomposition settings.
+sed -E -i \
+    -e "s|^[[:space:]]*numberOfSubdomains[[:space:]]+[^;]+;|numberOfSubdomains  ${newNumberOfSubdomains};|" \
+    -e "s|^[[:space:]]*method[[:space:]]+[^;]+;|method          simple;|" \
+    -e "s|^[[:space:]]*n[[:space:]]+\([^;]+\);|    n           (${newSimpleCoeffs});|" \
+    "$decomposeParDict"
+
+# Update execution settings.
+sed -E -i \
+    -e "s|^[[:space:]]*endTime[[:space:]]+[^;]+;|endTime         ${newEndTime};|" \
+    -e "s|^[[:space:]]*writeInterval[[:space:]]+[^;]+;|writeInterval   ${newWriteInterval};|" \
+    -e "s|^[[:space:]]*runTimeModifiable[[:space:]]+[^;]+;|runTimeModifiable ${newRunTimeModifiable};|" \
+    "$controlDict"
+
+# Update Slurm resources and OpenFOAM collated-I/O grouping.
+sed -E -i \
+    -e "s|^(#SBATCH[[:space:]]+--ntasks=).*|\1${newNumberOfSubdomains}|" \
+    -e "s|^(#SBATCH[[:space:]]+--ntasks-per-node=).*|\1${newNumberOfSubdomains}|" \
+    -e "s|^mGroup=.*|mGroup=${newMGroup}             #Size of the groups for collated fileHandling (32 is the initial recommendation for Setonix)|" \
+    "$slurmScript"
+
+printf 'Updated: %s\n' "$decomposeParDict" "$controlDict" "$slurmScript"
