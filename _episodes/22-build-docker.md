@@ -12,6 +12,7 @@ objectives:
 - "Read and write a basic Dockerfile using `FROM`, `LABEL`, `RUN`, `ENV`, `COPY`, and `CMD`"
 - "Build and test an `amd64` Docker/OCI image"
 - "Apply basic practices for build contexts, package installation, image tags, and runtime users"
+- "Build an MPI application image from a Pawsey-provided base image"
 - "Publish an image to Docker Hub and pull it as a named SIF file on an HPC system"
 keypoints:
 - "Docker is commonly used to build and test Docker/OCI images on a workstation, while Singularity runs the resulting images on the HPC system"
@@ -20,6 +21,7 @@ keypoints:
 - "Docker image layers support build caching, but Dockerfile instruction order and cleanup affect build efficiency and image size"
 - "Use a small build context, a `.dockerignore` file, a trusted base image, and a meaningful image tag"
 - "Build for the CPU architecture of the target HPC system"
+- "Pawsey-provided base images offer tested starting environments for MPI and GPU applications on Pawsey systems"
 - "Do not store passwords, access tokens, or other secrets in a Dockerfile, build argument, or image layer"
 - "A registry provides the normal bridge between a Docker build environment and Singularity on an HPC system"
 - "Singularity can pull a Docker/OCI image from a registry and convert it into a named SIF file"
@@ -41,7 +43,7 @@ $ cd "$TUTO"
 Now move to the working directory for this episode:
 
 ```bash
-$ cd demos/lolcow_docker
+$ cd demos/build_lolcow_docker
 $ pwd
 ```
 {: .source}
@@ -49,7 +51,7 @@ $ pwd
 The working directory should end with:
 
 ```text
-singularity-containers/demos/lolcow_docker
+singularity-containers/demos/build_lolcow_docker
 ```
 {: .output}
 
@@ -105,7 +107,7 @@ Perform the Docker sections of this episode on the computer where Docker was ins
 Move to the Docker example in the training repository:
 
 ```bash
-$ cd "$TUTO/demos/lolcow_docker"
+$ cd "$TUTO/demos/build_lolcow_docker"
 $ pwd
 ```
 {: .source}
@@ -238,6 +240,8 @@ COPY lolcow-message.txt /usr/local/share/lolcow/message.txt
 
 The source must be present in the build context and must not be excluded by `.dockerignore`. Unlike a bind mount, the copied file becomes part of the built image and remains available when the image is transferred to another system.
 
+Another instruction that could copy this local file is `ADD`. However, `ADD` has additional capabilities, such as automatically extracting local tar archives and retrieving remote sources. For straightforward copies of local files and directories, prefer `COPY` because its behaviour and intent are clearer.
+
 #### `CMD`: define the default action
 
 ```dockerfile
@@ -247,7 +251,9 @@ CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat"]
 
 `CMD` defines the default command used when a Docker container is started without another command. The JSON, or exec, form preserves the command and arguments as separate values.
 
-The redirection and pipeline must be interpreted by a shell, so the Dockerfile explicitly starts `bash -c`. `cowsay` reads the copied message through standard input, and `lolcat` colours the resulting output. This is the same shell-expression principle used with `singularity exec` in the basic Singularity episode.
+The redirection and pipeline must be interpreted by a shell, so the Dockerfile explicitly starts `bash -c`. `cowsay` reads the copied message through standard input, and `lolcat` processes the resulting output. This is the same shell-expression principle used with `singularity exec` in the basic Singularity episode.
+
+Later in the episode, the `CMD` instruction is updated to use `lolcat --force`, ensuring that colour codes are emitted even when Docker has not allocated a terminal.
 
 > ## `CMD` is a default, not a build command
 >
@@ -272,57 +278,35 @@ $ docker build --platform linux/amd64 -t "$IMAGE" .
 
 The `IMAGE` variable contains the local repository name `lolcow` and tag `2026.09`. The `-t` option assigns that complete reference to the image. Docker finds the recipe through the symbolic link named `Dockerfile`.
 
-The final `.` selects the current directory as the **build context**. The build context is the collection of files and directories made available to the Docker builder. Files in the context can be used by instructions such as `COPY` and `ADD`, so the context should contain only what the build requires. Unrelated data, Git history, generated output, credentials, and large files should not be included.
+The final `.` selects the current directory as the **build context**. The build context is the collection of files and directories made available to the Docker builder. Files in the context can be used by instructions such as `COPY` and `ADD`, so the context should contain only what the build requires.
 
-Create a `.dockerignore` file to exclude common files that this build does not need:
-
-```text
-.git
-.gitignore
-*.sif
-*.tar
-*.tar.gz
-```
-{: .source}
-
-A `.dockerignore` file works similarly to `.gitignore`: matching paths are excluded from the build context before it is sent to the builder.
-
-The same recipe can be selected explicitly with the `-f` option instead of relying on the `Dockerfile` symbolic link:
-
-```bash
-$ docker build \
-    --platform linux/amd64 \
-    -f lolcow.dockerfile \
-    -t "$IMAGE" \
-    .
-```
-{: .source}
-
-Both commands build from `lolcow.dockerfile`. The first demonstrates Docker's conventional default filename, while the second names the recipe explicitly.
-
-On an `amd64` Linux or Windows system, the requested architecture matches the host. On an Apple Silicon or other `arm64` system, Docker Desktop normally uses emulation to perform this build, so it may take longer.
-
-> ## If the image is not loaded into the local Docker image store
+> ## Limiting a larger build context
 >
-> Some Docker installations use a `buildx` builder whose output is not loaded automatically. In that case, build with:
->
-> ```bash
-> $ docker buildx build --platform linux/amd64 --load -t "$IMAGE" .
-> ```
-> {: .source}
+> This example has a small, controlled build context containing only the recipe and its message file, so it does not require a `.dockerignore` file. Larger projects commonly use `.dockerignore` to reduce unnecessary build-context processing and to prevent broad `COPY` or `ADD` instructions from including unwanted or sensitive files.
 {: .callout}
 
-List the local image:
+List the newly built image:
 
 ```bash
 $ docker image ls "$IMAGE"
 ```
 {: .source}
 
-Inspect the architecture recorded for the image:
+The output should include the image name and tag:
 
+```text
+IMAGE            ID             DISK USAGE   CONTENT SIZE   EXTRA
+lolcow:2026.09   fee6b76c45f3   53.4MB       53.4MB
+```
+{: .output}
+
+The image ID and reported sizes may differ.
+
+Confirm the operating system and CPU architecture recorded for the image:
+
+<!-- The raw block prevents Jekyll/Liquid from interpreting Docker's Go-template braces. -->
 ```bash
-$ docker image inspect "$IMAGE" --format '{{.Os}}/{{.Architecture}}'
+$ docker image inspect "$IMAGE" --format '{% raw %}{{.Os}}/{{.Architecture}}{% endraw %}'
 ```
 {: .source}
 
@@ -333,28 +317,224 @@ linux/amd64
 ```
 {: .output}
 
-### Modify the copied message and rebuild the image
-
-Display the message file on the local computer:
+Now run the image's default action without `--rm`:
 
 ```bash
-$ cat lolcow-message.txt
+$ docker run "$IMAGE"
 ```
 {: .source}
 
-Its initial content is:
+The output should contain the message copied from `lolcow-message.txt`:
 
 ```text
-Built with Docker and ready to run with Singularity!
+ _________________________________________
+/ Built with Docker and ready to run with \
+\ Singularity!                            /
+ -----------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
 ```
 {: .output}
 
-Replace the message with one of your own:
+The exact spacing may vary. At this stage, the output may have no colours because `docker run` does not allocate a terminal by default and `lolcat` may suppress colour when its output is not connected to a terminal.
+
+The `cowsay` pipeline has finished, so no process from this container is still running. Confirm that the default container list is empty:
 
 ```bash
-$ printf '%s\n' 'My updated container message' > lolcow-message.txt
+$ docker container ls
 ```
 {: .source}
+
+Now include stopped containers in the listing:
+
+```bash
+$ docker container ls --all
+```
+{: .source}
+
+The output should contain a stopped container created from the image. Docker assigns a generated name when `--name` is not specified:
+
+```text
+CONTAINER ID   IMAGE            COMMAND                  CREATED          STATUS                      PORTS   NAMES
+a1b2c3d4e5f6   lolcow:2026.09   "bash -c 'cowsay …'"   10 seconds ago   Exited (0) 8 seconds ago           generated_name
+```
+{: .output}
+
+The container ID, generated name, and times will differ.
+
+`docker run` creates a new container from the image and starts its main process. When that process finishes, the container stops, but Docker retains the container object by default. The retained object includes its configuration, logs, metadata, and writable filesystem layer. This allows a stopped container to be inspected, restarted, or used to recover files created during its execution.
+
+For these short tests, there is no useful state to retain. Remove all exited containers:
+
+```bash
+$ docker container rm $(docker container ls --all --quiet --filter status=exited)
+```
+{: .source}
+
+The command substitution is intentionally unquoted so that each container ID is passed to `docker container rm` as a separate argument.
+
+Run the image again, this time with automatic cleanup:
+
+```bash
+$ docker run --rm "$IMAGE"
+```
+{: .source}
+
+The `--rm` option instructs Docker to remove the container automatically after its main process exits. Confirm that this second test did not leave another stopped container:
+
+```bash
+$ docker container ls --all
+```
+{: .source}
+
+For short-lived tests in this episode, continue using `--rm` unless you deliberately need to inspect or restart the stopped container afterward.
+
+> ## Running the `amd64` image on an Apple Silicon Mac
+>
+> On an `arm64` computer, such as an Apple Silicon Mac, Docker may report that the requested image platform does not match the detected host platform. This is expected because the image was deliberately built for the `linux/amd64` architecture used on Setonix. Docker Desktop can use emulation to run it.
+>
+> Make the intended runtime platform explicit with:
+>
+> ```bash
+> $ docker run --rm --platform linux/amd64 "$IMAGE"
+> ```
+> {: .source}
+>
+> This suppresses the platform-mismatch warning but still uses emulation on an `arm64` host.
+{: .callout}
+
+
+### Alternative build commands
+
+The explicit `linux/amd64` build used above is the recommended command for preparing this image for Setonix. The following alternatives illustrate what happens when the target platform is omitted, how Docker selects its default recipe, and how Docker Buildx can validate a build configuration.
+
+#### Build for the local computer's native architecture
+
+If `--platform` is omitted, Docker normally builds for the builder's native platform. Use a different image tag so that this comparison does not replace the `linux/amd64` image required for Setonix:
+
+```bash
+$ NATIVE_IMAGE="lolcow:native"
+$ docker build --tag "$NATIVE_IMAGE" .
+```
+{: .source}
+
+Inspect the resulting image:
+
+<!-- The raw block prevents Jekyll/Liquid from interpreting Docker's Go-template braces. -->
+```bash
+$ docker image inspect "$NATIVE_IMAGE" --format '{% raw %}{{.Os}}/{{.Architecture}}{% endraw %}'
+```
+{: .source}
+
+The result normally reflects the local builder:
+
+- `linux/amd64` on a typical x86-64 Linux or Windows system
+- `linux/arm64` on an Apple Silicon Mac
+
+A native `arm64` image may be convenient for local execution, but it is not the image that this exercise prepares for Setonix.
+
+#### Select the recipe explicitly
+
+By default, `docker build` looks for a file named `Dockerfile` at the root of the build context. In this example, that conventional name is a symbolic link to the descriptively named recipe `lolcow.dockerfile`.
+
+Remove the symbolic link:
+
+```bash
+$ rm Dockerfile
+```
+{: .source}
+
+Try the default build command again:
+
+```bash
+$ docker build --platform linux/amd64 --tag "$IMAGE" .
+```
+{: .source}
+
+The build should fail with an error similar to:
+
+```text
+failed to read dockerfile: open Dockerfile: no such file or directory
+```
+{: .error}
+
+The exact error may differ between Docker versions. The build fails because no file named `Dockerfile` is now present at the root of the build context.
+
+Select the actual recipe explicitly with `--file`:
+
+```bash
+$ docker build \
+    --platform linux/amd64 \
+    --file lolcow.dockerfile \
+    --tag "$IMAGE" \
+    .
+```
+{: .source}
+
+Recreate the relative symbolic link and inspect it:
+
+```bash
+$ ln -s lolcow.dockerfile Dockerfile
+$ ls -l Dockerfile
+```
+{: .source}
+
+The output should show:
+
+```text
+Dockerfile -> lolcow.dockerfile
+```
+{: .output}
+
+Using a descriptive filename such as `lolcow.dockerfile` makes the recipe identifiable when it is viewed outside its original directory or alongside other recipes. Otherwise, a user can accumulate many unrelated files all named `Dockerfile`. The relative symbolic link preserves Docker's conventional default filename while keeping the actual recipe descriptive and portable with the repository.
+
+#### Check the build configuration with Docker Buildx
+
+Docker Buildx is a Docker CLI plugin that exposes extended capabilities of the BuildKit backend. It became widely associated with cross-platform and multi-platform builds because it provided direct access to configurable builders and the `--platform` option. In current Docker installations, the ordinary `docker build` command also uses BuildKit and can build directly for `linux/amd64`, as demonstrated earlier.
+
+Buildx remains useful for additional operations such as build checks, multi-platform builds, configurable builders, cache import and export, and explicit output selection. For this episode, use its `--check` option to analyse the Dockerfile and build options without executing the complete image build:
+
+```bash
+$ docker buildx build \
+    --check \
+    --file lolcow.dockerfile \
+    .
+```
+{: .source}
+
+Build checks act like Dockerfile linting: they report recognised issues, outdated practices, or inconsistencies in the build configuration. A clean recipe may complete without warnings. A reported warning does not necessarily mean that a normal build would fail.
+
+The `--check` option requires Docker Buildx 0.15.0 or later. Check the installed version with:
+
+```bash
+$ docker buildx version
+```
+{: .source}
+
+The main `docker build --platform linux/amd64 ...` command remains the recommended way to build this image during the episode. Buildx is introduced here so that you recognise the extended build interface and one of its practical development tools.
+
+### Modify the image and reuse the build cache
+
+Docker's layered build model allows unchanged build results to be reused. To demonstrate this, we will make a small change to the final `CMD` instruction, rebuild the image, and inspect which earlier steps Docker retrieves from its build cache. The practical change adds `--force` because `lolcat` normally suppresses colour when its standard output is not connected to a terminal.
+
+Open `lolcow.dockerfile` in a text editor and change the final instruction from:
+
+```dockerfile
+CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat"]
+```
+{: .source}
+
+to:
+
+```dockerfile
+CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat --force"]
+```
+{: .source}
+
+The `--force` option tells `lolcat` to emit colour codes even when its output is not connected to a terminal.
 
 Rebuild the image using the same name and tag:
 
@@ -363,34 +543,25 @@ $ docker build --platform linux/amd64 -t "$IMAGE" .
 ```
 {: .source}
 
-Which build steps are reused from the cache, and which step runs again?
+Which build steps are reused from the cache, and which part changes?
 
 > ## Solution
 >
-> Docker can reuse the unchanged base-image and package-installation layers. The `COPY` step runs again because `lolcow-message.txt`, one of its inputs, changed. Instructions after that changed step are also reconsidered.
+> The base image, package-installation layer, environment setting, and copied message are unchanged, so Docker can reuse their cached results. Only the final image configuration changes because the `CMD` instruction was modified.
 >
-> Placing stable and expensive installation steps before frequently changing application files allows Docker to reuse more of the build cache during development.
+> This demonstrates why instructions that change frequently are normally placed after stable and expensive build steps.
 {: .solution}
 
-Run the rebuilt image and confirm that it displays the new message:
+Run the rebuilt image:
 
 ```bash
 $ docker run --rm "$IMAGE"
 ```
 {: .source}
 
-#### Test the image with Docker
+The same message should now be displayed in colour. The terminal must support ANSI colour sequences, as standard terminals on current Linux, macOS, and Windows installations normally do.
 
-Run the image's default command:
-
-```bash
-$ docker run --rm "$IMAGE"
-```
-{: .source}
-
-The output should contain the message from `lolcow-message.txt`, displayed by `cowsay` and coloured by `lolcat`.
-
-The `--rm` option removes the stopped container after it exits. It does not remove the image.
+### Run other commands with Docker
 
 Override the default `CMD` by supplying another command after the image name:
 
@@ -401,37 +572,133 @@ $ docker run --rm "$IMAGE" cat /etc/os-release
 
 Docker runs the selected command instead of the image's default `CMD`.
 
-Open an interactive shell for inspection:
+### Open an interactive shell with Docker
+
+As with `singularity shell`, Docker can open an interactive shell for inspecting and testing an image:
 
 ```bash
-$ docker run --rm -it "$IMAGE" bash
+$ docker run --rm --interactive --tty "$IMAGE" bash
 ```
 {: .source}
 
-The options have the following roles:
+The `--interactive` option keeps standard input open, while `--tty` allocates a pseudo-terminal. The final `bash` overrides this image's default `CMD` and starts an interactive Bash shell instead. Other images may already define a shell as their default action, may provide a different shell such as `sh`, or may require an `ENTRYPOINT` to be overridden.
 
-- `-i` keeps standard input open
-- `-t` allocates a terminal
-- `--rm` removes the stopped container when the shell exits
+The prompt should change to something similar to:
 
-Inside the container, inspect the environment:
+```text
+root@CONTAINER-ID:/#
+```
+{: .output}
+
+The container ID and exact prompt will differ.
+
+Unlike normal Singularity execution on the cluster, this Docker container runs as root inside the container because the Dockerfile does not define another runtime user. This root identity applies within Docker's container environment. It is not the root user of the host operating system.
+
+Inspect the packaged operating-system environment and locate the installed commands:
 
 ```bash
 root@CONTAINER-ID:/# cat /etc/os-release
 root@CONTAINER-ID:/# command -v cowsay lolcat
+```
+{: .source}
+
+Run the installed applications directly:
+
+```bash
+root@CONTAINER-ID:/# cowsay "Running interactively with Docker"
+root@CONTAINER-ID:/# cowsay "Running interactively with Docker" | lolcat --force
+```
+{: .source}
+
+As in the Singularity episode, the interactive shell is useful for inspection and testing. Changes entered interactively are not recorded in the Dockerfile and should not replace a reproducible build.
+
+### Access the host working directory
+
+Singularity normally makes the host current working directory available inside the container automatically. Docker does not do this by default.
+
+From the interactive Docker shell, inspect the current directory:
+
+```bash
 root@CONTAINER-ID:/# pwd
+root@CONTAINER-ID:/# ls
+```
+{: .source}
+
+The files from the host `build_lolcow_docker` directory are not visible. Exit the container:
+
+```bash
 root@CONTAINER-ID:/# exit
 ```
 {: .source}
 
-The container's writable layer is temporary in this example because `--rm` removes the container after it stops. Changes made interactively do not update the image or the Dockerfile. If an interactive test reveals a required change, edit the Dockerfile and rebuild the image.
+Start another interactive container and explicitly bind mount the host current directory at `/work`:
 
-This is the reproducible development loop:
+```bash
+$ docker run \
+    --rm \
+    --interactive \
+    --tty \
+    --mount type=bind,source="$PWD",target=/work \
+    "$IMAGE" \
+    bash
+```
+{: .source}
 
-1. edit the Dockerfile or required build-context files
-2. build the image
-3. test the image
-4. repeat until the Dockerfile reliably produces the required environment
+Inside the container, inspect the mounted directory:
+
+```bash
+root@CONTAINER-ID:/# ls -l /work
+```
+{: .source}
+
+The directory should contain files including:
+
+```text
+Dockerfile
+lolcow.dockerfile
+lolcow-message.txt
+```
+{: .output}
+
+The files remain stored on the host. Docker only makes the host directory accessible at `/work` for this container.
+
+Exit when finished:
+
+```bash
+root@CONTAINER-ID:/# exit
+```
+{: .source}
+
+#### Copy a file from the image to the host non-interactively
+
+As in the basic Singularity episode, a command can copy a file packaged inside the image to a host directory without opening an interactive shell. Docker does not mount the host current working directory automatically, so make it available at `/work` and copy the packaged message into it:
+
+```bash
+$ docker run \
+    --rm \
+    --mount type=bind,source="$PWD",target=/work \
+    "$IMAGE" \
+    cp /usr/local/share/lolcow/message.txt /work/lolcow-message.copy.txt
+```
+{: .source}
+
+The source path is the file copied into the image during the build. The destination is within `/work`, which maps to the host current working directory.
+
+After the container exits, inspect the copied file from the host:
+
+```bash
+$ cat lolcow-message.copy.txt
+```
+{: .source}
+
+The output should be:
+
+```text
+Built with Docker and ready to run with Singularity!
+```
+{: .output}
+
+The container was removed automatically because `--rm` was used, but the copied file remains because it was written through the bind mount to the host filesystem.
 
 ### Basic practices for research and HPC images
 
@@ -449,6 +716,170 @@ A working Dockerfile is only the starting point. When preparing an image for a r
 - Test the final SIF image on the target HPC system, including MPI, GPU, filesystem, and performance behaviour where relevant.
 
 For compiled applications, consider a **multi-stage build**. A build stage can contain compilers and development packages, while a later runtime stage receives only the installed application and required runtime libraries. This can substantially reduce the final image size and software surface. The MPI episode includes an example of the build-time requirements for an HPC application linked against MPI.
+
+### Use Pawsey-provided base images
+
+Pawsey publishes container base images that users can extend for their own applications. These provide tested starting environments for Pawsey systems, including MPI base images designed for compatibility with the Cray MPICH environment on Setonix and ROCm-based images prepared for AMD GPU workloads. A derived application image and its complete workflow must still be tested on the target system.
+
+The recipes used to build Pawsey-supported images are available from the [Pawsey container recipes repository](https://github.com/PawseySC/pawsey-containers). The corresponding Docker/OCI images are published under the [Pawsey organisation on Quay.io](https://quay.io/pawsey).
+
+For this example, move to a separate build context:
+
+```bash
+$ cd "$TUTO/demos/build_mandelbrot_docker"
+$ ls -l
+```
+{: .source}
+
+The directory contains:
+
+```text
+README.md
+THIRD_PARTY_NOTICES.md
+mandelbrot_mpi.dockerfile
+mpi-mandelbrot.cpp
+render-mandelbrot
+```
+{: .output}
+
+We will build an MPI Mandelbrot renderer on top of this Pawsey-provided image:
+
+```text
+quay.io/pawsey/mpich-base:3.4.3_ubuntu24.04
+```
+{: .output}
+
+The base image already provides MPICH, the GNU compiler toolchain, and MPI utilities. The derived image compiles an MPI C++ application with the base image's `mpic++` compiler and installs ImageMagick to convert the application's raw PPM result into a PNG file that is straightforward to view.
+
+The training application was independently written for this example and informed by the educational MPI partitioning approaches in Liam Ryan's MIT-licensed Mandelbrot repository. Attribution and the upstream licence are retained in `mpi-mandelbrot.cpp` and `THIRD_PARTY_NOTICES.md`. The notice file is also copied into the final image.
+
+#### Read the MPI application recipe
+
+The complete `mandelbrot_mpi.dockerfile` recipe is:
+
+```dockerfile
+# Build the application on Pawsey's Setonix-compatible MPICH base image
+FROM quay.io/pawsey/mpich-base:3.4.3_ubuntu24.04
+
+# Record standard OCI image metadata
+LABEL org.opencontainers.image.title="MPI Mandelbrot renderer" \
+      org.opencontainers.image.description="MPI training application built on Pawsey's MPICH base image" \
+      org.opencontainers.image.vendor="Pawsey Supercomputing Research Centre" \
+      org.opencontainers.image.licenses="MIT"
+
+# Install the utility used to convert the PPM result to PNG
+RUN set -eux; \
+    export DEBIAN_FRONTEND=noninteractive; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends imagemagick; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy and compile the MPI application with the compiler from the base image
+COPY mpi-mandelbrot.cpp /tmp/mpi-mandelbrot.cpp
+RUN mpic++ \
+        -std=c++17 \
+        -O3 \
+        -Wall \
+        -Wextra \
+        -Wpedantic \
+        -o /usr/local/bin/mpi-mandelbrot \
+        /tmp/mpi-mandelbrot.cpp \
+    && rm -f /tmp/mpi-mandelbrot.cpp
+
+# Install the wrapper that launches MPI and converts the result to PNG
+COPY render-mandelbrot /usr/local/bin/render-mandelbrot
+RUN chmod 0755 /usr/local/bin/render-mandelbrot
+
+# Preserve third-party acknowledgements and licence information
+COPY THIRD_PARTY_NOTICES.md \
+    /usr/local/share/doc/mpi-mandelbrot/THIRD_PARTY_NOTICES.md
+
+# Display the wrapper help when no other command is supplied
+CMD ["render-mandelbrot", "--help"]
+```
+{: .source}
+
+This recipe demonstrates how a specialised base image can provide build tools and runtime libraries. The application is compiled with `mpic++` from the Pawsey base image, so the derived image uses the MPI environment supplied and tested by Pawsey.
+
+The `render-mandelbrot` wrapper launches the MPI program, writes a temporary PPM image, converts it to PNG, and removes the temporary file. The C++ source divides image rows among MPI ranks and uses `MPI_Gatherv` to assemble the calculated pixels on rank 0.
+
+#### Build the MPI application image
+
+Define its local image reference:
+
+```bash
+$ MPI_IMAGE="mandelbrot-mpi:2026.09"
+```
+{: .source}
+
+Build it for Setonix's CPU architecture:
+
+```bash
+$ docker build \
+    --platform linux/amd64 \
+    --file mandelbrot_mpi.dockerfile \
+    --tag "$MPI_IMAGE" \
+    .
+```
+{: .source}
+
+Confirm that the image exists:
+
+```bash
+$ docker image ls "$MPI_IMAGE"
+```
+{: .source}
+
+Run the default action to display the wrapper help:
+
+```bash
+$ docker run --rm --platform linux/amd64 "$MPI_IMAGE"
+```
+{: .source}
+
+#### Render a Mandelbrot image with MPI
+
+Run four MPI processes and bind mount the current host directory at `/work` so that the PNG result persists after the container exits:
+
+```bash
+$ docker run \
+    --rm \
+    --platform linux/amd64 \
+    --mount type=bind,source="$PWD",target=/work \
+    "$MPI_IMAGE" \
+    render-mandelbrot \
+        --processes 4 \
+        --width 1200 \
+        --height 800 \
+        --iterations 500 \
+        --output /work/mandelbrot.png
+```
+{: .source}
+
+Representative output is:
+
+```text
+MPI Mandelbrot renderer
+Image size: 1200 x 800
+Maximum iterations: 500
+MPI processes: 4
+PPM output: /tmp/tmp.XXXXXXXXXX.ppm
+Rendering completed in 0.420 seconds
+PNG output: /work/mandelbrot.png
+```
+{: .output}
+
+The temporary filename and elapsed time will differ. Confirm that the PNG file exists on the host:
+
+```bash
+$ ls -lh mandelbrot.png
+```
+{: .source}
+
+Open `mandelbrot.png` with the normal image viewer or web browser on the local computer.
+
+The MPI execution in this section occurs entirely within Docker on one local computer. Running the resulting MPI image across Setonix compute nodes requires the Singularity, Slurm, and host-MPI integration covered in the MPI container episode.
 
 ### Publish the image to Docker Hub
 

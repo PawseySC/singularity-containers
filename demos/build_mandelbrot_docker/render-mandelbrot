@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+processes=4
+width=1200
+height=800
+iterations=500
+output="mandelbrot.png"
+
+usage() {
+    cat <<'EOF'
+Usage: render-mandelbrot [OPTIONS]
+
+Options:
+  --processes N     MPI processes to use (default: 4)
+  --width N         Image width in pixels (default: 1200)
+  --height N        Image height in pixels (default: 800)
+  --iterations N    Maximum iterations (default: 500)
+  --output FILE     PNG output path (default: mandelbrot.png)
+  --help            Show this help
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --processes) processes="$2"; shift 2 ;;
+        --width) width="$2"; shift 2 ;;
+        --height) height="$2"; shift 2 ;;
+        --iterations) iterations="$2"; shift 2 ;;
+        --output) output="$2"; shift 2 ;;
+        --help) usage; exit 0 ;;
+        *) echo "Unknown option: $1" >&2; usage >&2; exit 2 ;;
+    esac
+done
+
+temporary_ppm=$(mktemp --suffix=.ppm)
+trap 'rm -f "$temporary_ppm"' EXIT
+
+mpiexec -n "$processes" mpi-mandelbrot \
+    --width "$width" \
+    --height "$height" \
+    --iterations "$iterations" \
+    --output "$temporary_ppm"
+
+convert "$temporary_ppm" "$output"
+echo "PNG output: $output"
