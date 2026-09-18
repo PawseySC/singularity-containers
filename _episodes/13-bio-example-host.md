@@ -43,7 +43,7 @@ bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  s
 Now let's look at the root directory when we're in the container
 
 ```
-$ singularity exec docker://ubuntu:18.04 ls /
+$ singularity exec docker://ubuntu:24.04 ls /
 ```
 {: .bash}
 
@@ -72,7 +72,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec docker://ubuntu:18.04 pwd
+> > $ singularity exec docker://ubuntu:24.04 pwd
 > > ```
 > > {: .bash}
 > >
@@ -93,7 +93,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec docker://ubuntu:18.04 ls
+> > $ singularity exec docker://ubuntu:24.04 ls
 > > ```
 > > {: .bash}
 > >
@@ -114,7 +114,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec docker://ubuntu:18.04 ls $TUTO/_episodes
+> > $ singularity exec docker://ubuntu:24.04 ls $TUTO/_episodes
 > > ```
 > > {: .bash}
 > >
@@ -128,11 +128,11 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 {: .challenge}
 
 
-> ## What happens on Pawsey HPC systems?
+> ## What happens on Setonix?
 > 
-> This last example won't work as expected on Zeus, Magnus and other Pawsey HPC machines.  
-> This is due to site defaults that are meant to make users' life easier. In particular, `/group` and `/scratch` get bind mounted by default.  
-> If you want to experience this example on Pawsey HPC, you should first `unset SINGULARITY_BINDPATH`.
+> This last example won't work as expected on Setonix.  
+> This is due to site defaults that are meant to make users' life easier: in particular, `/scratch` — where your `$TUTO` directory lives — is bind mounted into every container by default, regardless of your current working directory.  
+> If you want to experience this example as shown above, you should first `unset SINGULARITY_BINDPATH`.
 {: .callout}
 
 
@@ -143,7 +143,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ## Solution
 > > 
 > > ```
-> > $ singularity exec docker://ubuntu:18.04 touch /example
+> > $ singularity exec docker://ubuntu:24.04 touch /example
 > > ```
 > > {: .bash}
 > > 
@@ -170,7 +170,7 @@ There is also a short syntax, that just mounts the dir using the same name and p
 Let's use the latter syntax to mount `$TUTO` into the container and re-run `ls`.
 
 ```
-$ singularity exec -B $TUTO docker://ubuntu:18.04 ls $TUTO/_episodes
+$ singularity exec -B $TUTO docker://ubuntu:24.04 ls $TUTO/_episodes
 ```
 {: .bash}
 
@@ -186,8 +186,8 @@ $ singularity exec -B $TUTO docker://ubuntu:18.04 ls $TUTO/_episodes
 Also, we can write files in a host dir which has been bind mounted in the container:
 
 ```
-$ singularity exec -B $TUTO docker://ubuntu:18.04 touch $TUTO/_episodes/example
-$ singularity exec -B $TUTO docker://ubuntu:18.04 ls $TUTO/_episodes/example
+$ singularity exec -B $TUTO docker://ubuntu:24.04 touch $TUTO/_episodes/example
+$ singularity exec -B $TUTO docker://ubuntu:24.04 ls $TUTO/_episodes/example
 ```
 {: .bash}
 
@@ -242,7 +242,7 @@ By default, shell variables are inherited in the container from the host:
 
 ```
 $ export HELLO=world
-$ singularity exec docker://ubuntu:18.04 bash -c 'echo $HELLO'
+$ singularity exec docker://ubuntu:24.04 bash -c 'echo $HELLO'
 ```
 {: .bash}
 
@@ -256,7 +256,7 @@ There might be situations where you want to isolate the shell environment of the
 
 ```
 $ export HELLO=world
-$ singularity exec -C docker://ubuntu:18.04 bash -c 'echo $HELLO'
+$ singularity exec -C docker://ubuntu:24.04 bash -c 'echo $HELLO'
 ```
 {: .bash}
 
@@ -269,7 +269,7 @@ If you need to pass only specific variables to the container, that might or migh
 
 ```
 $ export SINGULARITYENV_CIAO=mondo
-$ singularity exec -C docker://ubuntu:18.04 bash -c 'echo $CIAO'
+$ singularity exec -C docker://ubuntu:24.04 bash -c 'echo $CIAO'
 ```
 {: .bash}
 
@@ -281,7 +281,7 @@ mondo
 From Singularity 3.6.x on, there's an alternative way to define variables that are specific to the container, using the flag `--env`:
 
 ```
-$ singularity exec --env CIAO=mondo docker://ubuntu:18.04 bash -c 'echo $CIAO'
+$ singularity exec --env CIAO=mondo docker://ubuntu:24.04 bash -c 'echo $CIAO'
 ```
 {: .bash}
 
@@ -296,7 +296,16 @@ mondo
 We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro).  BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics packages.  
 This example is adapted from the [BioContainers documentation](http://biocontainers-edu.biocontainers.pro/en/latest/running_example.html).
 
-We're going to use an image for the most recent BLAST version from the `quay.io` registry, *i.e.* `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`.  First, we'll pull the image.  This should take a few minutes (unless you had pulled the image in advance):
+We're going to use an image for the most recent BLAST version from the `quay.io` registry, *i.e.* `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`.
+
+Let's first `cd` into `demos/blast`, so that the `.sif` image file ends up there, alongside the other files we'll need for this example:
+
+```
+$ cd $TUTO/demos/blast
+```
+{: .bash}
+
+Now, we'll pull the image.  This should take a few minutes (unless you had pulled the image in advance):
 
 ```
 $ singularity pull docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4
