@@ -12,8 +12,6 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         cowsay \
-        fortune-mod \
-        fortunes-min \
         lolcat; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
@@ -21,5 +19,8 @@ RUN set -eux; \
 # Make the installed commands available by name at runtime
 ENV PATH="/usr/games:${PATH}"
 
+# Copy the message displayed by the default container action
+COPY lolcow-message.txt /usr/local/share/lolcow/message.txt
+
 # Define the default action for docker run and singularity run
-CMD ["bash", "-c", "fortune | cowsay | lolcat"]
+CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat"]
