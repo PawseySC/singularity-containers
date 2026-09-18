@@ -38,7 +38,7 @@ wsl --install
 ```
 {: .bash}
 
-This installs WSL and a default Linux distribution.  Restart your computer if prompted.
+This enables WSL 2 on your computer, and on most systems will also install *Ubuntu* as the default Linux distribution in the same step.  Restart your computer if prompted.
 
 After restarting, open *PowerShell* again and check that WSL is working:
 
@@ -49,16 +49,34 @@ wsl --version
 
 This should print your installed WSL version, with no errors.
 
-#### Step 2: Install Docker Desktop
+#### Step 2: Install Ubuntu on WSL
+
+Check which Linux distributions are already installed:
+
+```
+wsl --list --verbose
+```
+{: .bash}
+
+If `Ubuntu` is listed, you're done with this step.  If it isn't (or the list is empty), install it explicitly:
+
+```
+wsl --install -d Ubuntu
+```
+{: .bash}
+
+The first time Ubuntu starts, it will ask you to create a Unix username and password — pick anything you like, you won't need them for this workshop.
+
+#### Step 3: Install Docker Desktop
 
 Download and install [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/).
 During installation, use the **WSL 2 based engine** if prompted.  After installation, verify that Docker Desktop is configured to use WSL 2.  This training uses **Linux container images**, so Docker Desktop must run in Linux container mode, not Windows container mode.
 
 Once installed, start Docker Desktop (it needs to be running in the background for the `docker` command to work).
 
-#### Step 3: Check Docker
+#### Step 4: Check Docker
 
-Open *PowerShell* (or your terminal of choice) and run:
+For consistency, we'll run the `docker` commands from **PowerShell**. Open *PowerShell* and run:
 
 ```
 docker --version
@@ -73,6 +91,13 @@ docker run hello-world
 {: .bash}
 
 This downloads (if needed) and runs a small test image.  See the [Final check](#final-check) section below for the output you should expect.
+
+> ## Does `docker` also work inside the Ubuntu/WSL terminal?
+>
+> Yes. Docker Desktop exposes the `docker` command inside your WSL distributions too, through a setting called *WSL Integration* (*Settings → Resources → WSL Integration* in Docker Desktop), which is on by default for your default distribution.
+>
+> Under the hood, Docker Desktop runs inside its own `docker-desktop` WSL distribution, isolated from your Ubuntu one the same way any two WSL distributions are isolated from each other; it only talks to Ubuntu because WSL Integration is enabled for it. See Docker's [WSL 2 security in Docker Desktop](https://docs.docker.com/desktop/features/wsl/) for the full explanation.
+{: .callout}
 
 
 ### 2. macOS
@@ -113,7 +138,7 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 
 > ## Additional check for Apple silicon Macs
 >
-> Setonix uses the `linux/amd64` platform for this training.  Apple silicon Macs use the `arm64` architecture, so Docker Desktop must use emulation to run the images used in the training.
+> Setonix uses the `linux/amd64` platform for this training.  Apple silicon Macs use the `arm64` architecture, so Docker Desktop must use emulation to run the images used in the training.W
 >
 > Run:
 >
@@ -164,7 +189,7 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 
 > ## Confirm your installation works
 >
-> Run the following command (`sudo docker run hello-world` on Linux, `docker run hello-world` on Windows/macOS).  The exact output may vary depending on your Docker version and computer architecture, but it should include a message beginning with `Hello from Docker!`.
+> Run the following command (`sudo docker run hello-world` on Linux, `docker run hello-world` in PowerShell on Windows, or in Terminal on macOS).  The exact output may vary depending on your Docker version and computer architecture, but it should include a message beginning with `Hello from Docker!`.
 >
 > ```
 > $ docker run hello-world
