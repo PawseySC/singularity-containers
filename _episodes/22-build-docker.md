@@ -265,14 +265,14 @@ Later in the episode, the `CMD` instruction is updated to use `lolcat --force`, 
 Define the complete local image reference, including its repository name and tag:
 
 ```bash
-$ IMAGE="lolcow:2026.09"
+$ COW_IMAGE="lolcow:2026.09"
 ```
 {: .source}
 
 Setonix compute nodes use the `amd64` architecture, also called `x86_64`. Build explicitly for that target:
 
 ```bash
-$ docker build --platform linux/amd64 -t "$IMAGE" .
+$ docker build --platform linux/amd64 -t "$COW_IMAGE" .
 ```
 {: .source}
 
@@ -288,7 +288,7 @@ The final `.` selects the current directory as the **build context**. The build 
 List the newly built image:
 
 ```bash
-$ docker image ls "$IMAGE"
+$ docker image ls "$COW_IMAGE"
 ```
 {: .source}
 
@@ -306,7 +306,7 @@ Confirm the operating system and CPU architecture recorded for the image:
 
 <!-- The raw block prevents Jekyll/Liquid from interpreting Docker's Go-template braces. -->
 ```bash
-$ docker image inspect "$IMAGE" --format '{% raw %}{{.Os}}/{{.Architecture}}{% endraw %}'
+$ docker image inspect "$COW_IMAGE" --format '{% raw %}{{.Os}}/{{.Architecture}}{% endraw %}'
 ```
 {: .source}
 
@@ -320,7 +320,7 @@ linux/amd64
 Now run the image's default action without `--rm`:
 
 ```bash
-$ docker run "$IMAGE"
+$ docker run "$COW_IMAGE"
 ```
 {: .source}
 
@@ -379,7 +379,7 @@ The command substitution is intentionally unquoted so that each container ID is 
 Run the image again, this time with automatic cleanup:
 
 ```bash
-$ docker run --rm "$IMAGE"
+$ docker run --rm "$COW_IMAGE"
 ```
 {: .source}
 
@@ -399,7 +399,7 @@ For short-lived tests in this episode, continue using `--rm` unless you delibera
 > Make the intended runtime platform explicit with:
 >
 > ```bash
-> $ docker run --rm --platform linux/amd64 "$IMAGE"
+> $ docker run --rm --platform linux/amd64 "$COW_IMAGE"
 > ```
 > {: .source}
 >
@@ -450,7 +450,7 @@ $ rm Dockerfile
 Try the default build command again:
 
 ```bash
-$ docker build --platform linux/amd64 --tag "$IMAGE" .
+$ docker build --platform linux/amd64 --tag "$COW_IMAGE" .
 ```
 {: .source}
 
@@ -469,7 +469,7 @@ Select the actual recipe explicitly with `--file`:
 $ docker build \
     --platform linux/amd64 \
     --file lolcow.dockerfile \
-    --tag "$IMAGE" \
+    --tag "$COW_IMAGE" \
     .
 ```
 {: .source}
@@ -539,7 +539,7 @@ The `--force` option tells `lolcat` to emit colour codes even when its output is
 Rebuild the image using the same name and tag:
 
 ```bash
-$ docker build --platform linux/amd64 -t "$IMAGE" .
+$ docker build --platform linux/amd64 -t "$COW_IMAGE" .
 ```
 {: .source}
 
@@ -555,7 +555,7 @@ Which build steps are reused from the cache, and which part changes?
 Run the rebuilt image:
 
 ```bash
-$ docker run --rm "$IMAGE"
+$ docker run --rm "$COW_IMAGE"
 ```
 {: .source}
 
@@ -566,7 +566,7 @@ The same message should now be displayed in colour. The terminal must support AN
 Override the default `CMD` by supplying another command after the image name:
 
 ```bash
-$ docker run --rm "$IMAGE" cat /etc/os-release
+$ docker run --rm "$COW_IMAGE" cat /etc/os-release
 ```
 {: .source}
 
@@ -577,7 +577,7 @@ Docker runs the selected command instead of the image's default `CMD`.
 As with `singularity shell`, Docker can open an interactive shell for inspecting and testing an image:
 
 ```bash
-$ docker run --rm --interactive --tty "$IMAGE" bash
+$ docker run --rm --interactive --tty "$COW_IMAGE" bash
 ```
 {: .source}
 
@@ -639,7 +639,7 @@ $ docker run \
     --interactive \
     --tty \
     --mount type=bind,source="$PWD",target=/work \
-    "$IMAGE" \
+    "$COW_IMAGE" \
     bash
 ```
 {: .source}
@@ -677,7 +677,7 @@ As in the basic Singularity episode, a command can copy a file packaged inside t
 $ docker run \
     --rm \
     --mount type=bind,source="$PWD",target=/work \
-    "$IMAGE" \
+    "$COW_IMAGE" \
     cp /usr/local/share/lolcow/message.txt /work/lolcow-message.copy.txt
 ```
 {: .source}
@@ -719,11 +719,11 @@ For compiled applications, consider a **multi-stage build**. A build stage can c
 
 ### Use Pawsey-provided base images
 
-Pawsey publishes container base images that users can extend for their own applications. These provide tested starting environments for Pawsey systems, including MPI base images designed for compatibility with the Cray MPICH environment on Setonix and ROCm-based images prepared for AMD GPU workloads. A derived application image and its complete workflow must still be tested on the target system.
+Pawsey publishes container base images that users can extend for their own applications. These are tested starting environments for Pawsey systems, including MPICH-based images prepared for the hybrid MPI model on Setonix and ROCm-based images for AMD GPU workloads. Each derived application image and workflow must still be validated on the target system.
 
-The recipes used to build Pawsey-supported images are available from the [Pawsey container recipes repository](https://github.com/PawseySC/pawsey-containers). The corresponding Docker/OCI images are published under the [Pawsey organisation on Quay.io](https://quay.io/pawsey).
+The recipes are available from the [Pawsey container recipes repository](https://github.com/PawseySC/pawsey-containers), while the corresponding Docker/OCI images are published under the [Pawsey organisation on Quay.io](https://quay.io/pawsey).
 
-For this example, move to a separate build context:
+Move to the separate Mandelbrot build context:
 
 ```bash
 $ cd "$TUTO/demos/build_mandelbrot_docker"
@@ -738,24 +738,21 @@ README.md
 THIRD_PARTY_NOTICES.md
 mandelbrot_mpi.dockerfile
 mpi-mandelbrot.cpp
-render-mandelbrot
+mpi_mandelbrot_pawsey.slurm.sh
+run-mandelbrot-docker.sh
 ```
 {: .output}
 
-We will build an MPI Mandelbrot renderer on top of this Pawsey-provided image:
+The image is built from:
 
-```text
-quay.io/pawsey/mpich-base:3.4.3_ubuntu24.04
+```dockerfile
+FROM quay.io/pawsey/mpich-base:3.4.3_ubuntu24.04
 ```
-{: .output}
+{: .source}
 
-The base image already provides MPICH, the GNU compiler toolchain, and MPI utilities. The derived image compiles an MPI C++ application with the base image's `mpic++` compiler and installs ImageMagick to convert the application's raw PPM result into a PNG file that is straightforward to view.
+The base image supplies MPICH, compiler wrappers, and MPI runtime tools. The derived image compiles `mpi-mandelbrot.cpp` with `mpic++`, installs ImageMagick for PPM-to-PNG conversion, and preserves `THIRD_PARTY_NOTICES.md` inside the image.
 
-The training application was independently written for this example and informed by the educational MPI partitioning approaches in Liam Ryan's MIT-licensed Mandelbrot repository. Attribution and the upstream licence are retained in `mpi-mandelbrot.cpp` and `THIRD_PARTY_NOTICES.md`. The notice file is also copied into the final image.
-
-#### Read the MPI application recipe
-
-The complete `mandelbrot_mpi.dockerfile` recipe is:
+The complete recipe is:
 
 ```dockerfile
 # Build the application on Pawsey's Setonix-compatible MPICH base image
@@ -787,35 +784,29 @@ RUN mpic++ \
         /tmp/mpi-mandelbrot.cpp \
     && rm -f /tmp/mpi-mandelbrot.cpp
 
-# Install the wrapper that launches MPI and converts the result to PNG
-COPY render-mandelbrot /usr/local/bin/render-mandelbrot
-RUN chmod 0755 /usr/local/bin/render-mandelbrot
-
 # Preserve third-party acknowledgements and licence information
 COPY THIRD_PARTY_NOTICES.md \
     /usr/local/share/doc/mpi-mandelbrot/THIRD_PARTY_NOTICES.md
 
-# Display the wrapper help when no other command is supplied
-CMD ["render-mandelbrot", "--help"]
+# Display application help when no other command is supplied
+CMD ["mpi-mandelbrot", "--help"]
 ```
 {: .source}
 
-This recipe demonstrates how a specialised base image can provide build tools and runtime libraries. The application is compiled with `mpic++` from the Pawsey base image, so the derived image uses the MPI environment supplied and tested by Pawsey.
+The image deliberately contains the application rather than a site-specific MPI launcher. A simple wrapper could have been copied into the image to run `mpiexec`, execute the renderer, and convert its output. That approach is convenient for a self-contained Docker demonstration, but it does not match the supported Setonix launch model, where Slurm starts the tasks outside the image. Embedding the launcher would also make it part of the immutable image, so refining the launch policy would require rebuilding and redistributing the image.
 
-The `render-mandelbrot` wrapper launches the MPI program, writes a temporary PPM image, converts it to PNG, and removes the temporary file. The C++ source divides image rows among MPI ranks and uses `MPI_Gatherv` to assemble the calculated pixels on rank 0.
+Instead, this example keeps launch scripts on the host. The application image remains reusable, while each environment selects the correct launcher:
+
+```text
+Local Docker: host script -> docker run -> container mpiexec -> MPI ranks
+Setonix:      Slurm srun -> one singularity exec per task -> MPI ranks
+```
+{: .output}
 
 #### Build the MPI application image
 
-Define its local image reference:
-
 ```bash
 $ MPI_IMAGE="mandelbrot-mpi:2026.09"
-```
-{: .source}
-
-Build it for Setonix's CPU architecture:
-
-```bash
 $ docker build \
     --platform linux/amd64 \
     --file mandelbrot_mpi.dockerfile \
@@ -824,64 +815,57 @@ $ docker build \
 ```
 {: .source}
 
-Confirm that the image exists:
-
-```bash
-$ docker image ls "$MPI_IMAGE"
-```
-{: .source}
-
-Run the default action to display the wrapper help:
+Check the default application help:
 
 ```bash
 $ docker run --rm --platform linux/amd64 "$MPI_IMAGE"
 ```
 {: .source}
 
-#### Render a Mandelbrot image with MPI
+#### Test MPI locally with Docker
 
-Run four MPI processes and bind mount the current host directory at `/work` so that the PNG result persists after the container exits:
+The host-side `run-mandelbrot-docker.sh` script uses `mpiexec` inside one Docker container. This is a local functional test on one computer, not the Setonix launch method.
 
 ```bash
-$ docker run \
-    --rm \
-    --platform linux/amd64 \
-    --mount type=bind,source="$PWD",target=/work \
-    "$MPI_IMAGE" \
-    render-mandelbrot \
-        --processes 4 \
-        --width 1200 \
-        --height 800 \
-        --iterations 500 \
-        --output /work/mandelbrot.png
+$ ./run-mandelbrot-docker.sh
 ```
 {: .source}
 
-Representative output is:
+The script bind mounts `output/`, starts four MPI ranks inside the container, writes a temporary PPM file, runs a second serial container command to convert it to PNG, and removes the PPM file. Representative output is:
 
 ```text
 MPI Mandelbrot renderer
 Image size: 1200 x 800
 Maximum iterations: 500
 MPI processes: 4
-PPM output: /tmp/tmp.XXXXXXXXXX.ppm
+PPM output: /output/mandelbrot.ppm
 Rendering completed in 0.420 seconds
-PNG output: /work/mandelbrot.png
+Created /path/to/build_mandelbrot_docker/output/mandelbrot.png
 ```
 {: .output}
 
-The temporary filename and elapsed time will differ. Confirm that the PNG file exists on the host:
+Confirm and open the result:
 
 ```bash
-$ ls -lh mandelbrot.png
+$ ls -lh output/mandelbrot.png
 ```
 {: .source}
 
-Open `mandelbrot.png` with the normal image viewer or web browser on the local computer.
+### Review the image-building practices
 
-The MPI execution in this section occurs entirely within Docker on one local computer. Running the resulting MPI image across Setonix compute nodes requires the Singularity, Slurm, and host-MPI integration covered in the MPI container episode.
+The lolcow and Mandelbrot examples demonstrate practices that should be retained in research and HPC container workflows:
 
-### Publish the image to Docker Hub
+- Start from trusted, versioned images, such as `docker.io/ubuntu:24.04` and `quay.io/pawsey/mpich-base:3.4.3_ubuntu24.04`.
+- Keep separate, focused build contexts for unrelated images.
+- Record standard OCI metadata and preserve licence notices with redistributed software.
+- Keep reproducible source files, scripts, and notices in version control and add them with `COPY`.
+- Place stable and expensive dependency steps before frequently changing application files to improve cache reuse.
+- Remove package-manager caches in the same `RUN` instruction that installs packages.
+- Build explicitly for the architecture of the target system.
+- Keep site-specific launch policy outside an immutable application image when the target environments require different launch mechanisms.
+- Test locally, then validate correctness and performance with the supported runtime and launch model on the target HPC system.
+
+### Publish the Mandelbrot image to Docker Hub
 
 A registry is the normal way to move a Docker/OCI image from the build computer to the HPC system. This section uses Docker Hub, which was introduced in the basic Singularity episode.
 
@@ -889,7 +873,7 @@ You need a Docker Hub account and a repository to push the image. Replace `<dock
 
 ```bash
 $ DOCKERHUB_ACCOUNT="<dockerhub-account>"
-$ REMOTE_IMAGE="docker.io/${DOCKERHUB_ACCOUNT}/lolcow:2026.09"
+$ MPI_REMOTE_IMAGE="docker.io/${DOCKERHUB_ACCOUNT}/mandelbrot-mpi:2026.09"
 ```
 {: .source}
 
@@ -905,7 +889,7 @@ Follow the authentication instructions shown by Docker. Do not put the password 
 Add the registry-qualified tag to the existing local image:
 
 ```bash
-$ docker tag "$IMAGE" "$REMOTE_IMAGE"
+$ docker tag "$MPI_IMAGE" "$MPI_REMOTE_IMAGE"
 ```
 {: .source}
 
@@ -919,7 +903,7 @@ $ docker image ls
 Push the registry-qualified image:
 
 ```bash
-$ docker push "$REMOTE_IMAGE"
+$ docker push "$MPI_REMOTE_IMAGE"
 ```
 {: .source}
 
@@ -932,7 +916,7 @@ After the push completes, inspect the repository and tag in Docker Hub. For this
 > For a reproducible workflow, record the registry, namespace, repository, tag, digest, Dockerfile revision, and relevant build inputs. A retained SIF file also preserves the exact content that was pulled at that time.
 {: .callout}
 
-### Pull the image as a SIF file on Setonix
+### Pull the Mandelbrot image as a SIF file on Setonix
 
 Return to the terminal connected to Setonix and request an interactive allocation if you are not already working on a compute node:
 
@@ -967,7 +951,7 @@ Pull the Docker/OCI image and give the resulting SIF file an explicit name:
 
 ```bash
 $ singularity pull \
-    "${MY_LOCAL_LIBRARY}/lolcow--2026.09.sif" \
+    "${MY_LOCAL_LIBRARY}/mandelbrot-mpi--2026.09.sif" \
     "docker://docker.io/${DOCKERHUB_ACCOUNT}/lolcow:2026.09"
 ```
 {: .source}
@@ -977,34 +961,35 @@ Singularity retrieves the manifest and filesystem layers from the registry, asse
 Define the image path and inspect the file:
 
 ```bash
-$ SINGULARITY_IMAGE="${MY_LOCAL_LIBRARY}/lolcow--2026.09.sif"
-$ ls -lh "$SINGULARITY_IMAGE"
-$ singularity inspect "$SINGULARITY_IMAGE"
+$ SINGULARITY_MPI_IMAGE="${MY_LOCAL_LIBRARY}/mandelbrot-mpi--2026.09.sif"
+$ ls -lh "$SINGULARITY_MPI_IMAGE"
+$ singularity inspect "$SINGULARITY_MPI_IMAGE"
 ```
 {: .source}
 
-Run the default action recorded by the Docker image:
+Verify the packaged application without starting an MPI job:
 
 ```bash
-$ singularity run "$SINGULARITY_IMAGE"
+$ singularity exec "$SINGULARITY_MPI_IMAGE" mpi-mandelbrot --help
 ```
 {: .source}
 
-Select another command with `singularity exec`:
+Inspect the third-party acknowledgements retained in the image:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" id
+$ singularity exec "$SINGULARITY_MPI_IMAGE" \
+    cat /usr/local/share/doc/mpi-mandelbrot/THIRD_PARTY_NOTICES.md
 ```
 {: .source}
 
-Under the normal Singularity execution model on the cluster, the containerised process runs with your cluster user identity. The Docker image does not need to contain a user account matching each possible HPC user.
+The Docker/OCI image has now been built, tested locally, published through a registry, and converted into a SIF image on Setonix. Actual MPI execution uses `mpi_mandelbrot_pawsey.slurm.sh`: host-side `srun` starts one `singularity exec` per Slurm task, following the Pawsey hybrid MPI model covered in the MPI container episode.
 
 ### Confirm the complete workflow
 
 Using the commands from this episode, identify the artefact or service produced at each stage:
 
-1. `docker build --platform linux/amd64 -t "$IMAGE" .`
-2. `docker push "$REMOTE_IMAGE"`
+1. `docker build --platform linux/amd64 --file mandelbrot_mpi.dockerfile --tag "$MPI_IMAGE" .`
+2. `docker push "$MPI_REMOTE_IMAGE"`
 3. `singularity pull OUTPUT.sif docker://REGISTRY/NAMESPACE/IMAGE:TAG`
 4. `singularity run OUTPUT.sif`
 
@@ -1021,14 +1006,14 @@ Using the commands from this episode, identify the artefact or service produced 
 A registry is normally the simplest and most traceable distribution method. If a registry cannot be used, Docker can export a local image to an archive:
 
 ```bash
-$ docker image save -o lolcow--2026.09.tar "$IMAGE"
+$ docker image save -o mandelbrot-mpi--2026.09.tar "$MPI_IMAGE"
 ```
 {: .source}
 
 The archive can be transferred to another Docker installation and loaded with:
 
 ```bash
-$ docker image load -i lolcow--2026.09.tar
+$ docker image load -i mandelbrot-mpi--2026.09.tar
 ```
 {: .source}
 
