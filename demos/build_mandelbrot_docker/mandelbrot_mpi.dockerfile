@@ -27,13 +27,9 @@ RUN mpic++ \
         /tmp/mpi-mandelbrot.cpp \
     && rm -f /tmp/mpi-mandelbrot.cpp
 
-# Install the wrapper that launches MPI and converts the result to PNG
-COPY render-mandelbrot /usr/local/bin/render-mandelbrot
-RUN chmod 0755 /usr/local/bin/render-mandelbrot
-
 # Preserve third-party acknowledgements and licence information
 COPY THIRD_PARTY_NOTICES.md \
     /usr/local/share/doc/mpi-mandelbrot/THIRD_PARTY_NOTICES.md
 
-# Display the wrapper help when no other command is supplied
-CMD ["render-mandelbrot", "--help"]
+# Display application help when no other command is supplied
+CMD ["mpi-mandelbrot", "--help"]
