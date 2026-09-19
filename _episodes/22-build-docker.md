@@ -29,9 +29,12 @@ keypoints:
 
 ### Prepare for the hands-on exercise
 
-Perform the Docker sections of this episode on the local computer where Docker was installed and tested in the installation episode. Do not run these Docker commands on a Setonix login or compute node.
+> ## Run on your local computer
+>
+> Run the following commands in the terminal on the local computer where Docker was installed and tested. Do not run these Docker commands on a Setonix login or compute node. This location remains in effect until another location callout appears.
+{: .callout}
 
-Open a terminal on your local computer and clone the training repository if you have not already done so:
+Clone the training repository if you have not already done so:
 
 ```bash
 $ git clone https://github.com/PawseySC/singularity-containers
@@ -594,6 +597,8 @@ The container ID and exact prompt will differ.
 
 Unlike normal Singularity execution on the cluster, this Docker container runs as root inside the container because the Dockerfile does not define another runtime user. This root identity applies within Docker's container environment. It is not the root user of the host operating system.
 
+An image that works as Docker root can still fail on Setonix, where Singularity normally runs the process with your host user identity and the SIF filesystem is read-only. Install software into the image at build time, but design the application to write results, caches, temporary files, and runtime configuration only to writable locations such as the current working directory, `/tmp`, or bind-mounted project and scratch directories. The runtime must not require `sudo`, creation of system accounts, or modification of directories such as `/usr` and `/opt`. Detailed non-root and arbitrary-user testing is covered in the advanced Docker episode.
+
 Inspect the packaged operating-system environment and locate the installed commands:
 
 ```bash
@@ -700,23 +705,6 @@ Built with Docker and ready to run with Singularity!
 
 The container was removed automatically because `--rm` was used, but the copied file remains because it was written through the bind mount to the host filesystem.
 
-### Basic practices for research and HPC images
-
-A working Dockerfile is only the starting point. When preparing an image for a research workflow:
-
-- Start from an image maintained by a trusted project, vendor, or organisation.
-- Prefer explicit application and base-image versions over `latest` where practical.
-- Record the Dockerfile and related build files in version control.
-- Keep the build context small and use `.dockerignore`.
-- Install only required packages and remove package-manager caches in the same layer.
-- Put frequently changing `COPY` instructions after stable dependency-installation steps when practical, so the build cache can be reused.
-- Use `COPY` for ordinary file and directory copies. Use `ADD` only when its additional behaviour is specifically required.
-- Do not place passwords, private keys, access tokens, licence files, or other secrets in the Dockerfile, build arguments, environment variables, or copied build context. Use the build system's supported secret mechanism when a build must access protected resources.
-- Rebuild and test images regularly so that base-image and package security updates are incorporated.
-- Test the final SIF image on the target HPC system, including MPI, GPU, filesystem, and performance behaviour where relevant.
-
-For compiled applications, consider a **multi-stage build**. A build stage can contain compilers and development packages, while a later runtime stage receives only the installed application and required runtime libraries. This can substantially reduce the final image size and software surface. The MPI episode includes an example of the build-time requirements for an HPC application linked against MPI.
-
 ### Use Pawsey-provided base images
 
 Pawsey publishes container base images that users can extend for their own applications. These are tested starting environments for Pawsey systems, including MPICH-based images prepared for the hybrid MPI model on Setonix and ROCm-based images for AMD GPU workloads. Each derived application image and workflow must still be validated on the target system.
@@ -803,6 +791,8 @@ Setonix:      Slurm srun -> one singularity exec per task -> MPI ranks
 ```
 {: .output}
 
+This separation is intentional: the image contains the application and stable dependencies; command-line arguments and environment variables configure a run; bind mounts provide input data and writable output locations; and the host-side script records environment-specific launch policy. Keeping data, credentials, site paths, and Slurm resource requests outside the image makes the image easier to reuse and validate.
+
 #### Build the MPI application image
 
 ```bash
@@ -867,31 +857,52 @@ $ ls -lh output/mandelbrot.docker.png
 ```
 {: .source}
 
-### Review the image-building practices
+### Review image-building practices
 
 The lolcow and Mandelbrot examples demonstrate practices that should be retained in research and HPC container workflows:
 
-- Start from trusted, versioned images, such as `docker.io/ubuntu:24.04` and `quay.io/pawsey/mpich-base:3.4.3_ubuntu24.04`.
-- Keep separate, focused build contexts for unrelated images.
-- Record standard OCI metadata and preserve licence notices with redistributed software.
-- Keep reproducible source files, scripts, and notices in version control and add them with `COPY`.
-- Place stable and expensive dependency steps before frequently changing application files to improve cache reuse.
-- Remove package-manager caches in the same `RUN` instruction that installs packages.
+- Start from an image maintained by a trusted project, vendor, or organisation, and prefer explicit application and base-image versions over `latest` where practical. In this episode, the examples use `docker.io/ubuntu:24.04` and `quay.io/pawsey/mpich-base:3.4.3_ubuntu24.04`.
+- Keep separate, focused build contexts for unrelated images. Keep each context small and use `.dockerignore` when needed to exclude unnecessary or sensitive files.
+- Record the Dockerfile and related build files in version control. Record standard OCI metadata and preserve licence notices with redistributed software.
+- Use `COPY` for ordinary file and directory copies. Use `ADD` only when its additional behaviour is specifically required.
+- Install only required packages and remove package-manager caches in the same `RUN` instruction that installs them.
+- Place stable and expensive dependency steps before frequently changing application files to improve build-cache reuse.
+- Do not place passwords, private keys, access tokens, licence files, or other secrets in the Dockerfile, build arguments, environment variables, or copied build context. Use the build system's supported secret mechanism when a build must access protected resources.
 - Build explicitly for the architecture of the target system.
 - Keep site-specific launch policy outside an immutable application image when the target environments require different launch mechanisms.
-- Test locally, then validate correctness and performance with the supported runtime and launch model on the target HPC system.
+- Rebuild and test images regularly so that base-image and package security updates are incorporated.
+- Test locally, then validate the final SIF image with the supported runtime and launch model on the target HPC system, including MPI, GPU, filesystem, correctness, and performance behaviour where relevant.
+
+For compiled applications, consider a **Docker multi-stage build**. A Dockerfile can use multiple `FROM` instructions, commonly naming a build stage with `AS`. A later runtime stage can use `COPY --from=<stage>` to copy only the compiled application and other required artefacts, leaving compilers, source files, and development packages out of the final image. The final stage must still provide every runtime library required by the copied application.
+
+Image size is also reduced by choosing an appropriate base image, installing only required packages, using `--no-install-recommends`, removing package-manager caches in the same `RUN` instruction, keeping the build context small, and excluding unnecessary files with `.dockerignore`. Combining related commands can prevent temporary files from remaining in an earlier layer, but merely reducing the number of layers does not by itself guarantee a smaller or better image. A complete multi-stage and image-size exercise is covered in the advanced Docker episode.
 
 ### Publish the Mandelbrot image to Docker Hub
 
-A registry is the normal way to move a Docker/OCI image from the build computer to the HPC system. This section uses Docker Hub, which was introduced in the basic Singularity episode.
+A registry is the normal way to move a Docker/OCI image from the build computer to the HPC system. This section uses Docker Hub, which was introduced in the setup episode.
 
-You need a Docker Hub account and a repository to push the image. Replace `<dockerhub-account>` with your account name:
+The [Setup Docker on your computer]({% link _episodes/00-setup-docker.md %}) episode covered creating and verifying a Docker Hub account and testing image publishing. Use the same Docker ID here. If `DOCKER_ID` is not defined in the current shell, assign it now. Replace `<docker-id>` with your Docker ID and do not include the angle brackets:
 
 ```bash
-$ DOCKERHUB_ACCOUNT="<dockerhub-account>"
-$ MPI_REMOTE_IMAGE="docker.io/${DOCKERHUB_ACCOUNT}/mandelbrot-mpi:2026.09"
+$ DOCKER_ID="<docker-id>"
+$ MPI_REMOTE_IMAGE="docker.io/${DOCKER_ID}/mandelbrot-mpi:2026.09"
 ```
 {: .source}
+
+> ## Windows PowerShell syntax
+>
+> In Windows PowerShell, assign the variables with:
+>
+> ```powershell
+> PS> $DOCKER_ID = "<docker-id>"
+> PS> $MPI_REMOTE_IMAGE = "docker.io/${DOCKER_ID}/mandelbrot-mpi:2026.09"
+> ```
+> {: .source}
+>
+> The `$` characters in `$DOCKER_ID` and `$MPI_REMOTE_IMAGE` are part of the PowerShell variable names and must be typed. The later Docker commands use the same quoted variable references in PowerShell, Bash, and Zsh.
+{: .solution}
+
+Before pushing, sign in to Docker Hub in a web browser and create a **public** repository named `mandelbrot-mpi` under your Docker ID, following the same repository-creation process used for `first-image` in the setup episode. The complete repository name will be `docker.io/<docker-id>/mandelbrot-mpi`. Do not include the angle brackets when substituting your Docker ID.
 
 Authenticate from the Docker client:
 
@@ -934,17 +945,22 @@ After the push completes, inspect the repository and tag in Docker Hub. For this
 
 ### Pull the Mandelbrot image as a SIF file on Setonix
 
-Return to the terminal connected to Setonix and request an interactive allocation if you are not already working on a compute node:
+> ## Run on Setonix
+>
+> Run the following commands in the terminal connected to Setonix. This location remains in effect until another location callout appears.
+{: .callout}
+
+Request an interactive allocation if you are not already working on a compute node:
 
 ```bash
 $ salloc -N 1 -n 1 -c 4 --reservation=ContainersTraining -t 4:00:00
 ```
 {: .source}
 
-Load the Singularity module used for non-MPI containers:
+Load Pawsey's MPI-enabled Singularity module:
 
 ```bash
-$ module load singularity/4.1.0-nohost
+$ module load singularity/4.1.0-mpi
 ```
 {: .source}
 
@@ -956,10 +972,11 @@ $ mkdir -p "$MY_LOCAL_LIBRARY"
 ```
 {: .source}
 
-Set the same Docker Hub account name used when publishing the image:
+Set the same Docker ID used when publishing the image and reconstruct the registry-qualified image reference in the Setonix shell:
 
 ```bash
-$ DOCKERHUB_ACCOUNT="<dockerhub-account>"
+$ DOCKER_ID="<docker-id>"
+$ MPI_REMOTE_IMAGE="docker.io/${DOCKER_ID}/mandelbrot-mpi:2026.09"
 ```
 {: .source}
 
@@ -968,7 +985,7 @@ Pull the Docker/OCI image and give the resulting SIF file an explicit name:
 ```bash
 $ singularity pull \
     "${MY_LOCAL_LIBRARY}/mandelbrot-mpi--2026.09.sif" \
-    "docker://docker.io/${DOCKERHUB_ACCOUNT}/lolcow:2026.09"
+    "docker://${MPI_REMOTE_IMAGE}"
 ```
 {: .source}
 
@@ -998,7 +1015,14 @@ $ singularity exec "$SINGULARITY_MPI_IMAGE" \
 ```
 {: .source}
 
-The Setonix script requests 16 Slurm tasks. Its defaults deliberately use a different centre and a larger workload than the local Docker test:
+Now we can submit a job in Setonix that uses this image. In Setonix, move to the mandelbrot demo directory:
+
+```bash
+$ cd $TUTO/demos/build_madelbrot_docker
+```
+{: .source}
+
+The Setonix script `runMandelbrotSingularityPawsey.slurm.sh` requests 16 Slurm tasks. Its defaults deliberately use a different centre and a larger workload than the local Docker test:
 
 ```text
 WIDTH=6000
@@ -1019,7 +1043,14 @@ $ sbatch runMandelbrotSingularityPawsey.slurm.sh
 
 The host-side `srun` command starts one `singularity exec` per Slurm task, following the Pawsey hybrid MPI model covered in the MPI container episode. The larger workload gives the 16 ranks substantially more pixel and iteration work than the default local test.
 
-After the job finishes, return to a terminal on the local computer. Define the Pawsey username explicitly because the local username may differ from the Pawsey username:
+After the job finishes:
+
+> ## Run on your local computer
+>
+> Return to a terminal on your local computer. The following commands run locally, not on Setonix.
+{: .callout}
+
+Define the Pawsey username explicitly because the local username may differ from the Pawsey username:
 
 ```bash
 $ PAWSEY_USER="<pawsey-username>"
@@ -1060,7 +1091,12 @@ Using the commands from this episode, identify the artefact or service produced 
 
 A registry is normally the simplest and most traceable distribution method. If a registry cannot be used, Docker can export the local image to an archive.
 
-On the local computer, create the Docker archive:
+> ## Run on your local computer
+>
+> Run the following archive-creation and transfer commands on the local computer where the Docker image was built.
+{: .callout}
+
+Create the Docker archive:
 
 ```bash
 $ docker image save \
@@ -1085,15 +1121,29 @@ $ scp \
 ```
 {: .source}
 
-The destination directory must already exist. If necessary, log in to Setonix and create it before running `scp`:
+The destination directory must already exist.
 
-```bash
-$ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
-$ mkdir -p "$MY_LOCAL_LIBRARY"
-```
-{: .source}
+> ## If the destination directory does not exist
+>
+> **On Setonix**, log in and create the personal image-library directory:
+>
+> ```bash
+> $ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
+> $ mkdir -p "$MY_LOCAL_LIBRARY"
+> ```
+> {: .source}
+>
+> **Back on your local computer**, run the `scp` command.
+{: .solution}
 
-After the archive has been transferred, run the remaining commands on Setonix. Load the MPI-enabled Singularity module, define the image-library path, and move into that directory:
+After the archive has been transferred:
+
+> ## Run on Setonix
+>
+> Run the remaining archive-conversion commands in the terminal connected to Setonix.
+{: .callout}
+
+Load the MPI-enabled Singularity module, define the image-library path, and move into that directory:
 
 ```bash
 $ module load singularity/4.1.0-mpi
@@ -1137,12 +1187,15 @@ $ rm mandelbrot-mpi--2026.09.tar
 ```
 {: .source}
 
-If the archive is transferred to another Docker installation instead, load it there with:
-
-```bash
-$ docker image load --input mandelbrot-mpi--2026.09.tar
-```
-{: .source}
+> ## Optional: load the archive into another Docker installation
+>
+> If the archive is transferred to another computer running Docker instead of Setonix, load it into that Docker installation with:
+>
+> ```bash
+> $ docker image load --input mandelbrot-mpi--2026.09.tar
+> ```
+> {: .source}
+{: .solution}
 
 A Docker image archive may be substantially larger than a compressed SIF. Prefer publishing the image to an appropriate registry and pulling it with Singularity when a registry is available.
 
@@ -1150,6 +1203,54 @@ A Docker image archive may be substantially larger than a compressed SIF. Prefer
 >
 > Private registry access requires authentication and site-specific handling of credentials. Software licences may also restrict whether an image can be shared, exported, or executed on another system. Follow the registry, licence, project, and Pawsey security requirements that apply to the image. Do not use a public registry merely to avoid configuring an approved private distribution method.
 {: .callout}
+
+### Manage local Docker images
+
+> ## Run on your local computer
+>
+> Return to the local computer where Docker is installed. The commands in this section operate on Docker's local image store, not on Setonix.
+{: .callout}
+
+Docker stores built and pulled images in its **local image store**. This is distinct from a remote registry such as Docker Hub.
+
+If `MPI_IMAGE` is not defined in this local shell, define it again:
+
+```bash
+$ MPI_IMAGE="mandelbrot-mpi:2026.09"
+```
+{: .source}
+
+List local image references:
+
+```bash
+$ docker image ls
+```
+{: .source}
+
+Inspect image metadata, including architecture, labels, and runtime configuration:
+
+```bash
+$ docker image inspect "$MPI_IMAGE"
+```
+{: .source}
+
+Remove a local image reference when it is no longer needed:
+
+```bash
+$ docker image rm "$MPI_IMAGE"
+```
+{: .source}
+
+Removing a local image reference does not delete the corresponding repository or tag from Docker Hub. An image may also have several local names or tags that refer to the same underlying image data. If a container still refers to an image, remove that container deliberately before removing the image rather than forcing the operation.
+
+Remove dangling images after reviewing Docker's confirmation prompt:
+
+```bash
+$ docker image prune
+```
+{: .source}
+
+Avoid `docker image prune --all` unless you understand that it can remove any image not currently used by a container. Image-layer inspection, disk-usage analysis, and build-cache cleanup are covered in the advanced Docker episode.
 
 #### Review the Docker-to-HPC workflow
 
