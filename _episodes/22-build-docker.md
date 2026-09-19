@@ -854,16 +854,16 @@ Maximum iterations: 1000
 Centre: (-0.743644, 0.131826)
 Scale: 0.002
 MPI processes: 8
-PPM output: /output/mandelbrot.ppm
+PPM output: /output/mandelbrot.docker.ppm
 Rendering completed in 0.420 seconds
-Created /path/to/build_mandelbrot_docker/output/mandelbrot.png
+Created /path/to/build_mandelbrot_docker/output/mandelbrot.docker.png
 ```
 {: .output}
 
 Confirm and open the result:
 
 ```bash
-$ ls -lh output/mandelbrot.png
+$ ls -lh output/mandelbrot.docker.png
 ```
 {: .source}
 
@@ -1019,7 +1019,25 @@ $ sbatch runMandelbrotSingularityPawsey.slurm.sh
 
 The host-side `srun` command starts one `singularity exec` per Slurm task, following the Pawsey hybrid MPI model covered in the MPI container episode. The larger workload gives the 16 ranks substantially more pixel and iteration work than the default local test.
 
-The Docker/OCI image has now been built, tested locally, published through a registry, converted into a SIF image, and launched through the supported Setonix MPI model.
+After the job finishes, return to a terminal on the local computer. Define the Pawsey username explicitly because the local username may differ from the Pawsey username:
+
+```bash
+$ PAWSEY_USER="<pawsey-username>"
+```
+{: .source}
+
+Copy the generated PNG from Setonix into the current local directory:
+
+```bash
+$ scp \
+    "${PAWSEY_USER}@setonix.pawsey.org.au:/scratch/courses01/${PAWSEY_USER}/singularity-containers/demos/build_mandelbrot_docker/output/mandelbrot.singularity.setonix.png" \
+    .
+```
+{: .source}
+
+The file can now be opened with the local operating system's normal image viewer.
+
+The Docker/OCI image has now been built, tested locally, published through a registry, converted into a SIF image, launched through the supported Setonix MPI model, and its result transferred back to the local computer.
 
 ### Confirm the complete workflow
 
@@ -1040,26 +1058,86 @@ Using the commands from this episode, identify the artefact or service produced 
 
 #### Optional: transfer an image without a registry
 
-A registry is normally the simplest and most traceable distribution method. If a registry cannot be used, Docker can export a local image to an archive:
+A registry is normally the simplest and most traceable distribution method. If a registry cannot be used, Docker can export the local image to an archive.
+
+On the local computer, create the Docker archive:
 
 ```bash
-$ docker image save -o mandelbrot-mpi--2026.09.tar "$MPI_IMAGE"
+$ docker image save \
+    --output mandelbrot-mpi--2026.09.tar \
+    "$MPI_IMAGE"
 ```
 {: .source}
 
-Transfer the archive to Setonix using the approved file-transfer method. Then load the MPI-enabled Singularity module and convert the Docker archive into a SIF image:
+Define the Pawsey username explicitly because the local username may differ from the Pawsey username:
+
+```bash
+$ PAWSEY_USER="<pawsey-username>"
+```
+{: .source}
+
+Transfer the archive directly to the personal Singularity image-library directory on Setonix:
+
+```bash
+$ scp \
+    mandelbrot-mpi--2026.09.tar \
+    "${PAWSEY_USER}@setonix.pawsey.org.au:/software/projects/courses01/${PAWSEY_USER}/singularity/images/"
+```
+{: .source}
+
+The destination directory must already exist. If necessary, log in to Setonix and create it before running `scp`:
+
+```bash
+$ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
+$ mkdir -p "$MY_LOCAL_LIBRARY"
+```
+{: .source}
+
+After the archive has been transferred, run the remaining commands on Setonix. Load the MPI-enabled Singularity module, define the image-library path, and move into that directory:
 
 ```bash
 $ module load singularity/4.1.0-mpi
+$ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
+$ cd "$MY_LOCAL_LIBRARY"
+```
+{: .source}
+
+Confirm that the transferred archive is present:
+
+```bash
+$ ls -lh mandelbrot-mpi--2026.09.tar
+```
+{: .source}
+
+Convert the Docker archive into a SIF image:
+
+```bash
 $ singularity build \
     mandelbrot-mpi--2026.09.sif \
     docker-archive://mandelbrot-mpi--2026.09.tar
 ```
 {: .source}
 
-The `docker-archive://` source identifies an archive created by `docker image save`. `singularity build` reads its layers and metadata and creates the SIF file. The Docker archive itself is not a SIF file.
+The `docker-archive://` source identifies an archive created by `docker image save`. `singularity build` reads its image layers and metadata and creates the SIF file. The Docker archive itself is not a SIF file.
 
-If the archive is transferred to another Docker installation instead, load it with:
+Verify the resulting image and confirm that the updated Mandelbrot options are available:
+
+```bash
+$ ls -lh mandelbrot-mpi--2026.09.sif
+$ singularity exec \
+    mandelbrot-mpi--2026.09.sif \
+    mpi-mandelbrot --help
+```
+{: .source}
+
+After verifying the SIF, the transferred Docker archive can be removed:
+
+```bash
+$ rm mandelbrot-mpi--2026.09.tar
+```
+{: .source}
+
+If the archive is transferred to another Docker installation instead, load it there with:
 
 ```bash
 $ docker image load --input mandelbrot-mpi--2026.09.tar

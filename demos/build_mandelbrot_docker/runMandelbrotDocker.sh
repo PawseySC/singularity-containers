@@ -16,8 +16,8 @@ SCALE="${SCALE:-3.0}"
 #--- Set output files
 OUTPUT_DIR="${OUTPUT_DIR:-$PWD/output}"
 mkdir -p "$OUTPUT_DIR"
-FILE_PPM="mandelbrot.ppm"
-FILE_PNG="mandelbrot.png"
+FILE_PPM="mandelbrot.docker.ppm"
+FILE_PNG="mandelbrot.docker.png"
 
 #--- Report the selected Mandelbrot view
 printf 'Image size: %s x %s\n' "$WIDTH" "$HEIGHT"
