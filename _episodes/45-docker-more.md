@@ -42,7 +42,11 @@ $ cd "$TUTO/demos/docker_advanced"
 ```
 {: .source}
 
-### Build a single-stage compiled image
+### Reduce image size and software surface
+
+The first topic in this episode is reducing the size and software surface of a compiled application image. We will first build a single-stage image that contains both the build tools and the application, then convert it to a multi-stage build whose final stage contains only the application and its required runtime dependencies. Comparing the two images will show what a multi-stage build removes and what must remain for the application to run correctly.
+
+#### Build a single-stage compiled image
 
 Create `hello.cpp`:
 
@@ -100,7 +104,7 @@ $ docker image history hello-hpc:single
 
 The image works, but it also contains the compiler, development files, source file, and package-management content that remain after the build.
 
-### Convert the recipe to a multi-stage build
+#### Convert the recipe to a multi-stage build
 
 A Docker multi-stage build contains multiple `FROM` instructions. `AS build` gives the first stage a stable name, and `COPY --from=build` copies selected artefacts into the final stage.
 
@@ -148,7 +152,7 @@ $ docker run --rm --platform linux/amd64 hello-hpc:multi
 ```
 {: .source}
 
-Compare the images:
+Compare the size and layer history of the two final images:
 
 ```bash
 $ docker image ls hello-hpc
@@ -157,25 +161,16 @@ $ docker image history hello-hpc:multi
 ```
 {: .source}
 
-The final multi-stage image receives only the compiled executable from the build stage. Build tools and source files remain in the discarded build stage. The runtime stage must nevertheless contain every shared library required by the executable.
+The output from `docker image ls` should show that `hello-hpc:multi` is smaller than `hello-hpc:single`. The history of the single-stage image includes the installation of `g++` and the compilation steps because they form part of that final image. In contrast, the history of the multi-stage runtime image begins from its second `FROM` instruction and includes only the runtime-stage instructions. The build stage is not included in the final runtime image.
+
+The multi-stage image therefore excludes the compiler, development files, and source code while retaining the compiled executable and its required runtime libraries. `docker image history` shows how the final image was constructed; it is not a complete inventory of the files or packages inside the image.
 
 > ## MPI and GPU runtime stages
 >
 > Do not copy an MPI or GPU executable into an arbitrary small base image merely to reduce size. The final stage must provide ABI-compatible runtime libraries, and the image must remain compatible with the Pawsey Singularity module and host-library injection used by the workload. Start from a Pawsey-provided base image where applicable and validate the result on Setonix.
 {: .callout}
 
-### Understand what actually reduces image size
-
-Useful size-reduction practices include:
-
-1. Choose an appropriate supported base image.
-2. Install only packages required at runtime.
-3. Use `--no-install-recommends` where appropriate.
-4. Remove package indexes and temporary build files in the same `RUN` instruction that creates them.
-5. Keep the build context small and exclude unnecessary files with `.dockerignore`.
-6. Use multi-stage builds to leave compilers, headers, source files, and intermediate artefacts out of the final stage.
-
-Fewer layers do not automatically mean a smaller image. If one layer creates a large file and a later layer deletes it, the earlier layer still contains that data. Combine creation and cleanup when they belong to the same filesystem change, but keep the Dockerfile readable.
+#### Keep the build context small with `.dockerignore`
 
 Create `.dockerignore`:
 
@@ -187,7 +182,22 @@ output/
 ```
 {: .source}
 
-A `.dockerignore` reduces build-context processing and helps prevent unrelated or sensitive files from being available to broad `COPY` instructions. It does not remove content that a Dockerfile explicitly creates during a build.
+A `.dockerignore` file excludes matching paths from the build context sent to Docker. This reduces build-context processing and helps prevent unrelated or sensitive files from being available to broad `COPY` or `ADD` instructions. It does not remove content that a Dockerfile explicitly creates or downloads during the build, and it reduces the final image size only when the excluded content would otherwise have been copied into the image.
+
+#### Understand what actually reduces image size
+
+Useful size-reduction practices include:
+
+1. Choose an appropriate supported base image.
+2. Install only packages required at runtime.
+3. Use `--no-install-recommends` where appropriate.
+4. Remove package indexes and temporary build files in the same `RUN` instruction that creates them.
+5. Keep the build context small and exclude unnecessary files with `.dockerignore`.
+6. Use multi-stage builds to leave compilers, headers, source files, and intermediate artefacts out of the final stage.
+
+As discussed in the previous Docker episode, files created in one image layer remain part of that layer even if a later instruction deletes them. For operations such as package installation, keep the package-index update, installation, and cleanup in the same `RUN` instruction so that temporary package data is not retained in an earlier layer.
+
+This does not mean that every command should be concatenated into a single `RUN` instruction. Combine commands whose filesystem changes belong together, while keeping separate logical build steps readable and allowing Docker to reuse useful cached layers. Fewer layers do not automatically produce a smaller or better image.
 
 ### Design for non-root execution
 
