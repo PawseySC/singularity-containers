@@ -738,8 +738,8 @@ README.md
 THIRD_PARTY_NOTICES.md
 mandelbrot_mpi.dockerfile
 mpi-mandelbrot.cpp
-mpi_mandelbrot_pawsey.slurm.sh
-run-mandelbrot-docker.sh
+runMandelbrotSingularityPawsey.slurm.sh
+runMandelbrotDocker.sh
 ```
 {: .output}
 
@@ -824,20 +824,36 @@ $ docker run --rm --platform linux/amd64 "$MPI_IMAGE"
 
 #### Test MPI locally with Docker
 
-The host-side `run-mandelbrot-docker.sh` script uses `mpiexec` inside one Docker container. This is a local functional test on one computer, not the Setonix launch method.
+The host-side `runMandelbrotDocker.sh` script uses `mpiexec` inside one Docker container. This is a local functional test on one computer, not the Setonix launch method. Its default workload is `1200 x 800` pixels, 500 maximum iterations, and four MPI processes. `WIDTH`, `HEIGHT`, `ITERATIONS`, `MPI_PROCESSES`, `CENTRE_REAL`, `CENTRE_IMAGINARY`, and `SCALE` can be overridden as environment variables.
 
 ```bash
-$ ./run-mandelbrot-docker.sh
+$ ./runMandelbrotDocker.sh
 ```
 {: .source}
 
-The script bind mounts `output/`, starts four MPI ranks inside the container, writes a temporary PPM file, runs a second serial container command to convert it to PNG, and removes the PPM file. Representative output is:
+For example, render a zoomed view with a larger workload without editing the script:
+
+```bash
+$ MPI_PROCESSES=8 \
+    WIDTH=3000 \
+    HEIGHT=2000 \
+    ITERATIONS=1000 \
+    CENTRE_REAL=-0.743643887037151 \
+    CENTRE_IMAGINARY=0.131825904205330 \
+    SCALE=0.002 \
+    ./runMandelbrotDocker.sh
+```
+{: .source}
+
+The script defines `$OUTPUT_DIR` on the host and bind mounts it at `/output` inside Docker. Commands inside the container use `/output/$FILE_PPM` and `/output/$FILE_PNG`, while cleanup and reporting on the host use paths under `$OUTPUT_DIR`. The script starts four MPI ranks inside one container, converts the PPM result to PNG with a second serial container command, and removes the intermediate PPM file. Representative output is:
 
 ```text
 MPI Mandelbrot renderer
-Image size: 1200 x 800
-Maximum iterations: 500
-MPI processes: 4
+Image size: 3000 x 2000
+Maximum iterations: 1000
+Centre: (-0.743644, 0.131826)
+Scale: 0.002
+MPI processes: 8
 PPM output: /output/mandelbrot.ppm
 Rendering completed in 0.420 seconds
 Created /path/to/build_mandelbrot_docker/output/mandelbrot.png
@@ -982,7 +998,28 @@ $ singularity exec "$SINGULARITY_MPI_IMAGE" \
 ```
 {: .source}
 
-The Docker/OCI image has now been built, tested locally, published through a registry, and converted into a SIF image on Setonix. Actual MPI execution uses `mpi_mandelbrot_pawsey.slurm.sh`: host-side `srun` starts one `singularity exec` per Slurm task, following the Pawsey hybrid MPI model covered in the MPI container episode.
+The Setonix script requests 16 Slurm tasks. Its defaults deliberately use a different centre and a larger workload than the local Docker test:
+
+```text
+WIDTH=6000
+HEIGHT=4000
+ITERATIONS=2000
+CENTRE_REAL=-0.743643887037151
+CENTRE_IMAGINARY=0.131825904205330
+SCALE=0.002
+```
+{: .output}
+
+Submit it with:
+
+```bash
+$ sbatch runMandelbrotSingularityPawsey.slurm.sh
+```
+{: .source}
+
+The host-side `srun` command starts one `singularity exec` per Slurm task, following the Pawsey hybrid MPI model covered in the MPI container episode. The larger workload gives the 16 ranks substantially more pixel and iteration work than the default local test.
+
+The Docker/OCI image has now been built, tested locally, published through a registry, converted into a SIF image, and launched through the supported Setonix MPI model.
 
 ### Confirm the complete workflow
 
@@ -1010,14 +1047,26 @@ $ docker image save -o mandelbrot-mpi--2026.09.tar "$MPI_IMAGE"
 ```
 {: .source}
 
-The archive can be transferred to another Docker installation and loaded with:
+Transfer the archive to Setonix using the approved file-transfer method. Then load the MPI-enabled Singularity module and convert the Docker archive into a SIF image:
 
 ```bash
-$ docker image load -i mandelbrot-mpi--2026.09.tar
+$ module load singularity/4.1.0-mpi
+$ singularity build \
+    mandelbrot-mpi--2026.09.sif \
+    docker-archive://mandelbrot-mpi--2026.09.tar
 ```
 {: .source}
 
-A Docker image archive is not a SIF file. It preserves the Docker/OCI image representation for Docker-compatible tooling and may be substantially larger than a compressed SIF. For the workflow taught here, prefer publishing the image to an appropriate registry and pulling it with Singularity.
+The `docker-archive://` source identifies an archive created by `docker image save`. `singularity build` reads its layers and metadata and creates the SIF file. The Docker archive itself is not a SIF file.
+
+If the archive is transferred to another Docker installation instead, load it with:
+
+```bash
+$ docker image load --input mandelbrot-mpi--2026.09.tar
+```
+{: .source}
+
+A Docker image archive may be substantially larger than a compressed SIF. Prefer publishing the image to an appropriate registry and pulling it with Singularity when a registry is available.
 
 > ## Private and restricted images
 >
