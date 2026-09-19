@@ -26,8 +26,8 @@ SCALE="${SCALE:-0.002}"
 #--- Set output files
 OUTPUT_DIR="$PWD/output"
 mkdir -p "$OUTPUT_DIR"
-FILE_PPM="mandelbrot.ppm"
-FILE_PNG="mandelbrot.png"
+FILE_PPM="mandelbrot.singularity.setonix.ppm"
+FILE_PNG="mandelbrot.singularity.setonix.png"
 
 #--- Report the selected Mandelbrot view
 printf 'Image size: %s x %s\n' "$WIDTH" "$HEIGHT"
