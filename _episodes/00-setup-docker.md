@@ -7,10 +7,12 @@ questions:
 objectives:
 - Install Docker on your own computer, on Windows, macOS or Linux
 - Verify the installation by running a test container
+- Create and verify a Docker Hub account and test publishing an image
 keypoints:
 - We will use Docker to build container images
 - Installing Docker may require *admin*/*sudo* privileges, depending on your operating system and computer configuration
 - The `docker run hello-world` command verifies that Docker can obtain an image and run a container
+- A verified Docker Hub account is required for the later image-publishing exercise
 ---
 
 ### Why do I need this?
@@ -207,6 +209,93 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 > > If you see a message starting with `Hello from Docker!` like this one, your installation is ready for the workshop — you're all set!
 > {: .solution}
 {: .challenge}
+
+
+### Create and test a Docker Hub account
+
+Later in the training, you will publish a container image to Docker Hub so that it can be pulled from Setonix with Singularity.  Create and verify your Docker Hub account before the workshop.
+
+The steps below are based on Docker's official [Create a Docker account](https://docs.docker.com/accounts/individual/create-account/), [Create a repository](https://docs.docker.com/docker-hub/repos/create/), and [Push images to a repository](https://docs.docker.com/docker-hub/repos/manage/hub-images/push/) instructions.  You can follow those instructions directly if the Docker Hub interface or account requirements have changed.
+
+1. Open the [Docker Hub sign-up page](https://hub.docker.com/signup/).
+2. Create a free account using an email address, or continue with a supported external account.
+3. Choose your Docker ID carefully.  Your Docker ID is the username used in Docker Hub image names, and it cannot be changed after the account is created.
+4. Complete the account verification process.  You will not be able to sign in until the account has been verified.
+5. Sign in to [Docker Hub](https://hub.docker.com/) and record your Docker ID.
+
+In a terminal, assign your Docker ID to a shell variable.  Replace `<docker-id>` with your Docker ID and do not include the angle brackets:
+
+```
+$ DOCKER_ID="<docker-id>"
+```
+{: .bash}
+
+#### Create a test repository
+
+While signed in to Docker Hub:
+
+1. Open **My Hub → Repositories**.
+2. Select **Create repository**.
+3. Select your personal Docker ID as the namespace.
+4. Enter `first-image` as the repository name.
+5. Set the repository visibility to **Public**.
+6. Select **Create**.
+
+The resulting repository name will be:
+
+```
+docker.io/<docker-id>/first-image
+```
+{: .output}
+
+#### Test publishing an image
+
+The earlier `docker run hello-world` test downloaded the `hello-world` image and ran a container from it.  Reuse that small image to verify that you can authenticate, tag an image for your Docker Hub namespace, and push it to the test repository.
+
+Authenticate from the Docker client:
+
+```
+$ docker login docker.io
+```
+{: .bash}
+
+Follow the authentication instructions shown by Docker.  Do not enter a password or access token directly as part of the command because doing so may record it in your shell history.
+
+Create a new tag for the local `hello-world` image.  The new tag includes your Docker ID and the repository name:
+
+```
+$ docker tag hello-world:latest "docker.io/${DOCKER_ID}/first-image:latest"
+```
+{: .bash}
+
+Push the tagged image to Docker Hub:
+
+```
+$ docker push "docker.io/${DOCKER_ID}/first-image:latest"
+```
+{: .bash}
+
+After the push completes, open the `first-image` repository in Docker Hub and confirm that the `latest` tag is present.
+
+To verify that Docker can retrieve the published image, remove its registry-qualified local tag, pull it from Docker Hub, and run it:
+
+```
+$ docker image rm "docker.io/${DOCKER_ID}/first-image:latest"
+$ docker pull "docker.io/${DOCKER_ID}/first-image:latest"
+$ docker run --rm "docker.io/${DOCKER_ID}/first-image:latest"
+```
+{: .bash}
+
+The output should begin with:
+
+```
+Hello from Docker!
+```
+{: .output}
+
+This test publishes an existing small image rather than building a new one.  Image building, meaningful version tags, and publishing the training application are covered later in the workshop.
+
+Do not upload proprietary, confidential, export-controlled, licensed, or otherwise restricted software to a public repository.
 
 
 ### If you run into problems
