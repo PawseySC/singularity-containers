@@ -75,10 +75,11 @@ RUN set -eux; \
 
 COPY hello.cpp /tmp/hello.cpp
 RUN g++ -O2 -Wall -Wextra -Wpedantic \
-        -o /usr/local/bin/hello \
+        -o /usr/local/bin/hello.exe \
         /tmp/hello.cpp
 
-CMD ["hello"]
+ENTRYPOINT ["hello.exe"]
+CMD ["Hello from the single-stage image"]
 ```
 {: .source}
 
@@ -122,7 +123,7 @@ RUN set -eux; \
 COPY hello.cpp /tmp/hello.cpp
 RUN mkdir -p /out \
     && g++ -O2 -Wall -Wextra -Wpedantic \
-        -o /out/hello \
+        -o /out/hello.exe \
         /tmp/hello.cpp
 
 FROM docker.io/ubuntu:24.04
@@ -133,9 +134,9 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends file; \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=build /out/hello /usr/local/bin/hello
+COPY --from=build /out/hello.exe /usr/local/bin/hello.exe
 
-ENTRYPOINT ["hello"]
+ENTRYPOINT ["hello.exe"]
 CMD ["Hello from the multi-stage image"]
 ```
 {: .source}
@@ -274,8 +275,8 @@ The final interface must be tested with both Docker and Singularity. For HPC job
 Check the executable inside the image:
 
 ```bash
-$ docker run --rm --entrypoint /usr/bin/file hello-hpc:multi /usr/local/bin/hello
-$ docker run --rm --entrypoint /usr/bin/ldd hello-hpc:multi /usr/local/bin/hello
+$ docker run --rm --entrypoint /usr/bin/file hello-hpc:multi /usr/local/bin/hello.exe
+$ docker run --rm --entrypoint /usr/bin/ldd hello-hpc:multi /usr/local/bin/hello.exe
 ```
 {: .source}
 
