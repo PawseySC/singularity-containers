@@ -27,6 +27,7 @@
 #include <cstring>
 #include <iostream>
 #include <limits>
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -36,6 +37,9 @@ struct Options {
     int width = 1200;
     int height = 800;
     int max_iterations = 500;
+    double centre_real = -0.5;
+    double centre_imaginary = 0.0;
+    double scale = 3.0;
     std::string output = "mandelbrot.ppm";
 };
 
@@ -46,6 +50,10 @@ void print_usage(const char *program) {
         << "  --width N         Image width in pixels (default: 1200)\n"
         << "  --height N        Image height in pixels (default: 800)\n"
         << "  --iterations N    Maximum iterations (default: 500)\n"
+        << "  --centre-real X   Real coordinate of the centre (default: -0.5)\n"
+        << "  --centre-imaginary Y\n"
+        << "                     Imaginary coordinate of the centre (default: 0.0)\n"
+        << "  --scale X         Width of the complex-plane view (default: 3.0)\n"
         << "  --output FILE     PPM output path (default: mandelbrot.ppm)\n"
         << "  --help            Show this help\n";
 }
@@ -59,6 +67,17 @@ bool parse_positive_int(const char *text, int &value) {
         return false;
     }
     value = static_cast<int>(parsed);
+    return true;
+}
+
+bool parse_finite_double(const char *text, double &value) {
+    errno = 0;
+    char *end = nullptr;
+    const double parsed = std::strtod(text, &end);
+    if (errno != 0 || end == text || *end != '\0' || !std::isfinite(parsed)) {
+        return false;
+    }
+    value = parsed;
     return true;
 }
 
@@ -89,6 +108,21 @@ bool parse_options(int argc, char **argv, Options &options, std::string &error) 
         } else if (argument == "--iterations") {
             if (!parse_positive_int(value, options.max_iterations)) {
                 error = "Invalid positive integer for --iterations";
+                return false;
+            }
+        } else if (argument == "--centre-real") {
+            if (!parse_finite_double(value, options.centre_real)) {
+                error = "Invalid number for --centre-real";
+                return false;
+            }
+        } else if (argument == "--centre-imaginary") {
+            if (!parse_finite_double(value, options.centre_imaginary)) {
+                error = "Invalid number for --centre-imaginary";
+                return false;
+            }
+        } else if (argument == "--scale") {
+            if (!parse_finite_double(value, options.scale) || options.scale <= 0.0) {
+                error = "Invalid positive number for --scale";
                 return false;
             }
         } else if (argument == "--output") {
@@ -163,12 +197,17 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
     const double started = MPI_Wtime();
 
+    const double view_width = options.scale;
+    const double view_height = options.scale * options.height / options.width;
+    const double minimum_real = options.centre_real - view_width / 2.0;
+    const double minimum_imaginary = options.centre_imaginary - view_height / 2.0;
+
     for (int local_y = 0; local_y < local_rows; ++local_y) {
         const int y = first_row + local_y;
-        const double imaginary = -1.2 + 2.4 * y / (options.height - 1.0);
+        const double imaginary = minimum_imaginary + view_height * y / (options.height - 1.0);
 
         for (int x = 0; x < options.width; ++x) {
-            const double real = -2.0 + 3.0 * x / (options.width - 1.0);
+            const double real = minimum_real + view_width * x / (options.width - 1.0);
             double zr = 0.0;
             double zi = 0.0;
             int iteration = 0;
@@ -213,6 +252,9 @@ int main(int argc, char **argv) {
         std::cout << "MPI Mandelbrot renderer\n"
                   << "Image size: " << options.width << " x " << options.height << '\n'
                   << "Maximum iterations: " << options.max_iterations << '\n'
+                  << "Centre: (" << options.centre_real << ", "
+                  << options.centre_imaginary << ")\n"
+                  << "Scale: " << options.scale << '\n'
                   << "MPI processes: " << processes << '\n'
                   << "PPM output: " << options.output << '\n'
                   << "Rendering completed in " << (MPI_Wtime() - started) << " seconds\n";

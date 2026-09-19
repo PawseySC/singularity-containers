@@ -1,10 +1,32 @@
 # MPI Mandelbrot container example
 
-The image contains the MPI application and its runtime dependencies. Launch policy remains outside the image:
+The workload and viewport are controlled through environment variables.
 
-- `run-mandelbrot-docker.sh` performs a local, single-host Docker test using container-side `mpiexec`.
-- `mpi_mandelbrot_pawsey.slurm.sh` uses host-side `srun`, which starts one `singularity exec` per Slurm task on Setonix.
+Local Docker defaults:
 
-Build with:
+- `MPI_PROCESSES=4`
+- `WIDTH=1200`
+- `HEIGHT=800`
+- `ITERATIONS=500`
+- `CENTRE_REAL=-0.5`
+- `CENTRE_IMAGINARY=0.0`
+- `SCALE=3.0`
 
-    docker build --platform linux/amd64 --file mandelbrot_mpi.dockerfile --tag mandelbrot-mpi:2026.09 .
+Run locally with the defaults:
+
+    ./runMandelbrotDocker.sh
+
+The Setonix script requests 16 tasks and defaults to a larger, zoomed workload:
+
+- `WIDTH=6000`
+- `HEIGHT=4000`
+- `ITERATIONS=2000`
+- `CENTRE_REAL=-0.743643887037151`
+- `CENTRE_IMAGINARY=0.131825904205330`
+- `SCALE=0.002`
+
+Submit with its defaults:
+
+    sbatch runMandelbrotSingularityPawsey.slurm.sh
+
+Any value can be overridden through `sbatch --export`.
