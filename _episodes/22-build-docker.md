@@ -3,19 +3,19 @@ title: "Building Docker/OCI images for HPC with Singularity"
 teaching: 30
 exercises: 20
 questions:
-- "Why are Dockerfiles commonly used to build images that will run with Singularity on HPC systems?"
+- "Why do we build images with Docker but run them with Singularity on a shared HPC system?"
 - "How can I describe and build a reproducible container image with a Dockerfile?"
 - "How can I test the image locally before using it on a cluster?"
 - "How can I publish an image to a registry and convert it to a SIF file?"
 objectives:
-- "Explain the roles of Docker and Singularity in an HPC container workflow"
+- "Explain why Docker and Singularity have different roles in an HPC container workflow"
 - "Read and write a basic Dockerfile using `FROM`, `LABEL`, `RUN`, `ENV`, `COPY`, and `CMD`"
 - "Build and test an `amd64` Docker/OCI image"
 - "Apply basic practices for build contexts, package installation, image tags, and runtime users"
 - "Build an MPI application image from a Pawsey-provided base image"
 - "Publish an image to Docker Hub and pull it as a named SIF file on an HPC system"
 keypoints:
-- "Docker is commonly used to build and test Docker/OCI images on a workstation, while Singularity runs the resulting images on the HPC system"
+- "Docker is commonly used to build and test Docker/OCI images on a developer-controlled computer, while Singularity provides the unprivileged runtime and host integration required on a shared HPC system"
 - "A Dockerfile records the base image and the instructions used to assemble a new image"
 - "`COPY` adds files from the build context to the image"
 - "Docker image layers support build caching, but Dockerfile instruction order and cleanup affect build efficiency and image size"
@@ -95,13 +95,18 @@ The second important advantage is interoperability. Docker builds images in the 
 
 In this sense, Docker/OCI images are a broadly interoperable distribution format. This does not mean that every image behaves identically with every container engine. Runtime features, image metadata, security models, CPU architecture, and host integration can differ. The final image must still be tested with Singularity on the target HPC system.
 
+The different security models also matter. A traditional Docker installation uses a daemon that normally runs with root privileges and can perform host-level operations such as starting containers and mounting host directories. Giving general users control of that daemon would provide highly privileged access on a shared machine. Docker is therefore suitable for a participant's own computer, but it is not provided as the general user-facing container runtime on Setonix.
+
+Singularity is designed for shared HPC systems. Normal container execution uses the invoking user's host identity rather than requiring the user to control a privileged daemon, and the Pawsey modules integrate containers with the filesystems, scheduler, MPI libraries, GPUs and other host facilities. This is why the training uses two engines rather than running Docker directly on Setonix.
+
 The tools therefore have complementary roles in this training:
-
-- **Docker builds and tests the Docker/OCI image** on the participant's local computer.
+- **Docker builds and tests the Docker/OCI image** on the participant's local computer, where the participant controls the development environment.
 - **A container registry stores and distributes the image** in a widely supported format.
-- **Singularity retrieves, converts, and runs the image** on the HPC system.
+- **Singularity retrieves and converts the image to SIF, then runs it** using the shared-system execution model on Setonix.
 
-Docker is not used to run the workload on Setonix. The final execution uses Singularity and follows the cluster-specific practices introduced in the other episodes.
+The registry transfer and conversion to SIF add steps, but they preserve Docker's mature Dockerfile and build-cache workflow without requiring Docker as the cluster runtime. They also create an explicit, immutable SIF artefact that can be organised and validated on the target system.
+
+Docker is not used to run the workload on Setonix. A successful local Docker test cannot establish that the image works with Singularity, the user's Setonix identity, read-only SIF execution, MPI, GPUs or Pawsey's host integration. The final image must therefore be validated with Singularity and the supported launch model on Setonix.
 
 ### Prepare the Docker build directory
 
