@@ -7,7 +7,7 @@ set -euo pipefail
 # List the images to pull.
 #
 # Each entry contains:
-#   IMAGE_REFERENCE|OUTPUT_FILENAME|JOB_NAME
+#   IMAGE_REFERENCE|OUTPUT_FILENAME|SHORT_NAME
 #
 # Add or remove entries only in this block.
 IMAGES=(
