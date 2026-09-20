@@ -4,7 +4,7 @@ teaching: 35
 exercises: 30
 questions:
 - "How can I reduce the size and software surface of a compiled application image?"
-- "How can I design an image that works without root privileges and with a read-only SIF filesystem?"
+- "Why must an image intended for Setonix work with an arbitrary non-root identity and a read-only SIF filesystem?"
 - "How should `ENTRYPOINT`, `CMD`, data, configuration, and launch policy be separated?"
 - "How can I inspect binaries, image layers, disk usage, and build cache before validating an image on Setonix?"
 objectives:
@@ -64,8 +64,10 @@ int main(int argc, char **argv) {
 Create `hello.single.dockerfile`:
 
 ```dockerfile
+# Use Ubuntu for both compilation and runtime
 FROM docker.io/ubuntu:24.04
 
+# Install the compiler and remove temporary package data in the same layer
 RUN set -eux; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
@@ -73,11 +75,13 @@ RUN set -eux; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
+# Copy and compile the application inside the final image
 COPY hello.cpp /tmp/hello.cpp
 RUN g++ -O2 -Wall -Wextra -Wpedantic \
         -o /usr/local/bin/hello.exe \
         /tmp/hello.cpp
 
+# Run the application with a default message
 ENTRYPOINT ["hello.exe"]
 CMD ["Hello from the single-stage image"]
 ```
@@ -112,6 +116,7 @@ A Docker multi-stage build contains multiple `FROM` instructions. `AS build` giv
 Create `hello.multistage.dockerfile`:
 
 ```dockerfile
+# Build stage: install the compiler and compile the application
 FROM docker.io/ubuntu:24.04 AS build
 
 RUN set -eux; \
@@ -126,16 +131,20 @@ RUN mkdir -p /out \
         -o /out/hello.exe \
         /tmp/hello.cpp
 
+# Runtime stage: start again from Ubuntu without the build tools
 FROM docker.io/ubuntu:24.04
 
+# Install only the utility required for the later inspection exercise
 RUN set -eux; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
     apt-get install -y --no-install-recommends file; \
     rm -rf /var/lib/apt/lists/*
 
+# Copy only the compiled executable from the build stage
 COPY --from=build /out/hello.exe /usr/local/bin/hello.exe
 
+# Run the application with a default message
 ENTRYPOINT ["hello.exe"]
 CMD ["Hello from the multi-stage image"]
 ```
@@ -200,9 +209,75 @@ As discussed in the previous Docker episode, files created in one image layer re
 
 This does not mean that every command should be concatenated into a single `RUN` instruction. Combine commands whose filesystem changes belong together, while keeping separate logical build steps readable and allowing Docker to reuse useful cached layers. Fewer layers do not automatically produce a smaller or better image.
 
+### Design the image's runtime interface
+
+The previous Docker episode used `CMD` alone to define a default action that users could replace completely. The examples above use `ENTRYPOINT` together with `CMD` to make the image behave like a dedicated command-line application. `ENTRYPOINT` is not required for every image, and using it is not inherently better than using `CMD` alone.
+
+#### Use `CMD` for a replaceable default command
+
+With `CMD` alone, the complete default command is replaced by anything supplied after the image reference. For example:
+
+```dockerfile
+CMD ["hello.exe", "Default message"]
+```
+{: .source}
+
+If an image were configured this way, running it without another command would use the complete default from `CMD`:
+
+```bash
+$ docker run --rm IMAGE
+```
+{: .source}
+
+Supplying a command after the image reference would replace that complete `CMD`, rather than pass an argument to `hello.exe`:
+
+```bash
+$ docker run --rm IMAGE cat /etc/os-release
+```
+{: .source}
+
+This design is appropriate when the image provides a useful default action but users should be able to replace the complete command easily. It is also useful for general software environments that contain several commands rather than one primary application.
+
+#### Use `ENTRYPOINT` for a dedicated application image
+
+When an image represents one primary application, `ENTRYPOINT` can define that executable and `CMD` can supply its default arguments:
+
+```dockerfile
+ENTRYPOINT ["hello.exe"]
+CMD ["Hello from the multi-stage image"]
+```
+{: .source}
+
+The examples in this episode therefore behave as follows:
+
+```bash
+$ docker run --rm hello-hpc:multi
+$ docker run --rm hello-hpc:multi "A different message"
+```
+{: .source}
+
+The first command runs `hello.exe` with the default message from `CMD`. In the second command, `"A different message"` replaces `CMD`, while `ENTRYPOINT` remains `hello.exe`. This provides an application-like interface in which values after the image reference are normally arguments to the packaged application.
+
+The trade-off is that running an unrelated command requires the executable itself to be overridden explicitly:
+
+```bash
+$ docker run --rm \
+    --entrypoint /bin/bash \
+    hello-hpc:multi
+```
+{: .source}
+
+Use `CMD` alone when users should be able to replace the complete default command conveniently. Use `ENTRYPOINT` with `CMD` when the image represents a particular application and values after the image reference should normally be passed to that application.
+
+Use exec form for both instructions unless shell interpretation is required. Exec form preserves argument boundaries and gives the application a clearer process and signal model. Wrapper scripts are appropriate when runtime setup is genuinely required, but they should finish with `exec "$@"` or `exec application ...` so that the application becomes the container's main process.
+
+The final interface must be tested with both Docker and Singularity. For HPC jobs, `singularity exec` is often clearer than relying on an image's default action because the job script records the exact executable and arguments.
+
 ### Design for non-root execution
 
-Docker often runs a container as root by default. Singularity on Setonix normally runs the process with your host user identity, and the SIF filesystem is read-only. Therefore, a successful root-based Docker test is not sufficient.
+Docker often runs a container as root by default. Singularity on Setonix normally runs the process with the invoking user's host identity, and the SIF filesystem is read-only. Therefore, a successful root-based Docker test is not sufficient.
+
+Containers share the host kernel, so runtime privileges matter. Running an application as root gives it more authority than most applications require and can increase the consequences of an application vulnerability or configuration error, particularly when writable host directories, devices or additional privileges are exposed to the container. Running the application with a non-root identity applies the principle of least privilege. For this Pawsey workflow, it is also a portability requirement because an image that works only as root with Docker will not match normal Singularity execution on Setonix.
 
 The application should:
 
@@ -213,26 +288,82 @@ The application should:
 - avoid `sudo`, system-user creation, service startup, and privileged initialisation at runtime;
 - tolerate a runtime numeric user ID that is not listed in the image's `/etc/passwd` file.
 
-Test the image with the current host UID and GID on macOS or Linux:
+> ## Why is the Docker daemon a separate security concern?
+>
+> Traditional Docker installations use a daemon that normally runs with host root privileges. The daemon performs host-level operations such as starting containers, mounting filesystems, configuring networks and exposing devices. Access to the daemon or its socket must therefore be treated as highly privileged host access.
+>
+> This daemon privilege is separate from the identity used by an application inside a particular container. Running an application as a non-root user reduces that application's authority, but it does not make unrestricted access to the Docker daemon safe. This distinction is one reason Docker is used for building on a developer-controlled computer while Singularity is used as the user-facing runtime on Setonix.
+{: .solution}
+
+#### Optional: define a non-root user for Docker
+
+Images intended primarily for Docker or Kubernetes sometimes define a known non-root user so that the application does not run as root by default:
+
+```dockerfile
+RUN groupadd --system application \
+    && useradd --system \
+        --gid application \
+        --create-home \
+        application
+
+USER application
+```
+{: .source}
+
+The `USER` instruction sets the default user for subsequent `RUN` instructions and for container execution. The application and its runtime directories must be accessible to that user.
+
+Pawsey application images do not generally need to define a fixed runtime user. Singularity normally runs the application with the invoking user's host UID and GID rather than changing to the user declared by `USER`. For Setonix portability, the application should instead tolerate an arbitrary non-root numeric identity that may not have an entry in the image's `/etc/passwd` file.
+
+#### Test an arbitrary non-root identity with Docker
+
+On macOS or Linux, run the image with the current host UID and primary GID. Bind mount the host working directory at `/work`, then use `hello.exe` inside the container to create a file there:
 
 ```bash
 $ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --mount type=bind,source="$PWD",target=/work \
     --workdir /work \
+    --entrypoint /bin/bash \
     hello-hpc:multi \
-    "Running as an unprivileged user"
+    -c 'hello.exe "Created by the container" > container-output.txt'
 ```
 {: .source}
 
-On Windows PowerShell, use a known numeric UID and GID for a Linux-container test:
+The `--user` option runs the container process with the host user's numeric UID and primary GID. On a native Linux Docker host, this normally prevents files written through the bind mount from being owned by root or by a fixed user defined in the image. The host directory's normal permissions still apply. Access that depends on supplementary groups may require additional group configuration.
+
+The `--entrypoint /bin/bash` option temporarily replaces the image's normal `hello.exe` entrypoint. Bash interprets the output redirection, while `hello.exe` produces the content. Because `/work` is the bind-mounted host working directory, `container-output.txt` is created in `$PWD` on the host rather than in the image.
+
+On Windows PowerShell, use a known numeric UID and GID for the Linux-container test:
 
 ```powershell
-PS> docker run --rm --user "1000:1000" --mount "type=bind,source=${PWD},target=/work" --workdir /work hello-hpc:multi "Running as an unprivileged user"
+PS> docker run --rm --user "1000:1000" --mount "type=bind,source=${PWD},target=/work" --workdir /work --entrypoint /bin/bash hello-hpc:multi -c 'hello.exe "Created by the container" > container-output.txt'
 ```
 {: .source}
 
-A stronger application test should also create its expected output in `/work` and confirm that the host user can read, modify, and remove that file afterward.
+Inspect the file from the host and confirm that the host user can modify and remove it:
+
+```bash
+$ ls -ln container-output.txt
+$ cat container-output.txt
+$ printf '%s\n' "Modified by the host" >> container-output.txt
+$ rm container-output.txt
+```
+{: .source}
+
+This checks both non-root execution and usable ownership and permissions for output written to the host. Docker Desktop on macOS and Windows shares files through a Linux virtual machine, so its UID and GID behaviour may not exactly match a native Linux host or Setonix. Final validation must still be performed on Setonix.
+
+#### Compare with Singularity on Setonix
+
+The Docker command above tests locally how the application is expected to behave when the image is later converted to SIF and run with Singularity. The equivalent command on Setonix would be:
+
+```bash
+$ singularity exec \
+    hello-hpc--multi.sif \
+    bash -c 'hello.exe "Created by the container" > container-output.txt'
+```
+{: .source}
+
+Singularity normally runs the command with the invoking user's host identity and makes the host current working directory available inside the container at the same path. Therefore, this example does not require Docker's `--user`, `--mount`, or `--workdir` options. In both commands, Bash interprets the redirection, `hello.exe` generates the content, and `container-output.txt` is stored in the host working directory rather than in the container image.
 
 ### Separate the image from runtime data and launch policy
 
@@ -249,26 +380,6 @@ Registry or SIF       image distribution and immutable execution artefact
 {: .output}
 
 Do not bake user data, project paths, credentials, Slurm reservations, process counts, or site-specific launch commands into the image.
-
-### Design `ENTRYPOINT` and `CMD` deliberately
-
-In exec form:
-
-- `ENTRYPOINT` defines the executable that should normally run.
-- `CMD` supplies default arguments, or supplies the default command when no `ENTRYPOINT` is defined.
-- arguments after the image reference in `docker run` replace `CMD` while retaining `ENTRYPOINT`.
-
-For the multi-stage example:
-
-```bash
-$ docker run --rm hello-hpc:multi
-$ docker run --rm hello-hpc:multi "A different message"
-```
-{: .source}
-
-Avoid shell form unless shell interpretation is required. Exec form preserves argument boundaries and gives the application a clearer process and signal model. Wrapper scripts are appropriate when runtime setup is genuinely required, but they should finish with `exec "$@"` or `exec application ...` so that the application becomes the container's main process.
-
-The final interface must be tested with both Docker and Singularity. For HPC jobs, `singularity exec` is often clearer than relying on an image's default action because the job script records the exact executable and arguments.
 
 ### Inspect executable and library compatibility
 
