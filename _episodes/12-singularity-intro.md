@@ -35,7 +35,7 @@ keypoints:
 If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
 
 ```
-$ salloc -N 1 -n 1 -c 4 --reservation=ContainersTraining -t 4:00:00
+$ salloc -N 1 -n 1 -c 16 --reservation=ContainersTraining -t 4:00:00
 ```
 {: .source}
 

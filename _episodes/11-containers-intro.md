@@ -124,7 +124,9 @@ Other container engines (not covered here) include:
 
 ### Why use Singularity instead of Docker on an HPC system?
 
-Containers share the host kernel, so the container engine's security and privilege model matters on a shared system. A traditional Docker installation uses a daemon that normally runs with root privileges. Users who can control that daemon can request operations such as starting containers, mounting host directories and configuring devices. Providing unrestricted Docker access is therefore not equivalent to providing an ordinary application command; it can amount to highly privileged access to the host.
+Containers share the host kernel, so the container engine's security and privilege model matters on a shared system. A traditional, rootful Docker installation uses a daemon that normally runs with root privileges. Users who can control that daemon can request operations such as starting containers, mounting host directories and configuring devices. Providing unrestricted Docker access is therefore not equivalent to providing an ordinary application command; it can amount to highly privileged access to the host.
+
+Docker also provides a **rootless mode**, in which the Docker daemon and containers run without root privileges by using Linux user namespaces. This mitigates the main security concern of the traditional Docker model. However, rootless Docker still requires additional host configuration and does not by itself provide all the scheduler, filesystem, network, MPI, GPU and multi-node integration expected on a large HPC system. Some HPC centres provide rootless OCI-compatible tools, particularly Podman-based solutions, but Singularity remains a common runtime because it was designed specifically for shared HPC environments.
 
 This model can be acceptable on a developer-controlled computer, where the user already administers the machine. It is not appropriate as the general user-facing runtime on a shared supercomputer, where many users and workloads must remain isolated from one another. Running an application as root inside a container can also increase the consequences of a vulnerable or incorrectly configured application, especially when writable host directories, devices or additional privileges are exposed to it.
 
@@ -175,9 +177,25 @@ If no existing image fully meets your requirements, you can use a suitable image
 <img class="img-responsive center-block" src="{{ page.root }}/fig/container_lifecycle.png" alt="Container Workflow" width="716" height="298"/>
 
 
+### Request an interactive allocation
+
+If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
+
+```
+$ salloc -N 1 -n 1 -c 16 --reservation=ContainersTraining -t 4:00:00
+```
+{: .source}
+
+```text
+salloc: Granted job allocation 3453895
+salloc: Waiting for resource configuration
+salloc: Nodes nid000152 are ready for job
+```
+{: .output}
+
 ### Get ready for the hands-on
 
-Before we start, let us ensure we have the required files to run the tutorials.
+Before we start, let us ensure we have got the required files to run the tutorials.
 
 If you haven't done so already, move to a suitable working directory and download the following GitHub repository. On Pawsey systems, use your scratch directory; on other HPC or cloud systems, use the equivalent working directory recommended by the system administrators.
 
@@ -189,13 +207,17 @@ $ cd "$TUTO"
 ```
 {: .source}
 
-<div class="panel panel-warning">
-  <div class="panel-heading">
-    <strong>Content update required — start</strong><br>
-    Update the following hands-on instructions
-  </div>
+Now `cd` to the working directory. In this case:
+```bash
+$ cd demos/basic_use
+$ pwd
+```
 
-  <div class="panel-body" markdown="1">
+The working directory should be something like:
+```text
+/path/to/scratch/singularity-containers/demos/basic_use
+```
+{: .source}
 
 > ## Want to save time later in the tutorial?
 >
@@ -238,9 +260,3 @@ $ cd "$TUTO"
 > ```
 > {: .output}
 {: .callout}
-  </div>
-
-  <div class="panel-footer">
-    <strong>Content update required — end</strong>
-  </div>
-</div>
