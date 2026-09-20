@@ -5,15 +5,18 @@ exercises: 0
 questions:
 - What are containers for?
 - Who is using containers in HPC ecosystems?
+- Why do shared HPC systems use Singularity instead of Docker to run containers?
 objectives:
 - 'Define the term: "container" in contrast to "virtual machine"'
 - Define other terms, such as image and registry
 - Discuss when you would benefit from using containers in your workflow
+- Explain why Docker and Singularity have different roles in an HPC container workflow
 keypoints:
   - Containers allow users to run software directly from pre-built images provided by developers, vendors and collaborators.
   - Containers package applications together with their software environment.
   - Containers share the host system's kernel instead of running their own.
   - Containers simplify software installation, portability and reproducibility.
+  - Docker is commonly used to build images away from a shared HPC system, while Singularity runs them with the user's normal identity on the cluster.
 
 ---
 
@@ -119,6 +122,30 @@ Other container engines (not covered here) include:
 * **Charliecloud**: a lightweight container solution designed for HPC environments.
 * **Enroot**: a lightweight container runtime developed by NVIDIA, commonly used for GPU-focused workloads.
 
+### Why use Singularity instead of Docker on an HPC system?
+
+Containers share the host kernel, so the container engine's security and privilege model matters on a shared system. A traditional, rootful Docker installation uses a daemon that normally runs with root privileges. Users who can control that daemon can request operations such as starting containers, mounting host directories and configuring devices. Providing unrestricted Docker access is therefore not equivalent to providing an ordinary application command; it can amount to highly privileged access to the host.
+
+Docker also provides a **rootless mode**, in which the Docker daemon and containers run without root privileges by using Linux user namespaces. This mitigates the main security concern of the traditional Docker model. However, rootless Docker still requires additional host configuration and does not by itself provide all the scheduler, filesystem, network, MPI, GPU and multi-node integration expected on a large HPC system. Some HPC centres provide rootless OCI-compatible tools, particularly Podman-based solutions, but Singularity remains a common runtime because it was designed specifically for shared HPC environments.
+
+This model can be acceptable on a developer-controlled computer, where the user already administers the machine. It is not appropriate as the general user-facing runtime on a shared supercomputer, where many users and workloads must remain isolated from one another. Running an application as root inside a container can also increase the consequences of a vulnerable or incorrectly configured application, especially when writable host directories, devices or additional privileges are exposed to it.
+
+Singularity was designed for shared HPC environments. Normal execution does not require each user to control a privileged daemon, and containerised processes normally run with the invoking user's host identity rather than becoming root. Singularity also integrates with host filesystems, resource managers, MPI libraries, GPUs and other HPC facilities.
+
+This leads to the two-engine workflow used in this training:
+
+```text
+Local computer                         Setonix
+--------------                         --------
+Docker builds and tests                Singularity runs
+a Docker/OCI image          ------>    a converted SIF image
+
+Developer-controlled system            Shared multi-user HPC system
+```
+{: .output}
+
+Docker provides a widely used image-building ecosystem and layered Dockerfile workflow. A registry or transferred archive carries the resulting Docker/OCI image to Setonix, where Singularity converts it to SIF and runs it under the cluster's security and integration model. The transfer and conversion add steps, but they allow each engine to be used for the role to which it is best suited.
+
 ### Image formats
 
 Most images distributed through registries such as *Docker Hub* and *Quay.io* use the container image structure standardised by the **Open Container Initiative (OCI)**. OCI is an industry project that defines open standards for container images, their distribution through registries and their execution by compatible container runtimes. Modern Docker images are generally OCI-compatible, which allows them to be used by container engines other than Docker.
@@ -152,70 +179,4 @@ If no existing image fully meets your requirements, you can use a suitable image
 
 ### Get ready for the hands-on
 
-Before we start, let us ensure we have the required files to run the tutorials.
-
-If you haven't done so already, move to a suitable working directory and download the following GitHub repository. On Pawsey systems, use your scratch directory; on other HPC or cloud systems, use the equivalent working directory recommended by the system administrators.
-
-```bash
-$ cd "$MYSCRATCH"    # On Pawsey systems
-$ git clone https://github.com/PawseySC/singularity-containers
-$ export TUTO="$PWD/singularity-containers"
-$ cd "$TUTO"
-```
-{: .source}
-
-<div class="panel panel-warning">
-  <div class="panel-heading">
-    <strong>Content update required — start</strong><br>
-    Update the following hands-on instructions
-  </div>
-
-  <div class="panel-body" markdown="1">
-
-> ## Want to save time later in the tutorial?
->
-> > ## Read this
-> > Open a second terminal in the machine where you're running the tutorial, then run the script `pull_big_images.sh` to start downloading a few images that you'll require later:
-> >
-> > ```
-> > $ cd $TUTO/demos
-> > $ nohup bash ./pull_big_images.sh &
-> > ```
-> > {: .source}
-> >
-> > **Alternatively**, if you are running at Pawsey, *e.g.* on Zeus, submit this other script with Slurm instead:
-> >
-> > ```
-> > $ cd $TUTO/demos
-> > $ sbatch ./sbatch_pull_big_images.sh
-> > ```
-> > {: .source}
-> >
-> > This pull process will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
-> >
-> {: .solution}
-{: .challenge}
-
-
-> ## Are you running on a shared HPC system?
->
-> If you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node.  You can set this up by using an interactive scheduler allocation, for instance on Zeus with Slurm:
->
-> ```
-> $ salloc -n 1 -t 4:00:00
-> ```
-> {: .source}
->
-> ```
-> salloc: Granted job allocation 3453895
-> salloc: Waiting for resource configuration
-> salloc: Nodes z052 are ready for job
-> ```
-> {: .output}
-{: .callout}
-  </div>
-
-  <div class="panel-footer">
-    <strong>Content update required — end</strong>
-  </div>
-</div>
+Before continuing, please follow the instructions in the preparatory episode: [Get ready on Setonix]({% link _episodes/02_get-ready.md %}). It explains how to connect to Setonix and start downloading the large container images required later in this training.
