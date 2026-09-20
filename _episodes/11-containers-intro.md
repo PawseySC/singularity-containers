@@ -179,4 +179,4 @@ If no existing image fully meets your requirements, you can use a suitable image
 
 ### Get ready for the hands-on
 
-Before we start, let us ensure we have got the required files to run the tutorials.
+Before continuing, please follow the instructions in the preparatory episode {% link _episodes/02_get-ready.md %}. It explains how to connect to Setonix and start downloading the large container images required later in this training.
