@@ -5,15 +5,18 @@ exercises: 0
 questions:
 - What are containers for?
 - Who is using containers in HPC ecosystems?
+- Why do shared HPC systems use Singularity instead of Docker to run containers?
 objectives:
 - 'Define the term: "container" in contrast to "virtual machine"'
 - Define other terms, such as image and registry
 - Discuss when you would benefit from using containers in your workflow
+- Explain why Docker and Singularity have different roles in an HPC container workflow
 keypoints:
   - Containers allow users to run software directly from pre-built images provided by developers, vendors and collaborators.
   - Containers package applications together with their software environment.
   - Containers share the host system's kernel instead of running their own.
   - Containers simplify software installation, portability and reproducibility.
+  - Docker is commonly used to build images away from a shared HPC system, while Singularity runs them with the user's normal identity on the cluster.
 
 ---
 
@@ -118,6 +121,28 @@ Other container engines (not covered here) include:
 * **Shifter/Sarus**: container runtimes designed for HPC systems with support for Docker-compatible images.
 * **Charliecloud**: a lightweight container solution designed for HPC environments.
 * **Enroot**: a lightweight container runtime developed by NVIDIA, commonly used for GPU-focused workloads.
+
+### Why use Singularity instead of Docker on an HPC system?
+
+Containers share the host kernel, so the container engine's security and privilege model matters on a shared system. A traditional Docker installation uses a daemon that normally runs with root privileges. Users who can control that daemon can request operations such as starting containers, mounting host directories and configuring devices. Providing unrestricted Docker access is therefore not equivalent to providing an ordinary application command; it can amount to highly privileged access to the host.
+
+This model can be acceptable on a developer-controlled computer, where the user already administers the machine. It is not appropriate as the general user-facing runtime on a shared supercomputer, where many users and workloads must remain isolated from one another. Running an application as root inside a container can also increase the consequences of a vulnerable or incorrectly configured application, especially when writable host directories, devices or additional privileges are exposed to it.
+
+Singularity was designed for shared HPC environments. Normal execution does not require each user to control a privileged daemon, and containerised processes normally run with the invoking user's host identity rather than becoming root. Singularity also integrates with host filesystems, resource managers, MPI libraries, GPUs and other HPC facilities.
+
+This leads to the two-engine workflow used in this training:
+
+```text
+Local computer                         Setonix
+--------------                         --------
+Docker builds and tests                Singularity runs
+a Docker/OCI image          ------>    a converted SIF image
+
+Developer-controlled system            Shared multi-user HPC system
+```
+{: .output}
+
+Docker provides a widely used image-building ecosystem and layered Dockerfile workflow. A registry or transferred archive carries the resulting Docker/OCI image to Setonix, where Singularity converts it to SIF and runs it under the cluster's security and integration model. The transfer and conversion add steps, but they allow each engine to be used for the role to which it is best suited.
 
 ### Image formats
 
