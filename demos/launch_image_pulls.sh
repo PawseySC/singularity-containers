@@ -7,12 +7,12 @@ set -euo pipefail
 # List the images to pull.
 #
 # Each entry contains:
-#   IMAGE_REFERENCE|OUTPUT_FILENAME
+#   IMAGE_REFERENCE|OUTPUT_FILENAME|JOB_NAME
 #
 # Add or remove entries only in this block.
 IMAGES=(
-    "docker://quay.io/pawsey/openfoam:v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04|openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif"
-    "docker://docker.io/trinityrnaseq/trinityrnaseq:2.8.6|trinityrnaseq--2.8.6.sif"
+    "docker://quay.io/pawsey/openfoam:v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04|openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif|openfoam"
+    "docker://docker.io/trinityrnaseq/trinityrnaseq:2.8.6|trinityrnaseq--2.8.6.sif|trinity"
 )
 
 
@@ -43,14 +43,17 @@ previous_job_id=""
 # Submit one pull job for each image.
 # Each job after the first waits for the preceding job to finish.
 for image in "${IMAGES[@]}"; do
-    IFS='|' read -r image_reference output_filename <<< "$image"
+    IFS='|' read -r image_reference output_filename short_name <<< "$image"
 
     echo "Submitting pull job for: $image_reference"
     echo "Image will be saved as:  ${MY_LOCAL_LIBRARY}/${output_filename}"
+    job_name="pulling:${short_name}"
+    echo "Slurm job name:          $job_name"
 
     if [[ -z "$previous_job_id" ]]; then
         job_id="$(
             sbatch --parsable \
+                --job-name="$job_name" \
                 "$JOB_SCRIPT" \
                 "$image_reference" \
                 "$output_filename"
@@ -58,6 +61,7 @@ for image in "${IMAGES[@]}"; do
     else
         job_id="$(
             sbatch --parsable \
+                --job-name="$job_name" \
                 --dependency="afterany:${previous_job_id}" \
                 "$JOB_SCRIPT" \
                 "$image_reference" \
