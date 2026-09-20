@@ -1,5 +1,5 @@
 ---
-title: "Get ready on Setonix (placeholder)"
+title: "Get ready on Setonix"
 teaching: 10
 exercises: 5
 questions:
