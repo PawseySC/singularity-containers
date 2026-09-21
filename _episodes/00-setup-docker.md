@@ -7,10 +7,12 @@ questions:
 objectives:
 - Install Docker on your own computer, on Windows, macOS or Linux
 - Verify the installation by running a test container
+- Create and verify a Docker Hub account and test publishing an image
 keypoints:
 - We will use Docker to build container images
 - Installing Docker may require *admin*/*sudo* privileges, depending on your operating system and computer configuration
 - The `docker run hello-world` command verifies that Docker can obtain an image and run a container
+- A verified Docker Hub account is required for the later image-publishing exercise
 ---
 
 ### Why do I need this?
@@ -31,48 +33,75 @@ We recommend *Docker Desktop* with the *WSL 2* backend.  WSL stands for *Windows
 
 #### Step 1: Install WSL 2
 
-Open *PowerShell* **as Administrator**, and run:
+Open *PowerShell* **as Administrator**.  In the Windows instructions, `PS>` represents the PowerShell prompt.  In the rest of the training, `$` is used as the general command prompt.  These prompts are visual indicators and must not be typed as part of the command.
 
-```
-wsl --install
-```
-{: .bash}
+Run:
 
-This installs WSL and a default Linux distribution.  Restart your computer if prompted.
+```powershell
+PS> wsl --install
+```
+{: .source}
+
+This enables WSL 2 on your computer, and on most systems will also install *Ubuntu* as the default Linux distribution in the same step.  Restart your computer if prompted.
 
 After restarting, open *PowerShell* again and check that WSL is working:
 
+```powershell
+PS> wsl --version
 ```
-wsl --version
-```
-{: .bash}
+{: .source}
 
 This should print your installed WSL version, with no errors.
 
-#### Step 2: Install Docker Desktop
+#### Step 2: Install Ubuntu on WSL
+
+Check which Linux distributions are already installed:
+
+```powershell
+PS> wsl --list --verbose
+```
+{: .source}
+
+If `Ubuntu` is listed, you're done with this step.  If it isn't (or the list is empty), install it explicitly:
+
+```powershell
+PS> wsl --install -d Ubuntu
+```
+{: .source}
+
+The first time Ubuntu starts, it will ask you to create a Unix username and password — pick anything you like, you won't need them for this workshop.
+
+#### Step 3: Install Docker Desktop
 
 Download and install [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/).
 During installation, use the **WSL 2 based engine** if prompted.  After installation, verify that Docker Desktop is configured to use WSL 2.  This training uses **Linux container images**, so Docker Desktop must run in Linux container mode, not Windows container mode.
 
 Once installed, start Docker Desktop (it needs to be running in the background for the `docker` command to work).
 
-#### Step 3: Check Docker
+#### Step 4: Check Docker
 
-Open *PowerShell* (or your terminal of choice) and run:
+For consistency, we'll run the `docker` commands from **PowerShell**. Open *PowerShell* and run:
 
+```powershell
+PS> docker --version
 ```
-docker --version
-```
-{: .bash}
+{: .source}
 
 This confirms that the Docker command-line client is installed.  It does not confirm that the Docker engine is running.  To test the complete installation, run:
 
+```powershell
+PS> docker run hello-world
 ```
-docker run hello-world
-```
-{: .bash}
+{: .source}
 
 This downloads (if needed) and runs a small test image.  See the [Final check](#final-check) section below for the output you should expect.
+
+> ## Does `docker` also work inside the Ubuntu/WSL terminal?
+>
+> Yes. Docker Desktop exposes the `docker` command inside your WSL distributions too, through a setting called *WSL Integration* (*Settings → Resources → WSL Integration* in Docker Desktop), which is on by default for your default distribution.
+>
+> Under the hood, Docker Desktop runs inside its own `docker-desktop` WSL distribution, isolated from your Ubuntu one the same way any two WSL distributions are isolated from each other; it only talks to Ubuntu because WSL Integration is enabled for it. See Docker's [WSL 2 security in Docker Desktop](https://docs.docker.com/desktop/features/wsl/) for the full explanation.
+{: .callout}
 
 
 ### 2. macOS
@@ -90,24 +119,24 @@ Install [Docker Desktop for Mac](https://docs.docker.com/desktop/setup/install/m
 
 After installation, start Docker Desktop from the *Applications* folder or run:
 
+```bash
+$ open -a Docker
 ```
-open -a Docker
-```
-{: .bash}
+{: .source}
 
 Wait until Docker Desktop reports that the engine is running.  Then open *Terminal* and run:
 
+```bash
+$ docker --version
 ```
-docker --version
-```
-{: .bash}
+{: .source}
 
 This confirms that the Docker command-line client is installed.  It does not confirm that the Docker engine is running.  To test the complete installation, run:
 
+```bash
+$ docker run hello-world
 ```
-docker run hello-world
-```
-{: .bash}
+{: .source}
 
 This downloads (if needed) and runs a small test image.  See the [Final check](#final-check) section below for the output you should expect
 
@@ -117,14 +146,14 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 >
 > Run:
 >
+> ```bash
+> $ docker run --rm --platform linux/amd64 alpine uname -m
 > ```
-> docker run --rm --platform linux/amd64 alpine uname -m
-> ```
-> {: .bash}
+> {: .source}
 >
 > The expected output is:
 >
-> ```
+> ```text
 > x86_64
 > ```
 > {: .output}
@@ -139,17 +168,17 @@ The instructions below use *Ubuntu* as an example.  If you're on another distrib
 
 After installation, open a terminal and run:
 
+```bash
+$ docker --version
 ```
-docker --version
-```
-{: .bash}
+{: .source}
 
 This confirms that the Docker command-line client is installed.  It does not confirm that the Docker engine is running.  To test the complete installation, run:
 
+```bash
+$ sudo docker run hello-world
 ```
-sudo docker run hello-world
-```
-{: .bash}
+{: .source}
 
 This downloads (if needed) and runs a small test image.  See the [Final check](#final-check) section below for the output you should expect.
 
@@ -164,16 +193,16 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 
 > ## Confirm your installation works
 >
-> Run the following command (`sudo docker run hello-world` on Linux, `docker run hello-world` on Windows/macOS).  The exact output may vary depending on your Docker version and computer architecture, but it should include a message beginning with `Hello from Docker!`.
+> Run the following command (`sudo docker run hello-world` on Linux, `docker run hello-world` in PowerShell on Windows, or in Terminal on macOS).  The exact output may vary depending on your Docker version and computer architecture, but it should include a message beginning with `Hello from Docker!`.
 >
-> ```
+> ```bash
 > $ docker run hello-world
 > ```
-> {: .bash}
+> {: .source}
 >
 > > ## Expected output
 > >
-> > ```
+> > ```text
 > > Hello from Docker!
 > > This message shows that your installation appears to be working correctly.
 > > ```
@@ -182,6 +211,106 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 > > If you see a message starting with `Hello from Docker!` like this one, your installation is ready for the workshop — you're all set!
 > {: .solution}
 {: .challenge}
+
+
+### Create and test a Docker Hub account
+
+Later in the training, you will publish a container image to Docker Hub so that it can be pulled from Setonix with Singularity.  Create and verify your Docker Hub account before the workshop.
+
+The steps below are based on Docker's official [Create a Docker account](https://docs.docker.com/accounts/individual/create-account/), [Create a repository](https://docs.docker.com/docker-hub/repos/create/), and [Push images to a repository](https://docs.docker.com/docker-hub/repos/manage/hub-images/push/) instructions.  You can follow those instructions directly if the Docker Hub interface or account requirements have changed.
+
+1. Open the [Docker Hub sign-up page](https://hub.docker.com/signup/).
+2. Create a free account using an email address, or continue with a supported external account.
+3. Choose your Docker ID carefully.  Your Docker ID is the username used in Docker Hub image names, and it cannot be changed after the account is created.
+4. Complete the account verification process.  You will not be able to sign in until the account has been verified.
+5. Sign in to [Docker Hub](https://hub.docker.com/) and record your Docker ID.
+
+Assign your Docker ID to a shell variable.  Replace `<docker-id>` with your Docker ID and do not include the angle brackets.
+
+On macOS or Linux, run:
+
+```bash
+$ DOCKER_ID="<docker-id>"
+```
+{: .source}
+
+In Windows PowerShell, the variable-assignment syntax is different, so run:
+
+```powershell
+PS> $DOCKER_ID = "<docker-id>"
+```
+{: .source}
+
+In this command, the `$` in `$DOCKER_ID` is part of the PowerShell variable name and must be typed.  It is not a command prompt.
+
+#### Create a test repository
+
+While signed in to Docker Hub:
+
+1. Open **My Hub → Repositories**.
+2. Select **Create repository**.
+3. Select your personal Docker ID as the namespace.
+4. Enter `first-image` as the repository name.
+5. Set the repository visibility to **Public**.
+6. Select **Create**.
+
+The resulting repository name will be:
+
+```text
+docker.io/<docker-id>/first-image
+```
+{: .output}
+
+#### Test publishing an image
+
+The earlier `docker run hello-world` test downloaded the `hello-world` image and ran a container from it.  Reuse that small image to verify that you can authenticate, tag an image for your Docker Hub namespace, and push it to the test repository.
+
+Authenticate from the Docker client:
+
+```bash
+$ docker login docker.io
+```
+{: .source}
+
+Follow the authentication instructions shown by Docker.  Do not enter a password or access token directly as part of the command because doing so may record it in your shell history.
+
+Create a new tag for the local `hello-world` image.  The new tag includes your Docker ID and the repository name:
+
+```bash
+$ docker tag hello-world:latest "docker.io/${DOCKER_ID}/first-image:latest"
+```
+{: .source}
+
+Push the tagged image to Docker Hub:
+
+```bash
+$ docker push "docker.io/${DOCKER_ID}/first-image:latest"
+```
+{: .source}
+
+The Docker commands above work in Bash, Zsh, and PowerShell after `DOCKER_ID` has been assigned using the syntax shown for the corresponding shell.
+
+After the push completes, open the `first-image` repository in Docker Hub and confirm that the `latest` tag is present.
+
+To verify that Docker can retrieve the published image reference from Docker Hub, remove its registry-qualified local tag, pull it from Docker Hub, and run it:
+
+```bash
+$ docker image rm "docker.io/${DOCKER_ID}/first-image:latest"
+$ docker pull "docker.io/${DOCKER_ID}/first-image:latest"
+$ docker run --rm "docker.io/${DOCKER_ID}/first-image:latest"
+```
+{: .source}
+
+The output should begin with:
+
+```text
+Hello from Docker!
+```
+{: .output}
+
+This test publishes an existing small image rather than building a new one.  Image building, meaningful version tags, and publishing the training application are covered later in the workshop.
+
+Do not upload proprietary, confidential, export-controlled, licensed, or otherwise restricted software to a public repository.
 
 
 ### If you run into problems
