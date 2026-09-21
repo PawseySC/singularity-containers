@@ -1109,13 +1109,6 @@ $ singularity exec "$COW_IMAGE" cowsay -f ./koala.cow "Copied from the container
 
 This works because the current working directory is available both on the host and inside the container.
 
-Remove the copied file when finished:
-
-```bash
-$ rm koala.cow
-```
-{: .source}
-
 > ## Optional: Binding additional host directories
 >
 > If a required host directory is not already available inside the container, use the `--bind` option:
