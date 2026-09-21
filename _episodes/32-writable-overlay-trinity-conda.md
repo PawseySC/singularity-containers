@@ -14,15 +14,19 @@ questions:
 objectives:
 - Bind mount a host directory at a specific path inside a container
 - Create and mount a persistent overlay with a container image
-- Use a persistent overlay to store application output and additional software separately from the container image
-- Use an overlay to reduce the number of individual files presented to the host filesystem
+- Use a persistent overlay to reduce the number of individual files presented to the host filesystem
+- Use a persistent overlay to store application output across container runs
+- Use a persistent overlay to install additional software without modifying the container image
+- Make software installed in an overlay available through `PATH`
 - Use a temporary writable layer when changes do not need to persist
 
 keypoints:
 - Bind mounts make host files directly accessible at selected paths inside a container
 - An immutable container image can be combined with a separate writable overlay
+- Persistent overlays can reduce host-visible file counts, preserve application output across container runs, and store additional software without modifying the container image
 - Changes stored in a persistent overlay remain available across container runs
 - From the host filesystem's perspective, an overlay consolidates many internal files into a single overlay file
+- Use a shell command, `--env PREPEND_PATH`, or `SINGULARITYENV_PREPEND_PATH` to prepend a directory to `PATH` inside the container
 - "`--writable-tmpfs` provides a new disposable writable layer for each container run"
 ---
 
@@ -31,7 +35,7 @@ keypoints:
 If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
 
 ```
-$ salloc -N 1 -n 1 -c 4 --reservation=ContainersTraining -t 4:00:00
+$ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 4:00:00
 ```
 {: .source}
 
@@ -66,11 +70,11 @@ $ pwd
 The working directory should be something like:
 
 ```text
-/path/to/scratch/singularity-containers/demos/trinity
+/path/to/your/scratch/singularity-containers/demos/trinity
 ```
 {: .output}
 
-Load the singularity module:
+Load the Singularity module:
 ```bash
 $ module load singularity/4.1.0-nompi
 ```
@@ -92,17 +96,17 @@ As discussed in the basic Singularity episode, bind mounts make host directories
 
 A bind mount does not make the directory packaged in the container image writable. Instead, it temporarily covers that path with a host directory. If the host directory is writable, the application can write through the container path, and the resulting files are stored directly in the host directory.
 
-For example, create a host directory and bind mount it at `/run` inside the container:
+For example, create a host directory and bind mount it read-write at `/run` inside the container. The `:rw` suffix is optional because read-write is the default, but we include it here to make the requested access mode explicit:
 
 ```bash
 $ mkdir -p "$PWD/my_run"
-$ singularity exec --bind "$PWD/my_run:/run" "$UBUNTU_IMAGE" \
+$ singularity exec --bind "$PWD/my_run:/run:rw" "$UBUNTU_IMAGE" \
     bash -c 'touch /run/running-file; ls -lth /run'
 ```
 {: .source}
 
 ```text
--rw-r--r-- 1 courses01 courses 0 Sep 17 09:47 running-file
+-rw-r--r-- 1 cou999 courses01 0 Sep 17 09:47 running-file
 ```
 {: .output}
 
@@ -114,7 +118,7 @@ $ ls -lth my_run
 {: .source}
 
 ```text
--rw-r--r-- 1 courses01 courses 0 Sep 17 09:47 running-file
+-rw-r--r-- 1 cou999 courses01 0 Sep 17 09:47 running-file
 ```
 {: .output}
 
@@ -143,9 +147,9 @@ Bind mounts can also expose host-provided software and libraries inside a contai
 
 Bind mounts are generally the simplest approach when files should remain directly accessible on the host. However, every file remains a separate entry on the host filesystem. A persistent overlay can be more suitable when a workflow creates a very large number of small files, or when persistent changes are needed across multiple paths in the container filesystem.
 
-### Create a persistent overlay filesystem
+### Create a persistent overlay file
 
-In a previous episode, we saw that the filesystem contained in a SIF container image is **read-only**. In other words, files within that filesystem cannot normally be created, modified or removed.
+In a previous episode, we saw that the filesystem packaged in a SIF container image is **read-only**. In other words, files within that filesystem cannot normally be created, modified or removed.
 
 However, there are situations where, rather than reading and writing files in a bind-mounted host directory, it is useful to store changes persistently within the container filesystem.
 
@@ -155,7 +159,16 @@ A persistent overlay can reduce this metadata workload by storing those files wi
 
 Singularity supports persistent overlays for this purpose. A persistent overlay stores changes separately from the immutable container image and makes those changes available again whenever the overlay is mounted.
 
-Now let's create a 200 MiB overlay:
+The general form of the command for creating a separate overlay file is:
+
+```text
+singularity overlay create --size SIZE OVERLAY_FILE
+```
+{: .output}
+
+The `--size` option specifies the overlay capacity in MiB, and `OVERLAY_FILE` specifies the name and location of the file to create. Singularity creates an EXT3 filesystem inside this file. The overlay is not itself a container image; it is mounted together with a container image in subsequent `singularity run`, `exec`, or `shell` commands.
+
+For this example, create a 200 MiB overlay named `my_overlay.ext3`:
 
 ```bash
 $ singularity overlay create --size 200 my_overlay.ext3
@@ -163,25 +176,45 @@ $ singularity overlay create --size 200 my_overlay.ext3
 {: .source}
 
 
-### Mount a persistent overlay filesystem
+### Mount a persistent overlay with a container image
 
-Let's give it a go with the persistent overlay we have just created. We can mount it at container runtime by using the `--overlay` option followed by the overlay filename. By default, the overlay is mounted read-write. We make this explicit by adding the `:rw` suffix to the filename:
+Creating an overlay file does not activate it automatically. The overlay must be specified each time a container is started with the changes stored in that overlay.
+
+The general form is:
+
+```text
+singularity COMMAND --overlay OVERLAY_FILE[:MODE] CONTAINER_IMAGE [ARGUMENTS...]
+```
+{: .output}
+
+Here:
+
+- `COMMAND` can be `run`, `exec`, or `shell`.
+- `OVERLAY_FILE` identifies the persistent overlay file.
+- `MODE` controls whether the overlay is mounted read-write (`rw`) or read-only (`ro`).
+- `CONTAINER_IMAGE` identifies the container image with which the overlay will be used.
+
+Read-write is the default mode. However, we include the `:rw` suffix to make the requested access mode explicit:
 
 ```bash
 $ singularity shell --overlay "my_overlay.ext3:rw" "$UBUNTU_IMAGE"
 ```
 {: .source}
 
-Now, every new directory and file that we create from inside the container will be stored in the persistent overlay filesystem.  For instance, from the interactive shell we opened let us try:
+This command starts an interactive shell using the filesystem packaged in the Ubuntu container image together with the writable layer provided by `my_overlay.ext3`. The container image remains unchanged, while files created or modified in normally read-only parts of the container filesystem are stored in the overlay.
 
-```
+For example, create a directory and two files:
+
+```bash
 Singularity> mkdir /australia
 Singularity> cd /australia
 Singularity> echo perth > wa
 Singularity> echo canberra > act
 Singularity> exit
 ```
-{: .bash}
+{: .source}
+
+The directory and files are stored in the persistent overlay and remain available in later container runs whenever the same overlay is mounted.
 
 
 > ## Access a pre-existing overlay filesystem
@@ -193,12 +226,12 @@ Singularity> exit
 > > ```
 > > $ ls /australia
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
-> > ```
+> > ```text
 > > ls: /australia: No such file or directory
 > > ```
-> > {: .output}
+> > {: .error}
 > {: .solution}
 >
 > Now try and look for `/australia` from inside a Ubuntu container, *without* mounting the overlay.
@@ -208,12 +241,12 @@ Singularity> exit
 > > ```
 > > $ singularity exec "$UBUNTU_IMAGE" ls /australia
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
-> > ```
+> > ```text
 > > ls: /australia: No such file or directory
 > > ```
-> > {: .output}
+> > {: .error}
 > {: .solution}
 >
 > But, if we run another container and mount the overlay, the files will still be there.  Try and `ls` from inside a container, using the appropriate flag.
@@ -223,7 +256,7 @@ Singularity> exit
 > > ```
 > > $ singularity exec --overlay "my_overlay.ext3:rw" "$UBUNTU_IMAGE" ls /australia
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
 > > ```
 > > act wa
@@ -238,13 +271,13 @@ The newly created directories and files persist in the overlay and can be access
 
 ### Run a Trinity genome assembly from inside the container
 
-A subdirectory in the directory we are in, `trinity_test_data/`, contains sample inputs for a genome assembly, coming from the `Docker/test_data/` subset in the [Trinity Github repo](https://github.com/trinityrnaseq/trinityrnaseq).
+A subdirectory in the directory we are in, `trinity_test_data/`, contains sample inputs for a genome assembly, coming from the `Docker/test_data/` subset in the [Trinity GitHub repository](https://github.com/trinityrnaseq/trinityrnaseq).
 
 
-> ## Create the output directory within an OverlayFS
+> ## Create the output directory in a persistent overlay
 >
 > For this exercise we are going to reuse the overlay file `my_overlay.ext3`.
-> To begin with, use the Ubuntu container image `ubuntu--24.04.sif` to create the directory `/trinity_out_dir` in the OverlayFS.
+> To begin with, use the Ubuntu container image `ubuntu--24.04.sif` to create the directory `/trinity_out_dir` in the persistent overlay.
 >
 > > ## Solution
 > >
@@ -252,7 +285,7 @@ A subdirectory in the directory we are in, `trinity_test_data/`, contains sample
 > > $ singularity exec --overlay "my_overlay.ext3:rw" "$UBUNTU_IMAGE" mkdir /trinity_out_dir
 > > $ singularity exec --overlay "my_overlay.ext3:rw" "$UBUNTU_IMAGE" ls -ltd /trinity_out_dir
 > > ```
-> > {: .bash}
+> > {: .source}
 > {: .solution}
 {: .challenge}
 
@@ -262,24 +295,36 @@ Now, let's download the Trinity container image from Docker Hub, `trinityrnaseq/
 ```
 $ singularity pull "${MY_LOCAL_LIBRARY}/trinityrnaseq--2.8.6.sif" docker://docker.io/trinityrnaseq/trinityrnaseq:2.8.6
 ```
-{: .bash}
+{: .source}
 
-Now, we're going to run a test assembly with our sample dataset, using the directory we just created in the OverlayFS to write the outputs.  In this small case, only about a hundred output files are created.  However, the Trinity assembly workflow can easily produce up to a million files, making the use of OverlayFS an interesting choice to reduce the workload on a host parallel filesystem.
+> ## If the Trinity image already exists
+>
+> You may see an error similar to:
+>
+> ```text
+> FATAL:   Image file already exists: ".../trinityrnaseq--2.8.6.sif" - will not overwrite
+> ```
+> {: .error}
+>
+> In this training, this message most likely means that `launch_image_pulls.sh`, run near the beginning of the training, has already downloaded the Trinity image to your local image library. Singularity will not overwrite the existing file. Do not download it again; continue the exercise using the existing `trinityrnaseq--2.8.6.sif` file.
+{: .solution}
+
+Now, we're going to run a test assembly with our sample dataset, using the directory we just created in the persistent overlay to write the outputs.  In this small case, only about a hundred output files are created.  However, the Trinity assembly workflow can easily produce up to a million files, making the use of a persistent overlay an interesting choice to reduce the workload on a host parallel filesystem.
 
 
 > ## Run the Trinity workflow
 >
 > This is the command to be run:
 >
-> ```
-> $ Trinity \
+> ```text
+> Trinity \
 >     --seqType fq --left trinity_test_data/reads.left.fq.gz \
 >     --right trinity_test_data/reads.right.fq.gz \
 >     --max_memory 1G --CPU 1 --output <OUTPUT-DIRECTORY>
 > ```
-> {: .bash}
+> {: .output}
 >
-> Can you run it using Singularity and OverlayFS?  (**Hint**: you will need to specify the appropriate directory for `--output`)
+> Can you run it using Singularity and the persistent overlay?  (**Hint**: you will need to specify the appropriate directory for `--output`)
 > Expect the run to take approximately 2-3 minutes.
 >
 > > ## Solution
@@ -293,12 +338,12 @@ Now, we're going to run a test assembly with our sample dataset, using the direc
 > >     --right trinity_test_data/reads.right.fq.gz \
 > >     --max_memory 1G --CPU 1 --output /trinity_out_dir
 > > ```
-> > {: .bash}
+> > {: .source}
 > {: .solution}
 {: .challenge}
 
 
-All of our outputs are stored in the OverlayFS, so we need to use a Singularity container to inspect them:
+All of our outputs are stored in the persistent overlay, so we need to use a Singularity container to inspect them:
 
 ```bash
 $ singularity exec --overlay "my_overlay.ext3:rw" "$UBUNTU_IMAGE" ls /trinity_out_dir
@@ -326,12 +371,12 @@ $ singularity exec --overlay "my_overlay.ext3:rw" "$UBUNTU_IMAGE" bash -c 'cp -p
 
 Note how we're wrapping the copy command within `bash -c`; this is to defer the evaluation of the `*` wildcard to when the container runs the command.
 
-We've run the entire workflow within the OverlayFS, and got only the two relevant output files out in the host filesystem!
+We've run the entire workflow within the persistent overlay, and got only the two relevant output files out in the host filesystem!
 
 ```
 $ ls -l Trinity.fasta*
 ```
-{: .bash}
+{: .source}
 
 ```
 -rw-r--r-- 1 courses01 courses 171507 Nov  4 05:49 Trinity.fasta
@@ -351,14 +396,14 @@ Let's work in another directory:
 ```
 $ cd "$TUTO/demos/conda_overlay"
 ```
-{: .bash}
+{: .source}
 
 And let's create a new overlay for this example. This time, we'll make it considerably larger, since a Conda/Mamba installation can easily take up a few gigabytes (note that the `--size` value in the following command is specified in MiB):
 
 ```
 $ singularity overlay create --size 5000 my_conda_overlay.ext3
 ```
-{: .bash}
+{: .source}
 
 > ## Choose the overlay size carefully
 >
@@ -443,6 +488,53 @@ $ rm Miniforge3-Linux-x86_64.sh
 > {: .solution}
 {: .challenge}
 
+> ## Alternative ways to add Miniforge to `PATH`
+>
+> The solution above starts Bash inside the container and modifies `PATH` explicitly:
+>
+> ```text
+> bash -c 'export PATH=/opt/conda/bin:$PATH && bwa'
+> ```
+> {: .output}
+>
+> This makes the complete shell operation visible, but Singularity also provides two more convenient ways to prepend a directory to `PATH`.
+>
+> To apply the change to a single container run, use the `--env` option with `PREPEND_PATH`:
+>
+> ```bash
+> $ singularity exec \
+>     --overlay "my_conda_overlay.ext3:rw" \
+>     --env PREPEND_PATH=/opt/conda/bin \
+>     "$UBUNTU_IMAGE" \
+>     bwa
+> ```
+> {: .source}
+>
+> `PREPEND_PATH` has a special meaning in Singularity. Its value is added to the beginning of `PATH` inside the container while preserving the other paths already configured there.
+>
+> Alternatively, define `SINGULARITYENV_PREPEND_PATH` in the host shell:
+>
+> ```bash
+> $ export SINGULARITYENV_PREPEND_PATH="/opt/conda/bin"
+> $ singularity exec \
+>     --overlay "my_conda_overlay.ext3:rw" \
+>     "$UBUNTU_IMAGE" \
+>     bwa
+> ```
+> {: .source}
+>
+> Variables whose names begin with `SINGULARITYENV_` are passed into the container without that prefix. Therefore, `SINGULARITYENV_PREPEND_PATH` on the host sets `PREPEND_PATH` for subsequent Singularity container runs.
+>
+> Unlike the command-local `--env` option, this exported variable remains active in the current host shell, allowing us to run `singularity exec` multiple times without defining the path again. Unset it when it is no longer required:
+>
+> ```bash
+> $ unset SINGULARITYENV_PREPEND_PATH
+> ```
+> {: .source}
+>
+> Use the explicit `bash -c` approach when you want the complete shell operation to be visible, `--env PREPEND_PATH=...` for a self-contained container run, or `SINGULARITYENV_PREPEND_PATH` when several subsequent container runs require the same path modification.
+{: .callout}
+
 The container image has not been modified. The BWA installation persists because it is stored in `my_conda_overlay.ext3` and becomes available whenever that overlay is mounted. However, shell settings such as the modified `PATH` do not persist between container runs, so they must be set again in each new shell or command.
 
 The same overlay may also be mounted with other compatible container images. However, software installed in the overlay may depend on libraries or other components provided by the original container image. For reliable and reproducible use, mount the overlay with the same container image unless you have verified compatibility with another one.
@@ -490,7 +582,7 @@ $ singularity exec --writable-tmpfs "$UBUNTU_IMAGE" ls /temporary-file
 ```text
 ls: cannot access '/temporary-file': No such file or directory
 ```
-{: .output}
+{: .error}
 
 The file existed during the previous interactive shell, but it was discarded along with that shell's temporary writable layer. Each use of `--writable-tmpfs` creates a new temporary layer; changes from an earlier container run are not recovered in subsequent runs.
 
