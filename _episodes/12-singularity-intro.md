@@ -9,7 +9,7 @@ questions:
 - "How can I execute pipelines and other shell expressions inside a container?"
 - "How can a containerised application read and write files on the host?"
 objectives:
-- "Identify the components of a Docker/OCI image reference"
+- "Identify the components of a Singularity Docker/OCI URI and registry image reference"
 - "Download and organise an image as a local SIF file"
 - "Run predefined and user-selected commands from a container"
 - "Inspect the software environment packaged inside a container"
@@ -35,7 +35,7 @@ keypoints:
 If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
 
 ```
-$ salloc -N 1 -n 1 -c 16 --reservation=ContainersTraining -t 4:00:00
+$ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 4:00:00
 ```
 {: .source}
 
@@ -56,63 +56,20 @@ If you haven't done so already, move to a suitable working directory and downloa
 $ cd "$MYSCRATCH"    # On Pawsey systems
 $ git clone https://github.com/PawseySC/singularity-containers
 $ export TUTO="$PWD/singularity-containers"
-$ cd "$TUTO"
 ```
 {: .source}
 
 Now `cd` to the working directory. In this case:
 ```bash
-$ cd demos/basic_use
+$ cd "${TUTO}/demos/basic_use"
 $ pwd
 ```
 
 The working directory should be something like:
 ```text
-/path/to/scratch/singularity-containers/demos/basic_use
+/path/to/your/scratch/singularity-containers/demos/basic_use
 ```
 {: .source}
-
-
-
-<div class="panel panel-warning">
-  <div class="panel-heading">
-    <strong>Content update required — start</strong><br>
-    Update the following hands-on instructions
-  </div>
-
-  <div class="panel-body" markdown="1">
-
-> ## Want to save time later in the tutorial?
->
-> > ## Read this
-> > Open a second terminal in the machine where you're running the tutorial, then run the script `pull_big_images.sh` to start downloading a few images that you'll require later:
-> >
-> > ```
-> > $ cd $TUTO/demos
-> > $ nohup bash ./pull_big_images.sh &
-> > ```
-> > {: .bash}
-> >
-> > **In alternative**, if you are running at Pawsey, *e.g.* on Zeus, submit this other script with Slurm instead:
-> >
-> > ```
-> > $ cd $TUTO/demos
-> > $ sbatch ./sbatch_pull_big_images.sh
-> > ```
-> > {: .bash}
-> >
-> > This pull process will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
-> >
-> {: .solution}
-{: .challenge}
-
-  </div>
-
-  <div class="panel-footer">
-    <strong>Content update required — end</strong>
-  </div>
-</div>
-
 
 ### Singularity: the container engine used in this training
 
@@ -163,7 +120,7 @@ Before using our first image, let us explore how scientific software is presente
 > Were there other repositories with similar names in the search results? What information would help you decide which publisher to trust?
 {: .challenge}
 
-An image repository can provide many related images through its tags. A tag may identify:
+A repository can publish multiple related images through its tags. A tag may indicate:
 
 - an application version
 - a base operating-system version
@@ -171,9 +128,9 @@ An image repository can provide many related images through its tags. A tag may 
 - a minimal or extended software environment
 - a stable release or a development build
 
-Consequently, selecting a container image requires more than finding a familiar application name. You must also identify the publisher and select an appropriate image tag.
+Consequently, selecting a container image requires more than finding a repository associated with a familiar application. You must also identify the publisher and select an appropriate tag.
 
-Docker Hub contains images from many publishers. Finding an image with the desired name does not automatically mean that it is trustworthy, maintained, compatible with your target system, or suitable for research use. When evaluating an image, consider:
+Docker Hub contains repositories from many publishers. Finding a repository associated with the desired application does not automatically mean that its images are trustworthy, maintained, compatible with your target system, or suitable for research use. When evaluating an image, consider:
 
 - who published it
 - whether it is maintained by the application developers or another trusted organisation
@@ -194,25 +151,25 @@ sylabsio/lolcow
 ```
 {: .output}
 
-Open the repository named `sylabsio/lolcow`.
+Open the repository identified on Docker Hub as `sylabsio/lolcow`.
 
-The repository name contains:
+This repository path contains:
 
 - `sylabsio`: the publisher's namespace
-- `lolcow`: the image repository
+- `lolcow`: the repository name
 
-The complete tagged image name is:
+A tagged image reference for this repository is:
 
 ```text
 sylabsio/lolcow:latest
 ```
 {: .output}
 
-The `latest` component is the image tag. We will discuss the meaning and limitations of this tag later in the episode.
+Here, `latest` is the tag associated with the published image. We will discuss the meaning and limitations of this tag later in the episode.
 
 > ## A teaching image
 >
-> We use `sylabsio/lolcow` because it produces an immediate and visually distinctive result without requiring input data or application-specific knowledge.
+> We use an image published in the `sylabsio/lolcow` repository because it produces an immediate and visually distinctive result without requiring input data or application-specific knowledge.
 >
 > It should not be interpreted as a recommendation for research or production workloads. Its role is to help us learn the basic Singularity commands before working with larger scientific application images.
 {: .callout}
@@ -235,13 +192,24 @@ The `latest` component is the image tag. We will discuss the meaning and limitat
 > Once you are on a compute node, load the Singularity module:
 >
 > ```bash
-> $ module load singularity/4.1.0-nohost
+> $ module load singularity/4.1.0-nompi
 > ```
 > {: .source}
 >
 > On Setonix, multiple Singularity module variants are available. These variants configure different levels of integration between the container and the host software environment, including support for MPI, GPUs, and Slurm.
 >
-> The `nohost` suffix identifies the module variant intended for containers that should remain isolated from the host software environment. This avoids introducing host MPI libraries or other specialised host integrations that are not required by these introductory examples.
+> The `nompi` suffix identifies the module variant intended for applications that do not require MPI communication, including many bioinformatics applications. It avoids injecting the host MPI software environment into the container.
+>
+> If the container requires stronger isolation from the host software environment, the `nohost` variant may be more appropriate. This variant avoids additional specialised host integrations. Note that configured host filesystems, such as `/scratch`, may still be available inside the container.
+>
+> List the available Singularity module variants with:
+>
+> ```bash
+> $ module avail singularity
+> ```
+> {: .source}
+>
+> For a detailed explanation of the available variants, see the [Singularity documentation in the Pawsey User Support Documentation](https://pawsey.atlassian.net/wiki/spaces/US/pages/51925894/Singularity).
 >
 > Confirm that the expected Singularity version is available after loading the module:
 >
@@ -254,8 +222,8 @@ The `latest` component is the image tag. We will discuss the meaning and limitat
 >
 > ```text
 > Currently Loaded Modules:
-  ...
-  15) singularity/4.1.0-nohost
+> ...
+> 15) singularity/4.1.0-nompi
 > ```
 > {: .output}
 >
@@ -275,15 +243,6 @@ The `latest` component is the image tag. We will discuss the meaning and limitat
 >
 > You only need to load the module once in each terminal session. If you open another terminal, start a new login session, or submit a batch job, load the module again in that environment before invoking `singularity`.
 >
-> The available module versions and variants can change when the Setonix software environment is updated. To see the currently available modules, run:
->
-> ```bash
-> $ module avail singularity
-> ```
-> {: .source}
->
-> For descriptions of the available module variants, see the
-> [Singularity documentation in the Pawsey User Support Documentation](https://pawsey.atlassian.net/wiki/spaces/US/pages/51925894/Singularity).
 {: .callout}
 
 ### Downloading an image as a SIF file
@@ -292,7 +251,7 @@ Singularity uses the Singularity Image Format (SIF) for its native container ima
 
 For images that you intend to keep and reuse, we recommend storing named SIF files in an organised personal or project image library.
 
-First, create a directory (your local library) where to keep your singularity images:
+First, create a directory to use as your local Singularity image library:
 
 ```bash
 $ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
@@ -300,43 +259,113 @@ $ mkdir -p "$MY_LOCAL_LIBRARY"
 ```
 {: .source}
 
-The source image that we found on Docker Hub is identified by:
+On Docker Hub, the repository page presents the selected image with a Docker command similar to (do no use it here, as Docker is not installed on Setonix):
+
+```text
+docker pull sylabsio/lolcow:latest
+```
+{: .output}
+
+This command contains two conceptually different parts:
+
+- `docker pull` is the Docker command used to retrieve an image.
+- `sylabsio/lolcow:latest` is the registry image reference identifying the namespace, repository, and tag.
+
+The components of this registry image reference are:
+
+- `sylabsio`: the namespace of the organisation or user that published the repository
+- `lolcow`: the repository name
+- `latest`: the tag associated with the published image in that repository
+
+In everyday language, people commonly call `lolcow`, `sylabsio/lolcow`, or `sylabsio/lolcow:latest` the **image name**. This is convenient but less precise. In this episode, **repository name** refers specifically to `lolcow`, while **registry image reference** refers to `sylabsio/lolcow:latest` or its registry-qualified form.
+
+We are using Singularity rather than Docker, so we will not run the `docker pull` command. Instead, we use the namespace, repository, and tag shown by Docker Hub to construct a **Singularity Docker/OCI URI**.
+
+The general form of a Singularity URI is:
+
+```text
+SCHEME://SOURCE
+```
+{: .output}
+
+When using `singularity pull`, the URI scheme tells Singularity what type of source it must retrieve and how to access it. The scheme must match the source. Common examples include:
+
+- `docker://` for a Docker/OCI image stored in a compatible container registry
+- `oras://` for a SIF or OCI artifact stored in an OCI registry
+- `library://` for an image stored in a Singularity Container Library
+- `http://` or `https://` for an image available directly through a web address
+
+In this example, Docker Hub distributes the source image in the Docker/OCI format, so we must use the `docker://` scheme.
+
+The general form of a Singularity Docker/OCI URI is:
+
+```text
+docker://REGISTRY/NAMESPACE/REPOSITORY:TAG
+```
+{: .output}
+
+For the image selected on Docker Hub, the explicit URI is:
 
 ```text
 docker://docker.io/sylabsio/lolcow:latest
 ```
 {: .output}
 
-The components of this image reference are:
+Its components are:
 
-- `docker://`: tells Singularity to retrieve a Docker/OCI image through a compatible container registry
-- `docker.io`: the registry hostname that explicitly identifies Docker Hub
-- `sylabsio`: the namespace of the organisation or user that published the image
-- `lolcow`: the image repository name
-- `latest`: the image tag
+- `docker://`: the URI scheme selected because the source is a Docker/OCI image stored in a compatible container registry
+- `docker.io`: the registry hostname selected because the repository is stored in Docker Hub
+- `sylabsio`: the publisher's namespace
+- `lolcow`: the repository name
+- `latest`: the tag
 
-The `docker://` prefix does not instruct Singularity to start Docker. Singularity communicates directly with the registry and processes the Docker/OCI image manifest and filesystem layers. Docker does not need to be installed or running on the system.
+The registry hostname must identify the registry containing the repository. For example:
 
-Then, use `singularity pull` to download the source image, convert it to SIF, and save it with an explicit filename:
+- `docker.io` identifies Docker Hub
+- `quay.io` identifies Quay Container Registry
+
+An image published in Quay would use the same `docker://` scheme but a different registry hostname:
+
+```text
+docker://quay.io/NAMESPACE/REPOSITORY:TAG
+```
+{: .output}
+
+The `docker://` scheme does not instruct Singularity to start Docker. It tells Singularity to interpret the source as Docker/OCI image content and retrieve it using the appropriate registry protocol. The registry hostname tells Singularity which registry to contact. Docker does not need to be installed or running on the system.
+
+The general form of `singularity pull` is:
 
 ```bash
-$ singularity pull "${MY_LOCAL_LIBRARY}/lolcow--latest.sif" docker://docker.io/sylabsio/lolcow:latest
+$ singularity pull [OUTPUT_FILE] URI
 ```
 {: .source}
 
-The first argument after `pull` is the SIF file that Singularity creates:
+- `OUTPUT_FILE` is the optional path and filename of the SIF image to create.
+- `URI` identifies the source image content to retrieve.
+
+For this training, provide the complete output path explicitly:
+
+```bash
+$ singularity pull "${MY_LOCAL_LIBRARY}/lolcow--latest.sif" \
+    docker://docker.io/sylabsio/lolcow:latest
+```
+{: .source}
+
+This command connects three related but distinct identifiers:
 
 ```text
+Docker Hub registry image reference:
+sylabsio/lolcow:latest
+
+Singularity Docker/OCI URI:
+docker://docker.io/sylabsio/lolcow:latest
+
+Local SIF path:
 ${MY_LOCAL_LIBRARY}/lolcow--latest.sif
 ```
 {: .output}
 
-The second argument is the source image reference:
-
-```text
-docker://docker.io/sylabsio/lolcow:latest
-```
-{: .output}
+The source URI tells Singularity what image content to retrieve. The output path tells Singularity where to save the converted SIF image and what local filename to use.
 
 Check that the SIF file was created:
 
@@ -347,9 +376,67 @@ $ ls -lh "$MY_LOCAL_LIBRARY"
 
 A filesystem directory containing SIF files is not technically a container registry. It is an organised local collection, or image library, that you manage yourself.
 
-> ## Optional: Docker Hub shorthand
+> ## Optional: Letting Singularity choose the SIF filename
 >
-> Docker Hub is the default registry for `docker://` references. Therefore:
+> The output filename can be omitted:
+>
+> ```bash
+> $ singularity pull docker://docker.io/sylabsio/lolcow:latest
+> ```
+> {: .source}
+>
+> Singularity then derives the filename from the repository name and tag and creates the SIF file in the current working directory:
+>
+> ```text
+> lolcow_latest.sif
+> ```
+> {: .output}
+>
+> You can use `--dir` to select another output directory while still allowing Singularity to generate the filename:
+>
+> ```bash
+> $ singularity pull --dir "$MY_LOCAL_LIBRARY" \
+>     docker://docker.io/sylabsio/lolcow:latest
+> ```
+> {: .source}
+>
+> This creates:
+>
+> ```text
+> ${MY_LOCAL_LIBRARY}/lolcow_latest.sif
+> ```
+> {: .output}
+>
+> The `--dir` option controls only the output directory. Singularity still generates the filename automatically using an underscore between the repository name and tag.
+>
+> We do not use this automatic filename in the training because repository names and tags can themselves contain hyphens or underscores. In such cases, it can be difficult to distinguish where the repository name ends and where the tag begins.
+>
+> Our local naming convention uses two hyphens, `--`, as a clear separator:
+>
+> ```text
+> repository--tag.sif
+> ```
+> {: .output}
+>
+> For this image, the resulting filename is:
+>
+> ```text
+> lolcow--latest.sif
+> ```
+> {: .output}
+>
+> Providing the complete output path explicitly allows us to select both the destination directory and this clearer filename:
+>
+> ```bash
+> $ singularity pull "${MY_LOCAL_LIBRARY}/lolcow--latest.sif" \
+>     docker://docker.io/sylabsio/lolcow:latest
+> ```
+> {: .source}
+{: .solution}
+
+> ## Optional: Omitting `docker.io` from Docker Hub URIs
+>
+> Docker Hub is the default registry for Singularity `docker://` URIs. Therefore:
 >
 > ```text
 > docker://sylabsio/lolcow:latest
@@ -371,7 +458,7 @@ A filesystem directory containing SIF files is not technically a container regis
 > Use `singularity pull` when obtaining an existing image from a registry:
 >
 > ```bash
-> $ singularity pull output.sif docker://registry/namespace/image:tag
+> $ singularity pull output.sif docker://registry/namespace/repository:tag
 > ```
 > {: .source}
 >
@@ -383,7 +470,7 @@ A filesystem directory containing SIF files is not technically a container regis
 The image is now available as a SIF file in your personal image library. Define a variable containing its path so that it can be referenced more conveniently in subsequent commands:
 
 ```bash
-$ SINGULARITY_IMAGE="${MYSOFTWARE}/singularity/images/lolcow--latest.sif"
+$ COW_IMAGE="${MY_LOCAL_LIBRARY}/lolcow--latest.sif"
 ```
 {: .source}
 
@@ -396,7 +483,7 @@ Singularity provides three main commands for running or interacting with a conta
 We will use all three commands in this episode. First, use `singularity run` to execute the default action provided by the `lolcow` image:
 
 ```bash
-$ singularity run "$SINGULARITY_IMAGE"
+$ singularity run "$COW_IMAGE"
 ```
 {: .source}
 
@@ -442,12 +529,12 @@ This illustrates an important benefit of containers: the required applications a
 
 The `run` command starts a container from the SIF image and executes the image's predefined **runscript**. The runscript is configured by the image publisher when the image is built.
 
-The general form of the command is:
+The general form of the `singularity` command is:
 
-```bash
-$ singularity run IMAGE [ARGUMENTS...]
+```text
+singularity run IMAGE [ARGUMENTS...]
 ```
-{: .source}
+{: .output}
 
 Running an image does not necessarily open an interactive session. The action performed by `singularity run` depends on the runscript defined in that particular image. For `lolcow`, the runscript generates a random message and displays it using an ASCII-art cow.
 
@@ -456,18 +543,18 @@ In the following sections, we will use:
 - `singularity exec` to choose a particular command to run from the image
 - `singularity shell` to explore the container environment interactively
 
-> ## Optional: Running an image using an online registry reference
+> ## Optional: Running an image using a Docker/OCI URI
 >
 > Creating a named SIF file with `singularity pull` gives you control over where the image is stored and how it is named. This is the recommended approach for images that you intend to manage and reuse.
 >
-> For a quick test, Singularity can also retrieve and run an image using its reference in an online registry:
+> For a quick test, Singularity can also retrieve and run an image using its Docker/OCI URI:
 >
 > ```bash
 > $ singularity run docker://docker.io/sylabsio/lolcow:latest
 > ```
 > {: .source}
 >
-> The first time this remote reference is used, Singularity may display informational messages while it retrieves and prepares the image:
+> The first time this URI is used, Singularity may display informational messages while it retrieves and prepares the image:
 >
 > ```text
 > INFO:    Converting OCI blobs to SIF format
@@ -481,7 +568,7 @@ In the following sections, we will use:
 >
 > When Singularity processes the command, it:
 >
-> 1. reads the online registry reference
+> 1. reads the Singularity Docker/OCI URI
 > 2. retrieves the Docker/OCI image manifest and filesystem layers from Docker Hub
 > 3. converts the image into the Singularity Image Format
 > 4. stores the converted image in its internal cache
@@ -495,27 +582,27 @@ In the following sections, we will use:
 > ```
 > {: .source}
 >
-> The second execution should start sooner because Singularity can reuse the converted image stored in its internal cache. In both executions, the container runs locally. The online registry reference tells Singularity where to retrieve the image, but it does not mean that the image is executed remotely.
+> The second execution should start sooner because Singularity can reuse the converted image stored in its internal cache. In both executions, the container runs locally. The Docker/OCI URI tells Singularity where to retrieve the image, but it does not mean that the image is executed remotely.
 >
-> > ## Local SIF file or online image reference?
+> > ## Local SIF file or Docker/OCI URI?
 > >
 > > The two commands use the same published image, but they manage it differently.
 > >
 > > Run the SIF file stored in your personal image library:
 > >
 > > ```bash
-> > $ singularity run "$SINGULARITY_IMAGE"
+> > $ singularity run "$COW_IMAGE"
 > > ```
 > > {: .source}
 > >
-> > Run the image using its Docker Hub reference:
+> > Run the image using its Singularity Docker/OCI URI:
 > >
 > > ```bash
 > > $ singularity run docker://docker.io/sylabsio/lolcow:latest
 > > ```
 > > {: .source}
 > >
-> > Using an online registry reference is convenient for quickly testing an image. Singularity manages the converted image in its internal cache, where cached objects may be identified by content-based hashes rather than recognisable image names.
+> > Using a Docker/OCI URI is convenient for quickly testing an image. Singularity manages the converted image in its internal cache, where cached objects may be identified by content-based hashes rather than recognisable repository names.
 > >
 > > For images that you intend to retain and use in research workflows, prefer an explicitly named SIF file stored in your personal or project image library.
 > {: .callout}
@@ -536,19 +623,19 @@ In the following sections, we will use:
 > ```text
 > Docker Hub
 >     |
->     |  Docker/OCI image:
+>     |  Registry image reference:
 >     |  docker.io/sylabsio/lolcow:latest
 >     v
 > Singularity retrieves and converts the image
 >     |
 >     |  Singularity SIF image:
->     |  lolcow_latest.sif
+>     |  lolcow--latest.sif
 >     v
 > Singularity runs the container
 > ```
 > {: .output}
 >
-> Docker Hub is the source registry, the Docker/OCI image is the source image, and `lolcow_latest.sif` is the converted image to a `.sif` file managed locally. Singularity performs the conversion and runs the container. The Docker engine is not involved.
+> Docker Hub is the source registry, `docker.io/sylabsio/lolcow:latest` is the registry image reference, and `lolcow--latest.sif` is the local SIF image created by Singularity. Singularity retrieves the Docker/OCI image content, converts it to SIF, and runs the resulting container. The Docker engine is not involved.
 {: .callout}
 
 ### Running a command in a container
@@ -556,30 +643,30 @@ In the following sections, we will use:
 `singularity run` executes the default action defined by the image publisher. To execute a command of your choice, use `singularity exec`:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" cowsay "Hello from my local SIF image!"
+$ singularity exec "$COW_IMAGE" cowsay "Hello from my local SIF image!"
 ```
 {: .source}
 
-The general form is:
+The general form of the `singularity` command is:
 
-```bash
-$ singularity exec IMAGE COMMAND [ARGUMENTS...]
+```text
+singularity exec IMAGE COMMAND [ARGUMENTS...]
 ```
-{: .source}
+{: .output}
 
 The image is followed by the command to execute and any arguments to pass to it.
 
 Ask the `cowsay` application for help:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" cowsay -h
+$ singularity exec "$COW_IMAGE" cowsay -h
 ```
 {: .source}
 
 List the figures packaged with `cowsay`:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" cowsay -l
+$ singularity exec "$COW_IMAGE" cowsay -l
 ```
 {: .source}
 
@@ -588,7 +675,7 @@ $ singularity exec "$SINGULARITY_IMAGE" cowsay -l
 > Select one of the figures reported by `cowsay -l` and print your own message. For example, if the image includes the `dragon` figure:
 >
 > ```bash
-> $ singularity exec "$SINGULARITY_IMAGE" cowsay -f dragon "Running from a container!"
+> $ singularity exec "$COW_IMAGE" cowsay -f dragon "Running from a container!"
 > ```
 > {: .source}
 {: .challenge}
@@ -598,7 +685,7 @@ $ singularity exec "$SINGULARITY_IMAGE" cowsay -l
 > If you run `cowsay` without providing a message:
 >
 > ```bash
-> $ singularity exec "$SINGULARITY_IMAGE" cowsay
+> $ singularity exec "$COW_IMAGE" cowsay
 > ```
 > {: .source}
 >
@@ -623,7 +710,7 @@ $ cat /etc/os-release
 Inside the container:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" cat /etc/os-release
+$ singularity exec "$COW_IMAGE" cat /etc/os-release
 ```
 {: .source}
 
@@ -632,7 +719,7 @@ The outputs may describe different Linux distributions or releases. The informat
 You can also use `which` to locate the three commands used by the image's default action:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" which date cowsay lolcat
+$ singularity exec "$COW_IMAGE" which date cowsay lolcat
 ```
 {: .source}
 
@@ -652,16 +739,21 @@ The command passed directly to `singularity exec` must be an executable that Sin
 For example, if we invoque `command -v` directly as another mean to locate the important tools in the image, we would get an error:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" command -v date cowsay lolcat
+$ singularity exec "$COW_IMAGE" command -v date cowsay lolcat
 ```
 {: .source}
+
+```text
+FATAL:   "command": executable file not found in $PATH
+```
+{: .error}
 
 This fails because `command` is a shell built-in that reports how a shell would resolve one or more command names. But it is not a separate executable that Singularity can start.
 
 To use a shell built-in like this one, start Bash inside the container and use its `-c` option:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" bash -c 'command -v date cowsay lolcat'
+$ singularity exec "$COW_IMAGE" bash -c 'command -v date cowsay lolcat'
 ```
 {: .source}
 
@@ -693,15 +785,20 @@ This pattern is useful whenever the operation to execute inside a container incl
 > > A first attempt may be:
 > >
 > > ```bash
-> > $ singularity exec "$SINGULARITY_IMAGE" cowsay "Hello from my local SIF image!" | lolcat
+> > $ singularity exec "$COW_IMAGE" cowsay "Hello from my local SIF image!" | lolcat
 > > ```
 > > {: .source}
+> >
+> > ```text
+> > bash: lolcat: command not found
+> > ```
+> > {: .error}
 > >
 > > This does not run the complete pipeline inside the container. The host shell interprets the pipe before Singularity starts:
 > >
 > > ```text
-> > singularity exec "$SINGULARITY_IMAGE" cowsay "Hello..."  |  lolcat
-> >             runs inside the container                       runs on the host
+> > singularity exec "$COW_IMAGE" cowsay "Hello..."  |  lolcat
+> >                      runs inside the container      runs on the host
 > > ```
 > > {: .output}
 > >
@@ -713,7 +810,7 @@ This pattern is useful whenever the operation to execute inside a container incl
 > > Pass the complete pipeline as a quoted command string to Bash inside the container:
 > >
 > > ```bash
-> > $ singularity exec "$SINGULARITY_IMAGE" bash -c 'cowsay "Hello from my local SIF image!" | lolcat'
+> > $ singularity exec "$COW_IMAGE" bash -c 'cowsay "Hello from my local SIF image!" | lolcat'
 > > ```
 > > {: .source}
 > >
@@ -721,7 +818,7 @@ This pattern is useful whenever the operation to execute inside a container incl
 > {: .solution}
 {: .challenge}
 
-> ## Reproduce the image's default action
+> ## Reproduce the image's default action using `singularity exec`
 >
 > The image's default action uses:
 >
@@ -734,7 +831,7 @@ This pattern is useful whenever the operation to execute inside a container incl
 > > ## Solution
 > >
 > > ```bash
-> > $ singularity exec "$SINGULARITY_IMAGE" bash -c 'date | cowsay | lolcat'
+> > $ singularity exec "$COW_IMAGE" bash -c 'date | cowsay | lolcat'
 > >
 > > ```
 > > {: .source}
@@ -744,7 +841,7 @@ This pattern is useful whenever the operation to execute inside a container incl
 > > This pipeline produces the same type of output as:
 > >
 > > ```bash
-> > $ singularity run "$SINGULARITY_IMAGE"
+> > $ singularity run "$COW_IMAGE"
 > > ```
 > > {: .source}
 > >
@@ -757,7 +854,7 @@ This pattern is useful whenever the operation to execute inside a container incl
 The `singularity exec` command runs a specified command and then returns control to the host shell. For interactive inspection and troubleshooting, use `singularity shell` instead:
 
 ```bash
-$ singularity shell "$SINGULARITY_IMAGE"
+$ singularity shell "$COW_IMAGE"
 ```
 {: .source}
 
@@ -823,7 +920,7 @@ An interactive shell is useful for:
 
 For repeatable workflows and batch jobs, prefer `singularity exec`. Commands passed to `exec` can be recorded directly in scripts, while commands entered interactively are not automatically preserved.
 
-A normal SIF image is read-only during execution. Exploring the image or attempting to modify its packaged files from an interactive shell does not permanently change the original SIF image.
+A standard SIF image is read-only during execution. Exploring the image or attempting to modify its packaged files from an interactive shell does not permanently change the original SIF image.
 
 ### Working with files
 
@@ -850,7 +947,7 @@ The exact defaults depend on the Singularity installation and its system configu
 
 > ## Additional bind paths on Setonix
 >
-> On Setonix, the `singularity/4.1.0-nohost` module configures these additional host filesystems:
+> On Setonix, the `singularity/4.1.0-nompi` module configures these additional host filesystems:
 >
 > ```text
 > /scratch
@@ -862,7 +959,7 @@ The exact defaults depend on the Singularity installation and its system configu
 > You can see this configuration with:
 >
 > ```bash
-> $ module show singularity/4.1.0-nohost
+> $ module show singularity/4.1.0-nompi
 > ```
 > {: .source}
 >
@@ -877,7 +974,7 @@ The exact defaults depend on the Singularity installation and its system configu
 >
 > The user's home directory does not need to appear in `SINGULARITY_BINDPATH` because Singularity normally handles the home-directory bind automatically.
 >
-> The `nohost` suffix does not mean that all host filesystems are hidden. It selects a Pawsey module variant that avoids injecting specialised host software stacks, such as host MPI libraries, into the container. Configured host filesystems can still be available.
+> The `nompi` or `nohost` variants in Pawsey's provided installations do not mean that all host filesystems are hidden. It selects a Pawsey module variant that avoids injecting specialised host software stacks, such as host MPI libraries, into the container. Configured host filesystems can still be available.
 {: .callout}
 
 Check the current working directory on the host:
@@ -890,7 +987,7 @@ $ pwd
 Run the same command inside the container:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" pwd
+$ singularity exec "$COW_IMAGE" pwd
 ```
 {: .source}
 
@@ -898,26 +995,35 @@ The two commands should report the same path.
 
 #### Attempting to write into the container image
 
-First, try to create a file in a directory provided by the container image:
+The image contains cow definition files under `/usr/share/cowsay/cows`. This application-specific directory is supplied by the container image and is not expected to exist on the host.
+
+Confirm that the directory exists inside the container:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" touch /usr/local/container-test.txt
+$ singularity exec "$COW_IMAGE" test -d /usr/share/cowsay/cows
+```
+{: .source}
+
+The command completes without output when the directory exists. Now try to create a file there:
+
+```bash
+$ singularity exec "$COW_IMAGE" touch /usr/share/cowsay/cows/container-test.txt
 ```
 {: .source}
 
 The command should fail with a message similar to:
 
 ```text
-touch: cannot touch '/usr/local/container-test.txt': Read-only file system
+touch: cannot touch '/usr/share/cowsay/cows/container-test.txt': Read-only file system
 ```
 {: .error}
 
-Depending on the system configuration, the error may instead report `Permission denied`. A normal SIF image is mounted read-only, and container processes run with your normal user identity rather than with administrative privileges. Consequently, applications cannot normally create or modify files in protected locations supplied by the image.
+The directory comes from the filesystem packaged in the SIF image. It is not a host directory made available through a bind mount. Because a standard SIF filesystem is read-only, the file cannot be created there.
 
 Now create a file in the current working directory instead:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" touch ./container-test.txt
+$ singularity exec "$COW_IMAGE" touch ./container-test.txt
 ```
 {: .source}
 
@@ -935,7 +1041,7 @@ This succeeds because the current working directory is a host directory made ava
 Use a command running inside the container to create a file in the current working directory:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" bash -c 'date | cowsay > message.txt'
+$ singularity exec "$COW_IMAGE" bash -c 'date | cowsay > message.txt'
 ```
 {: .source}
 
@@ -966,38 +1072,56 @@ The file remains available because it was written to the host filesystem, not in
 
 #### Copying a file from the image to the host
 
-Files packaged inside an image can also be copied to a writable host directory. The `cowsay` program is stored inside this image as `/usr/games/cowsay`.
+Files packaged inside an image can also be copied to a writable host directory. The `cowsay` application includes cowfiles that define its ASCII-art figures.
 
-Copy it from the image into the current host directory:
+Confirm that the koala cowfile exists inside the image:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" cp /usr/games/cowsay ./cowsay.copy
+$ singularity exec "$COW_IMAGE" test -f /usr/share/cowsay/cows/koala.cow
 ```
 {: .source}
 
-Check the copied file from the host:
+The command completes without output when the file exists.
+
+Copy the koala cowfile from the image into the current host directory:
 
 ```bash
-$ ls -l cowsay.copy
-$ head cowsay.copy
+$ singularity exec "$COW_IMAGE" cp /usr/share/cowsay/cows/koala.cow ./koala.cow
 ```
 {: .source}
 
-The source path, `/usr/games/cowsay`, refers to a file packaged inside the image. The destination path, `./cowsay.copy`, refers to the current working directory shared with the host.
+Check the copied file and display its complete contents from the host:
+
+```bash
+$ ls -l koala.cow
+$ cat koala.cow
+```
+{: .source}
+
+The source path, `/usr/share/cowsay/cows/koala.cow`, refers to an artwork file packaged inside the image. The destination path, `./koala.cow`, refers to the current working directory shared with the host.
+
+The copied cowfile can also be read from the host working directory by an application running inside the container:
+
+```bash
+$ singularity exec "$COW_IMAGE" cowsay -f ./koala.cow "Copied from the container image!"
+```
+{: .source}
+
+This works because the current working directory is available both on the host and inside the container.
 
 > ## Optional: Binding additional host directories
 >
 > If a required host directory is not already available inside the container, use the `--bind` option:
 >
 > ```bash
-> $ singularity exec --bind HOST_PATH:CONTAINER_PATH[:OPTIONS] "$SINGULARITY_IMAGE" COMMAND
+> $ singularity exec --bind HOST_PATH:CONTAINER_PATH[:OPTIONS] "$COW_IMAGE" COMMAND
 > ```
 > {: .source}
 >
 > For example:
 >
 > ```bash
-> $ singularity exec --bind "$HOME/my-data:/data:ro" "$SINGULARITY_IMAGE" ls /data
+> $ singularity exec --bind "$HOME/my-data:/data:ro" "$COW_IMAGE" ls /data
 > ```
 > {: .source}
 >
@@ -1014,19 +1138,19 @@ The source path, `/usr/games/cowsay`, refers to a file packaged inside the image
 
 > ## Modifying the image itself
 >
-> A normal SIF image is read-only during execution. Installing software or persistently writing files into its packaged filesystem requires a different workflow, such as rebuilding the image from a definition file, using a writable sandbox, or attaching a persistent overlay.
+> A standard SIF image is read-only during execution. Installing software or persistently writing files into its packaged filesystem requires a different workflow, such as rebuilding the image from a definition file, using a writable sandbox, or attaching a persistent overlay.
 >
 > These mechanisms are not needed for normal input and output files and will be covered separately.
 {: .callout}
 
 ### Image tags and reproducibility
 
-An image tag identifies a published image variant. The `latest` tag is only a conventional name. It does not guarantee that an image contains the newest application version, and its contents may change when the publisher updates it.
+A tag is a human-readable label associated with published image content in a repository. A tag can be moved by the publisher to refer to updated content. The `latest` tag is only a conventional label: it does not guarantee that the referenced image contains the newest application version.
 
-The `sylabsio/lolcow` image is used with `latest` because that is the tag provided for this teaching example. For research and production workflows, prefer a meaningful version tag when one is available:
+We use the `latest` tag from the `sylabsio/lolcow` repository because it is the tag provided for this teaching example. For research and production workflows, prefer a meaningful version tag when one is available:
 
 ```text
-docker://docker.io/namespace/application:1.2.3
+docker://docker.io/namespace/repository:1.2.3
 ```
 {: .output}
 
@@ -1054,7 +1178,7 @@ $ singularity help shell
 These commands display help for the Singularity container engine. To display help for an application packaged inside an image, execute that application's help command through the container, for example:
 
 ```bash
-$ singularity exec "$SINGULARITY_IMAGE" cowsay -h
+$ singularity exec "$COW_IMAGE" cowsay -h
 ```
 {: .source}
 
@@ -1069,7 +1193,7 @@ $ singularity exec "$SINGULARITY_IMAGE" cowsay -h
 > 5. Use `bash -c` when an operation requires shell syntax.
 > 6. Read and write persistent files through host directories made available inside the container.
 > 7. Copy files packaged inside an image to a writable host directory.
-> 8. Optionally, use an online registry reference for a quick test.
+> 8. Optionally, use a Docker/OCI URI for a quick test.
 >
-> For your own workflows, store reusable SIF files in an organised location and record the original registry reference and tag from which each file was obtained.
+> For your own workflows, store reusable SIF files in an organised location and record the original Singularity Docker/OCI URI, registry image reference, and tag from which each file was obtained.
 {: .callout}
