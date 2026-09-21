@@ -1,1 +1,0 @@
-../mpi_openfoam_pawsey.slurm.sh

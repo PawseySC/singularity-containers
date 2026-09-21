@@ -113,48 +113,105 @@ Pulling the OCI image and converting it into a SIF image may take a few minutes.
 > ```
 > {: .error}
 >
-> In this training, this message most likely means that `launch_image_pulls.sh`, run near the beginning of the training, has already downloaded the OpenFOAM image to your local image library. Singularity will not overwrite the existing file unless you add the `--force` option to the pull command. Do not force the download unless you need to; continue the exercise using the existing `openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif` file.
+> In this training, this message most likely means that `launch_image_pulls.sh`, run near the beginning of the training, has already downloaded the Trinity image to your local image library. Singularity will not overwrite the existing file unless you add the `--force` option to the pull command. Do not download force the download unless you need to; continue the exercise using the existing `openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif` file.
 {: .solution}
 
-### Prepare the OpenFOAM tutorial case
+### Copy an OpenFOAM tutorial from the image to the host
 
-The MPI example requires a local copy of the OpenFOAM `periodicPlaneChannel` tutorial with settings suitable for this training. To save time, the `prepareTutorial.sh` script performs the complete preparation:
+Container images are normally read-only, but the files they contain can be copied to the writable host filesystem. This is useful when an image includes examples, templates, configuration files, or other resources that need to be inspected or modified before use. In this section, we use an OpenFOAM tutorial case to demonstrate this general container workflow.
 
-* It checks that the OpenFOAM image and the required training files are available.
-* It copies the `periodicPlaneChannel` tutorial from the container image into the current host directory.
-* It runs `update-settings.sh` to update the OpenFOAM dictionaries and the Slurm job script with the settings used in this episode.
-
-Run the preparation script from the `demos/openfoam` directory:
+OpenFOAM includes numerous tutorial cases that can be used as starting points for simulations. We will first open an interactive shell inside the container to explore these files and copy one of the tutorial cases to the host. Start the interactive shell and notice that the prompt changes to `Singularity>`:
 
 ```bash
-$ ./prepareTutorial.sh
+$ SINGULARITY_IMAGE="${MY_LOCAL_LIBRARY}/openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif"
+$ singularity shell "$SINGULARITY_IMAGE"
 ```
 {: .source}
 
-The script stops if a `periodicPlaneChannel` directory already exists, rather than overwriting a case prepared during an earlier run. After successful completion, the case is ready to be submitted with the Slurm job script used in the next section.
+```text
+Singularity>
+```
+{: .output}
 
-> ## If curious: inspect the prepared tutorial
+When the shell starts, confirm that the current working directory is the directory from which `singularity shell` was invoked, then save that path in a variable:
+
+```bash
+Singularity> pwd
+Singularity> HOST_WORKING_DIR="$(pwd)"
+Singularity> echo "$HOST_WORKING_DIR"
+```
+{: .source}
+
+By default, Singularity makes the host current working directory available inside the container at the same path. This allows commands running in the container to read from and write to the episode directory on the host.
+
+OpenFOAM defines several environment variables to make its installation easier to navigate. The `FOAM_TUTORIALS` variable points to the collection of tutorial cases. Move to that directory and list its contents:
+
+```bash
+Singularity> echo "$FOAM_TUTORIALS"
+Singularity> cd "$FOAM_TUTORIALS"
+Singularity> pwd
+Singularity> ls
+```
+{: .source}
+
+```text
+Allclean    DNS         compressible      finiteArea    mesh         resources
+Allcollect  IO          discreteMethods   heatTransfer  modules      stressAnalysis
+Allrun      basic       electromagnetics   incompressible multiphase  verificationAndValidation
+Alltest     combustion  financial          lagrangian    preProcessing
+```
+{: .output}
+
+For this episode, we will use the tutorial at `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicPlaneChannel`.
+
+Once the tutorial has been selected, copy the case directory into the working directory on the host, whose path was saved in `HOST_WORKING_DIR`:
+
+```bash
+Singularity> cp -r "${FOAM_TUTORIALS}/incompressible/pimpleFoam/LES/periodicPlaneChannel" "$HOST_WORKING_DIR"
+```
+{: .source}
+
+> ## Alternative: copy the tutorial without opening an interactive shell
 >
-> List the top-level contents of the copied case:
+> The same steps can be performed directly from the host by using `singularity exec`. First, search the OpenFOAM tutorials directory for matching plane-channel cases:
 >
 > ```bash
-> $ ls -l periodicPlaneChannel
+> $ singularity exec "$SINGULARITY_IMAGE" \
+>     bash -c 'find "$FOAM_TUTORIALS" -iname "*PlaneChannel*"'
 > ```
 > {: .source}
 >
-> The `update-settings.sh` script creates numbered backups before modifying the OpenFOAM dictionaries and the Slurm script. During the first run, the original files are saved with names ending in `.original.00`.
+> The output should look something like this:
 >
-> Inspect the settings applied to the OpenFOAM dictionaries:
+> ```text
+> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/incompressible/pimpleFoam/LES/periodicPlaneChannel
+> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/incompressible/pimpleFoam/LES/planeChannel
+> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/verificationAndValidation/turbulenceModels/planeChannel
+> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/verificationAndValidation/turbulentInflow/oneCellThickPlaneChannel
+> ```
+> {: .output}
+>
+> Then copy the selected tutorial into the current working directory on the host:
 >
 > ```bash
-> $ grep -E '^[[:space:]]*(endTime|writeInterval|runTimeModifiable)' \
->   periodicPlaneChannel/system/controlDict
-> $ grep -E '^[[:space:]]*(numberOfSubdomains|method|n[[:space:]])' \
->   periodicPlaneChannel/system/decomposeParDict
+> $ singularity exec "$SINGULARITY_IMAGE" \
+>     bash -c 'cp -r "$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicPlaneChannel" "$PWD"'
 > ```
 > {: .source}
 >
-> Compare the modified dictionaries with their original versions:
+> The commands are passed through `bash -c` so that `$FOAM_TUTORIALS` and `$PWD` are expanded inside the container. Singularity normally makes the host current working directory available inside the container at the same path, so the copied `periodicPlaneChannel` directory appears in the directory from which the command was run.
+{: .solution}
+
+Now update the default OpenFOAM dictionaries and the Slurm job script to the settings used in this episode:
+
+```bash
+$ ./update-settings.sh
+```
+{: .source}
+
+> ## If curious: inspect the changes
+>
+> Each time `update-settings.sh` modifies a file, it first creates a numbered backup with a name ending in `.original.00`, `.original.01`, and so on. After the first execution, inspect the changes to the OpenFOAM dictionaries with:
 >
 > ```bash
 > $ diff -u \
