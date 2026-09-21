@@ -49,16 +49,27 @@ $ ssh <username>@setonix.pawsey.org.au
 
 ##### Windows
 
-Open _PowerShell_. In the Windows instructions, `PS>` represents the PowerShell prompt and must not be typed as part of the command.
+If you installed Ubuntu under WSL as described in the [Setup Docker on your computer]({% link _episodes/00-setup-docker.md %}) episode, open the _Ubuntu_ terminal and run:
 
-Run:
+```bash
+$ ssh <username>@setonix.pawsey.org.au
+```
+{: .source}
+
+This uses the same Bash environment and command syntax used throughout the training.
+
+Alternatively, you can connect from _PowerShell_:
 
 ```powershell
 PS> ssh <username>@setonix.pawsey.org.au
 ```
 {: .source}
 
-Current versions of Windows normally include the OpenSSH client. If PowerShell reports that `ssh` is not recognised, enable the _OpenSSH Client_ optional feature in Windows or use an SSH client approved for your computer.
+In the PowerShell example, `PS>` represents the prompt and must not be typed as part of the command.
+
+Current versions of Windows normally include the OpenSSH client. If the `ssh` command is not available in PowerShell or Ubuntu, use an SSH client approved for your computer or contact your system administrator.
+
+##### After connecting
 
 After a successful connection, you will be working on one of the Setonix login nodes. You can confirm the system hostname with:
 

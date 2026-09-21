@@ -17,7 +17,7 @@ keypoints:
 
 ### Why do I need this?
 
-We will be using **Docker** to build Linux container images on your own computer.  Later on, we'll switch to **Singularity**, which is used on Setonix.  Docker is the main workshop software that you need to install *before* the session.  On Windows, the recommended Docker Desktop setup also uses WSL 2.
+We will use **Docker** to build Linux container images on your own computer. Later, we will switch to **SingularityCE**, referred to as **Singularity** throughout this training, to run the images on Setonix. Docker is the main workshop software that you need to install *before* the session. On Windows, the recommended Docker Desktop configuration uses the WSL 2 backend and an Ubuntu WSL environment for the workshop commands.
 
 > ## Administrator permissions may be required
 >
@@ -29,11 +29,13 @@ Pick the section below that matches your operating system.  In all cases, the go
 
 ### 1. Windows
 
-We recommend *Docker Desktop* with the *WSL 2* backend.  WSL stands for *Windows Subsystem for Linux*.  WSL 2 provides a Linux environment using a Linux kernel inside a lightweight virtual machine managed automatically by Windows.  Docker Desktop uses this environment to run Linux containers on Windows.
+We recommend *Docker Desktop* with the *WSL 2* backend. WSL stands for *Windows Subsystem for Linux*. WSL 2 runs a Linux kernel inside a lightweight virtual machine managed automatically by Windows. Linux distributions such as Ubuntu run as isolated environments within WSL 2, while Docker Desktop uses the same WSL 2 infrastructure to run Linux containers on Windows.
 
-#### Step 1: Install WSL 2
+Windows participants will use the Ubuntu WSL terminal for the local Docker exercises in this training. This provides the Bash shell and Linux command-line tools used throughout the lessons. Docker Desktop runs the Docker Engine in its own `docker-desktop` WSL distribution, while WSL Integration makes the `docker` command available from Ubuntu.
 
-Open *PowerShell* **as Administrator**.  In the Windows instructions, `PS>` represents the PowerShell prompt.  In the rest of the training, `$` is used as the general command prompt.  These prompts are visual indicators and must not be typed as part of the command.
+#### Step 1: Install WSL 2 and Ubuntu
+
+Open *PowerShell* **as Administrator**. In the Windows setup instructions, `PS>` represents the PowerShell prompt. This prompt is a visual indicator and must not be typed as part of the command.
 
 Run:
 
@@ -42,7 +44,7 @@ PS> wsl --install
 ```
 {: .source}
 
-This enables WSL 2 on your computer, and on most systems will also install *Ubuntu* as the default Linux distribution in the same step.  Restart your computer if prompted.
+This enables WSL 2 on your computer and, on most systems, also installs *Ubuntu* as the default WSL Linux distribution. Restart your computer if prompted.
 
 After restarting, open *PowerShell* again and check that WSL is working:
 
@@ -51,56 +53,80 @@ PS> wsl --version
 ```
 {: .source}
 
-This should print your installed WSL version, with no errors.
+This should print your installed WSL version without errors.
 
-#### Step 2: Install Ubuntu on WSL
-
-Check which Linux distributions are already installed:
+Check which Linux distributions are installed and whether they use WSL 2:
 
 ```powershell
 PS> wsl --list --verbose
 ```
 {: .source}
 
-If `Ubuntu` is listed, you're done with this step.  If it isn't (or the list is empty), install it explicitly:
+The output should include an Ubuntu distribution. Note its exact name from the `NAME` column and confirm that the `VERSION` column shows `2`. For example:
+
+```text
+  NAME            STATE           VERSION
+* Ubuntu-24.04    Stopped         2
+```
+{: .output}
+
+If no Ubuntu distribution is listed, install it:
 
 ```powershell
 PS> wsl --install -d Ubuntu
 ```
 {: .source}
 
-The first time Ubuntu starts, it will ask you to create a Unix username and password — pick anything you like, you won't need them for this workshop.
+Then run `wsl --list --verbose` again and note the exact distribution name.
 
-#### Step 3: Install Docker Desktop
+If the installed Ubuntu distribution is listed with version `1`, convert it to WSL 2 by using its exact name listed. For example, in this case `Ubuntu-24.04`:
+
+```powershell
+PS> wsl --set-version Ubuntu-24.04 2
+```
+{: .source}
+
+Remember to replace `Ubuntu-24.04` with the exact name reported on your computer by the `wsl --list` command indicated above.
+
+The first time Ubuntu starts, it will ask you to create a Unix username and password. These credentials belong only to your Ubuntu WSL environment and do not need to match your Windows or Pawsey credentials.
+
+#### Step 2: Install Docker Desktop
 
 Download and install [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/).
-During installation, use the **WSL 2 based engine** if prompted.  After installation, verify that Docker Desktop is configured to use WSL 2.  This training uses **Linux container images**, so Docker Desktop must run in Linux container mode, not Windows container mode.
 
-Once installed, start Docker Desktop (it needs to be running in the background for the `docker` command to work).
+During installation, use the **WSL 2 based engine** if prompted. After installation, confirm that Docker Desktop is configured to use WSL 2. This training uses **Linux container images**, so Docker Desktop must run in Linux container mode, not Windows container mode.
 
-#### Step 4: Check Docker
+Start Docker Desktop and leave it running in the background while using Docker commands.
 
-For consistency, we'll run the `docker` commands from **PowerShell**. Open *PowerShell* and run:
+#### Step 3: Enable Docker in Ubuntu
 
-```powershell
-PS> docker --version
+In Docker Desktop, open *Settings → Resources → WSL Integration*. Enable integration for the Ubuntu distribution and select *Apply*.
+
+Docker Desktop runs the Docker Engine in its own `docker-desktop` WSL distribution. WSL Integration gives the Ubuntu environment access to the Docker command-line client and Docker Desktop engine without installing Docker Engine directly inside Ubuntu. See Docker's [WSL documentation](https://docs.docker.com/desktop/features/wsl/) for more information.
+
+#### Step 4: Check Docker from Ubuntu
+
+Open *Ubuntu* from the Windows Start menu. From this point onwards, Windows participants should run the local workshop commands in the Ubuntu terminal rather than PowerShell.
+
+In the commands below, `$` represents the Bash prompt and must not be typed. Check the Docker client:
+
+```bash
+$ docker --version
 ```
 {: .source}
 
-This confirms that the Docker command-line client is installed.  It does not confirm that the Docker engine is running.  To test the complete installation, run:
+This confirms that the Docker command-line client is available in Ubuntu. It does not confirm that the Docker Engine is running. To test the complete installation, run:
 
-```powershell
-PS> docker run hello-world
+```bash
+$ docker run hello-world
 ```
 {: .source}
 
-This downloads (if needed) and runs a small test image.  See the [Final check](#final-check) section below for the output you should expect.
+This downloads, if needed, and runs a small test image. See the [Final check](#final-check) section below for the output you should expect.
 
-> ## Does `docker` also work inside the Ubuntu/WSL terminal?
+> ## Where should I keep the training files?
 >
-> Yes. Docker Desktop exposes the `docker` command inside your WSL distributions too, through a setting called *WSL Integration* (*Settings → Resources → WSL Integration* in Docker Desktop), which is on by default for your default distribution.
->
-> Under the hood, Docker Desktop runs inside its own `docker-desktop` WSL distribution, isolated from your Ubuntu one the same way any two WSL distributions are isolated from each other; it only talks to Ubuntu because WSL Integration is enabled for it. See Docker's [WSL 2 security in Docker Desktop](https://docs.docker.com/desktop/features/wsl/) for the full explanation.
+> On Windows, clone and work with the training repository inside the Ubuntu WSL filesystem, for example under your Ubuntu home directory (`~`). Avoid placing the working repository under `/mnt/c/` unless access from Windows is specifically required.
 {: .callout}
 
 
@@ -193,7 +219,7 @@ This downloads (if needed) and runs a small test image.  See the [Final check](#
 
 > ## Confirm your installation works
 >
-> Run the following command (`sudo docker run hello-world` on Linux, `docker run hello-world` in PowerShell on Windows, or in Terminal on macOS).  The exact output may vary depending on your Docker version and computer architecture, but it should include a message beginning with `Hello from Docker!`.
+> Run the following command (`sudo docker run hello-world` on Linux, or `docker run hello-world` in the Ubuntu WSL terminal on Windows and in Terminal on macOS). The exact output may vary depending on your Docker version and computer architecture, but it should include a message beginning with `Hello from Docker!`.
 >
 > ```bash
 > $ docker run hello-world
@@ -225,23 +251,12 @@ The steps below are based on Docker's official [Create a Docker account](https:/
 4. Complete the account verification process.  You will not be able to sign in until the account has been verified.
 5. Sign in to [Docker Hub](https://hub.docker.com/) and record your Docker ID.
 
-Assign your Docker ID to a shell variable.  Replace `<docker-id>` with your Docker ID and do not include the angle brackets.
-
-On macOS or Linux, run:
+Assign your Docker ID to a shell variable. Replace `<docker-id>` with your Docker ID and do not include the angle brackets. Run this command in Terminal on macOS or Linux, or in the Ubuntu WSL terminal on Windows:
 
 ```bash
 $ DOCKER_ID="<docker-id>"
 ```
 {: .source}
-
-In Windows PowerShell, the variable-assignment syntax is different, so run:
-
-```powershell
-PS> $DOCKER_ID = "<docker-id>"
-```
-{: .source}
-
-In this command, the `$` in `$DOCKER_ID` is part of the PowerShell variable name and must be typed.  It is not a command prompt.
 
 #### Create a test repository
 
@@ -288,7 +303,7 @@ $ docker push "docker.io/${DOCKER_ID}/first-image:latest"
 ```
 {: .source}
 
-The Docker commands above work in Bash, Zsh, and PowerShell after `DOCKER_ID` has been assigned using the syntax shown for the corresponding shell.
+The Docker commands above use shell syntax that works in Bash and Zsh, including Bash in the Ubuntu WSL terminal on Windows.
 
 After the push completes, open the `first-image` repository in Docker Hub and confirm that the `latest` tag is present.
 
