@@ -16,6 +16,45 @@ keypoints:
 ---
 
 
+### Prepare for the hands-on exercise
+
+*(Skip this if you already have `$TUTO` set from earlier in the workshop.)*
+
+If you haven't done so already, move to a suitable working directory and download the tutorial repository.  On Pawsey systems, use your scratch directory:
+
+```
+$ cd "$MYSCRATCH"
+$ git clone https://github.com/PawseySC/singularity-containers
+$ export TUTO="$PWD/singularity-containers"
+$ cd "$TUTO"
+```
+{: .bash}
+
+
+### Pull the Ubuntu image we'll use in this episode
+
+Load the Singularity module, and set up a personal library directory to keep pulled images in one place, rather than scattering them around (we'll reuse this same directory later in the episode):
+
+```
+$ module load singularity/4.1.0-nompi
+$ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
+$ mkdir -p "$MY_LOCAL_LIBRARY"
+```
+{: .bash}
+
+Most of this episode uses a plain Ubuntu image.  Let's pull it once into our library, rather than referencing `docker://ubuntu:24.04` directly every time — on a shared training account in particular, that would otherwise re-trigger Singularity's OCI-to-SIF conversion (`Converting OCI blobs to SIF format`) on every single command:
+
+```
+$ singularity pull \
+  "${MY_LOCAL_LIBRARY}/ubuntu--24.04.sif" \
+  docker://ubuntu:24.04
+$ export image="${MY_LOCAL_LIBRARY}/ubuntu--24.04.sif"
+```
+{: .bash}
+
+From here on, we'll use `"$image"` wherever you'd otherwise see `docker://ubuntu:24.04`.
+
+
 ### Access to directories in the host machine
 
 Let's start and `cd` into the root demo directory:
@@ -43,7 +82,7 @@ bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  s
 Now let's look at the root directory when we're in the container
 
 ```
-$ singularity exec docker://ubuntu:24.04 ls /
+$ singularity exec "$image" ls /
 ```
 {: .bash}
 
@@ -72,7 +111,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec docker://ubuntu:24.04 pwd
+> > $ singularity exec "$image" pwd
 > > ```
 > > {: .bash}
 > >
@@ -93,7 +132,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec docker://ubuntu:24.04 ls
+> > $ singularity exec "$image" ls
 > > ```
 > > {: .bash}
 > >
@@ -114,7 +153,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec docker://ubuntu:24.04 ls $TUTO/_episodes
+> > $ singularity exec "$image" ls $TUTO/_episodes
 > > ```
 > > {: .bash}
 > >
@@ -143,7 +182,7 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 > > ## Solution
 > > 
 > > ```
-> > $ singularity exec docker://ubuntu:24.04 touch /example
+> > $ singularity exec "$image" touch /example
 > > ```
 > > {: .bash}
 > > 
@@ -170,7 +209,7 @@ There is also a short syntax, that just mounts the dir using the same name and p
 Let's use the latter syntax to mount `$TUTO` into the container and re-run `ls`.
 
 ```
-$ singularity exec -B $TUTO docker://ubuntu:24.04 ls $TUTO/_episodes
+$ singularity exec -B $TUTO "$image" ls $TUTO/_episodes
 ```
 {: .bash}
 
@@ -186,8 +225,8 @@ $ singularity exec -B $TUTO docker://ubuntu:24.04 ls $TUTO/_episodes
 Also, we can write files in a host dir which has been bind mounted in the container:
 
 ```
-$ singularity exec -B $TUTO docker://ubuntu:24.04 touch $TUTO/_episodes/example
-$ singularity exec -B $TUTO docker://ubuntu:24.04 ls $TUTO/_episodes/example
+$ singularity exec -B $TUTO "$image" touch $TUTO/_episodes/example
+$ singularity exec -B $TUTO "$image" ls $TUTO/_episodes/example
 ```
 {: .bash}
 
@@ -242,7 +281,7 @@ By default, shell variables are inherited in the container from the host:
 
 ```
 $ export HELLO=world
-$ singularity exec docker://ubuntu:24.04 bash -c 'echo $HELLO'
+$ singularity exec "$image" bash -c 'echo $HELLO'
 ```
 {: .bash}
 
@@ -256,7 +295,7 @@ There might be situations where you want to isolate the shell environment of the
 
 ```
 $ export HELLO=world
-$ singularity exec -C docker://ubuntu:24.04 bash -c 'echo $HELLO'
+$ singularity exec -C "$image" bash -c 'echo $HELLO'
 ```
 {: .bash}
 
@@ -269,7 +308,7 @@ If you need to pass only specific variables to the container, that might or migh
 
 ```
 $ export SINGULARITYENV_CIAO=mondo
-$ singularity exec -C docker://ubuntu:24.04 bash -c 'echo $CIAO'
+$ singularity exec -C "$image" bash -c 'echo $CIAO'
 ```
 {: .bash}
 
@@ -281,7 +320,7 @@ mondo
 From Singularity 3.6.x on, there's an alternative way to define variables that are specific to the container, using the flag `--env`:
 
 ```
-$ singularity exec --env CIAO=mondo docker://ubuntu:24.04 bash -c 'echo $CIAO'
+$ singularity exec --env CIAO=mondo "$image" bash -c 'echo $CIAO'
 ```
 {: .bash}
 
@@ -296,19 +335,54 @@ mondo
 We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro).  BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics packages.  
 This example is adapted from the [BioContainers documentation](http://biocontainers-edu.biocontainers.pro/en/latest/running_example.html).
 
-We're going to use an image for the most recent BLAST version from the `quay.io` registry, *i.e.* `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`.
 
-Let's first `cd` into `demos/blast`, so that the `.sif` image file ends up there, alongside the other files we'll need for this example:
+#### Request a new interactive allocation
+
+We should still move off the login node and onto a compute node for real work. Load the Singularity module first, so it's available once we're on the compute node:
+
+```
+$ module load singularity/4.1.0-nompi
+```
+{: .bash}
+
+Now start a new interactive session on a compute node with:
+
+```
+$ salloc -p gpu -A courses01-gpu --gres=gpu:1 -N 1  --reservation=ContainersTraining-gpu -t 00:30:00
+```
+{: .bash}
+
+Let's `cd` into `demos/blast`, where the input FASTA file for this example lives:
 
 ```
 $ cd $TUTO/demos/blast
 ```
 {: .bash}
 
-Now, we'll pull the image.  This should take a few minutes (unless you had pulled the image in advance):
+
+#### Pull the BLAST image into your personal library
+
+As with the other container images we use in this workshop, let's keep things tidy by pulling images into one personal library directory, rather than scattering `.sif` files across demo folders.  Define it and create it if it doesn't already exist:
 
 ```
-$ singularity pull docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4
+$ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
+$ mkdir -p "$MY_LOCAL_LIBRARY"
+```
+{: .bash}
+
+We're going to use an image for the most recent BLAST version from the `quay.io` registry, *i.e.* `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`.  Let's pull it into our library.  This should take a few minutes (unless you had pulled the image in advance):
+
+```
+$ singularity pull \
+  "${MY_LOCAL_LIBRARY}/blast--2.9.0--pl526h3066fca_4.sif" \
+  docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4
+```
+{: .bash}
+
+For the rest of this episode, we'll refer to it as `$image`:
+
+```
+$ export image="${MY_LOCAL_LIBRARY}/blast--2.9.0--pl526h3066fca_4.sif"
 ```
 {: .bash}
 
@@ -355,7 +429,7 @@ $ singularity pull docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec blast_2.9.0--pl526h3066fca_4.sif blastp -help
+> > $ singularity exec "$image" blastp -help
 > > ```
 > > {: .bash}
 > >
@@ -396,7 +470,7 @@ $ gunzip zebrafish.1.protein.faa.gz
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec ../blast/blast_2.9.0--pl526h3066fca_4.sif makeblastdb -in zebrafish.1.protein.faa -dbtype prot
+> > $ singularity exec "$image" makeblastdb -in zebrafish.1.protein.faa -dbtype prot
 > > ```
 > > {: .bash}
 > > ```
@@ -437,7 +511,7 @@ $ cd ../blast
 > > ## Solution
 > >
 > > ```
-> > $ singularity exec -B $TUTO/demos/blast_db blast_2.9.0--pl526h3066fca_4.sif blastp -query P04156.fasta -db $TUTO/demos/blast_db/zebrafish.1.protein.faa -out results.txt
+> > $ singularity exec -B $TUTO/demos/blast_db "$image" blastp -query P04156.fasta -db $TUTO/demos/blast_db/zebrafish.1.protein.faa -out results.txt
 > > ```
 > > {: .bash}
 > {: .solution}
@@ -466,3 +540,5 @@ Sequences producing significant alignments:                          (Bits)  Val
 {: .output}
 
 When you're done, quit the view by hitting the `q` button.
+
+Once you're finished with this section, you can `exit` the interactive allocation.
