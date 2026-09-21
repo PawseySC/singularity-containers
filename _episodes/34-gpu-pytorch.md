@@ -4,12 +4,12 @@ teaching: 5
 exercises: 10
 questions:
 objectives:
-- Run a PyTorch GPU training script inside a Singularity/Apptainer container
+- Run a PyTorch GPU training script inside a Singularity container
 - Recognise container PATH/entrypoint quirks, and know how to work around them
 keypoints:
 - Deep learning frameworks such as PyTorch use the same `--rocm`/`--nv` container pattern as any other GPU application
+- A container's `PATH` and command names may not match what you expect (*e.g.* `python` vs `python3`) — it's worth checking what's actually there
 - Keep datasets and outputs outside the read-only container image, *e.g.* in a bind-mounted or current-working-directory path
-- Pre-fetch anything that needs internet access (datasets, weights) before submitting a batch job — compute nodes may not have outbound internet access
 ---
 
 
@@ -21,7 +21,7 @@ keypoints:
 
 ### Why PyTorch?
 
-Many scientific applications now ship GPU-enabled containers — from molecular dynamics packages like Gromacs to deep learning frameworks like PyTorch, which is what we'll use here.  Modern deep learning-based scientific tools — including structural biology models such as AlphaFold3 — are built on PyTorch.  Running a full AlphaFold3-scale model is well beyond the scope of a single episode (large weights, multi-stage pipeline), but the *mechanics* of running one on Setonix are exactly what we'll practise: a GPU-enabled container, a bind-mounted data directory, and a single-GPU Slurm allocation.  We'll use a small, fast example instead — a fully-connected network classifying *FashionMNIST* images — so we can focus on the container mechanics rather than waiting on a large model.
+Many scientific applications now ship GPU-enabled containers — from molecular dynamics packages like Gromacs to deep learning frameworks like PyTorch.  PyTorch in particular is the basis of a large and growing range of scientific computations, from image analysis to protein structure prediction tools such as AlphaFold.  Here, we'll use it to test the container workflow: a GPU-enabled container, a bind-mounted data directory, and a single-GPU Slurm allocation.  We'll run a a fully-connected network classifying *FashionMNIST* images to help us appreciate GPU-enabled container mechanics.
 
 
 ### Request a new interactive allocation
@@ -166,7 +166,7 @@ Once you've confirmed the GPU is visible, `exit` the interactive allocation — 
 
 ### Pre-fetching the dataset
 
-The training script downloads *FashionMNIST* the first time it runs.  Compute nodes may not have outbound internet access (this varies by site), so let's fetch it now, while we still have our interactive allocation, or from the login node:
+The training script downloads *FashionMNIST* the first time it runs.  Setonix's compute nodes do have outbound internet access, but it's still good practice to fetch a dataset once rather than re-downloading it on every job run.  Let's fetch it now, while we still have our interactive allocation:
 
 ```
 $ singularity exec --rocm "$image" python3 -c '
