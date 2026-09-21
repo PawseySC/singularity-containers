@@ -101,7 +101,7 @@ In abstract, an image corresponds to a file, whereas a container corresponds to 
 
 A **registry** is a service that stores and distributes container images. Registries can be public (for example, *Docker Hub* or *Quay.io*) or private. Users can download images from registries and, where permitted, upload their own images for others to use.
 
-A **container engine** is the software used to create, download and run containers. Examples include *Docker*, *Singularity* and *Apptainer*.
+A **container engine** is software used to build and download container images and to start containers from them. Examples include *Docker*, *SingularityCE* and *Apptainer*.
 
 To build an image, we normally use a recipe describing how the image should be assembled. Most recipes start from an existing image that provides a base software environment, and then specify the additional applications, libraries, tools and configuration to include. This recipe is called a **Definition File** (or **def file**) in the *Singularity* and *Apptainer* ecosystems, and a **Dockerfile** in the *Docker* ecosystem.
 
@@ -110,7 +110,7 @@ To build an image, we normally use a recipe describing how the image should be a
 
 A number of tools are available to create, distribute and run containerised applications. Some of these will be covered throughout this tutorial:
 
-* **Docker**: the most widely used container platform and image ecosystem. Docker is commonly used on personal computers, cloud systems and CI/CD platforms to build and distribute container images. Although Docker itself is not typically used directly on shared HPC systems, Docker images are commonly used as the starting point for HPC container workflows. See the extensive [Docker documentation](https://docs.docker.com/) for more information.
+* **Docker**: the most widely used container platform and image ecosystem. Docker is commonly used on personal computers, cloud systems and CI/CD platforms to build and distribute container images. Although Docker itself is not typically used directly on shared HPC systems, Docker/OCI images are commonly used as the starting point for HPC container workflows. See the extensive [Docker documentation](https://docs.docker.com/) for more information.
 
 * **SingularityCE**: a container engine maintained by Sylabs and designed for HPC environments, allowing users to run containers without requiring elevated privileges. SingularityCE is the container engine used throughout this tutorial. See the [SingularityCE documentation](https://sylabs.io/guides/latest/user-guide/) for more information.
 
