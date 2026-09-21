@@ -1,0 +1,1 @@
+Built with Docker and ready to run with Singularity!
