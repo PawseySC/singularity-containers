@@ -113,48 +113,105 @@ Pulling the OCI image and converting it into a SIF image may take a few minutes.
 > ```
 > {: .error}
 >
-> In this training, this message most likely means that `launch_image_pulls.sh`, run near the beginning of the training, has already downloaded the OpenFOAM image to your local image library. Singularity will not overwrite the existing file unless you add the `--force` option to the pull command. Do not force the download unless you need to; continue the exercise using the existing `openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif` file.
+> In this training, this message most likely means that `launch_image_pulls.sh`, run near the beginning of the training, has already downloaded the Trinity image to your local image library. Singularity will not overwrite the existing file unless you add the `--force` option to the pull command. Do not download force the download unless you need to; continue the exercise using the existing `openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif` file.
 {: .solution}
 
-### Prepare the OpenFOAM tutorial case
+### Copy an OpenFOAM tutorial from the image to the host
 
-The MPI example requires a local copy of the OpenFOAM `periodicPlaneChannel` tutorial with settings suitable for this training. To save time, the `prepareTutorial.sh` script performs the complete preparation:
+Container images are normally read-only, but the files they contain can be copied to the writable host filesystem. This is useful when an image includes examples, templates, configuration files, or other resources that need to be inspected or modified before use. In this section, we use an OpenFOAM tutorial case to demonstrate this general container workflow.
 
-* It checks that the OpenFOAM image and the required training files are available.
-* It copies the `periodicPlaneChannel` tutorial from the container image into the current host directory.
-* It runs `update-settings.sh` to update the OpenFOAM dictionaries and the Slurm job script with the settings used in this episode.
-
-Run the preparation script from the `demos/openfoam` directory:
+OpenFOAM includes numerous tutorial cases that can be used as starting points for simulations. We will first open an interactive shell inside the container to explore these files and copy one of the tutorial cases to the host. Start the interactive shell and notice that the prompt changes to `Singularity>`:
 
 ```bash
-$ ./prepareTutorial.sh
+$ SINGULARITY_IMAGE="${MY_LOCAL_LIBRARY}/openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif"
+$ singularity shell "$SINGULARITY_IMAGE"
 ```
 {: .source}
 
-The script stops if a `periodicPlaneChannel` directory already exists, rather than overwriting a case prepared during an earlier run. After successful completion, the case is ready to be submitted with the Slurm job script used in the next section.
+```text
+Singularity>
+```
+{: .output}
 
-> ## If curious: inspect the prepared tutorial
+When the shell starts, confirm that the current working directory is the directory from which `singularity shell` was invoked, then save that path in a variable:
+
+```bash
+Singularity> pwd
+Singularity> HOST_WORKING_DIR="$(pwd)"
+Singularity> echo "$HOST_WORKING_DIR"
+```
+{: .source}
+
+By default, Singularity makes the host current working directory available inside the container at the same path. This allows commands running in the container to read from and write to the episode directory on the host.
+
+OpenFOAM defines several environment variables to make its installation easier to navigate. The `FOAM_TUTORIALS` variable points to the collection of tutorial cases. Move to that directory and list its contents:
+
+```bash
+Singularity> echo "$FOAM_TUTORIALS"
+Singularity> cd "$FOAM_TUTORIALS"
+Singularity> pwd
+Singularity> ls
+```
+{: .source}
+
+```text
+Allclean    DNS         compressible      finiteArea    mesh         resources
+Allcollect  IO          discreteMethods   heatTransfer  modules      stressAnalysis
+Allrun      basic       electromagnetics   incompressible multiphase  verificationAndValidation
+Alltest     combustion  financial          lagrangian    preProcessing
+```
+{: .output}
+
+For this episode, we will use the tutorial at `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicPlaneChannel`.
+
+Once the tutorial has been selected, copy the case directory into the working directory on the host, whose path was saved in `HOST_WORKING_DIR`:
+
+```bash
+Singularity> cp -r "${FOAM_TUTORIALS}/incompressible/pimpleFoam/LES/periodicPlaneChannel" "$HOST_WORKING_DIR"
+```
+{: .source}
+
+> ## Alternative: copy the tutorial without opening an interactive shell
 >
-> List the top-level contents of the copied case:
+> The same steps can be performed directly from the host by using `singularity exec`. First, search the OpenFOAM tutorials directory for matching plane-channel cases:
 >
 > ```bash
-> $ ls -l periodicPlaneChannel
+> $ singularity exec "$SINGULARITY_IMAGE" \
+>     bash -c 'find "$FOAM_TUTORIALS" -iname "*PlaneChannel*"'
 > ```
 > {: .source}
 >
-> The `update-settings.sh` script creates numbered backups before modifying the OpenFOAM dictionaries and the Slurm script. During the first run, the original files are saved with names ending in `.original.00`.
+> The output should look something like this:
 >
-> Inspect the settings applied to the OpenFOAM dictionaries:
+> ```text
+> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/incompressible/pimpleFoam/LES/periodicPlaneChannel
+> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/incompressible/pimpleFoam/LES/planeChannel
+> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/verificationAndValidation/turbulenceModels/planeChannel
+> /opt/OpenFOAM/OpenFOAM-v2606/tutorials/verificationAndValidation/turbulentInflow/oneCellThickPlaneChannel
+> ```
+> {: .output}
+>
+> Then copy the selected tutorial into the current working directory on the host:
 >
 > ```bash
-> $ grep -E '^[[:space:]]*(endTime|writeInterval|runTimeModifiable)' \
->   periodicPlaneChannel/system/controlDict
-> $ grep -E '^[[:space:]]*(numberOfSubdomains|method|n[[:space:]])' \
->   periodicPlaneChannel/system/decomposeParDict
+> $ singularity exec "$SINGULARITY_IMAGE" \
+>     bash -c 'cp -r "$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicPlaneChannel" "$PWD"'
 > ```
 > {: .source}
 >
-> Compare the modified dictionaries with their original versions:
+> The commands are passed through `bash -c` so that `$FOAM_TUTORIALS` and `$PWD` are expanded inside the container. Singularity normally makes the host current working directory available inside the container at the same path, so the copied `periodicPlaneChannel` directory appears in the directory from which the command was run.
+{: .solution}
+
+Now update the default OpenFOAM dictionaries and the Slurm job script to the settings used in this episode:
+
+```bash
+$ ./update-settings.sh
+```
+{: .source}
+
+> ## If curious: inspect the changes
+>
+> Each time `update-settings.sh` modifies a file, it first creates a numbered backup with a name ending in `.original.00`, `.original.01`, and so on. After the first execution, inspect the changes to the OpenFOAM dictionaries with:
 >
 > ```bash
 > $ diff -u \
@@ -186,7 +243,7 @@ $ squeue --me
 
 ```text
 JOBID        USER ACCOUNT             NAME EXEC_HOST ST  REASON START_TIME   END_TIME  TIME_LEFT NODES   PRIORITY     QOS
-48927321 course01 courses   mpi-openfoam-t nid002604  R    None 18:40:12     19:00:12      19:45     1      75246  normal
+48927321   cou999 courses01 mpi-openfoam-t nid002604  R    None 18:40:12     19:00:12      19:45     1      75246  normal
 ```
 {: .output}
 
@@ -207,22 +264,22 @@ $ ls -ltr periodicPlaneChannel
 {: .source}
 
 ```text
--rwxr-xr-x   1 courses01 courses     915 Sep 15 19:05 Allrun
--rwxr-xr-x   1 courses01 courses     340 Sep 15 19:05 Allclean
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 19:05 0.orig
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 19:06 system
--rw-r--r--   1 courses01 courses    3299 Sep 15 19:08 log.blockMesh
--rw-r--r--   1 courses01 courses    2167 Sep 15 19:08 log.renumberMesh
-drwxr-sr-x   3 courses01 courses    4096 Sep 15 19:08 constant
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 19:08 0
--rw-r--r--   1 courses01 courses    5782 Sep 15 19:08 log.decomposePar
-drwxr-sr-x 104 courses01 courses    4096 Sep 15 19:08 processors8_4-7
-drwxr-sr-x 104 courses01 courses    4096 Sep 15 19:08 processors8_0-3
--rw-r--r--   1 courses01 courses 1160982 Sep 15 19:08 log.pimpleFoam
--rw-r--r--   1 courses01 courses    2092 Sep 15 19:09 log.reconstructPar
-drwxr-sr-x   3 courses01 courses    4096 Sep 15 19:09 200
--rw-r--r--   1 courses01 courses    1763 Sep 15 19:09 log.postChannel
-drwxr-sr-x   3 courses01 courses    4096 Sep 15 19:13 graphs
+-rwxr-xr-x   1 cou999 courses01     915 Sep 15 19:05 Allrun
+-rwxr-xr-x   1 cou999 courses01     340 Sep 15 19:05 Allclean
+drwxr-sr-x   2 cou999 courses01    4096 Sep 15 19:05 0.orig
+drwxr-sr-x   2 cou999 courses01    4096 Sep 15 19:06 system
+-rw-r--r--   1 cou999 courses01    3299 Sep 15 19:08 log.blockMesh
+-rw-r--r--   1 cou999 courses01    2167 Sep 15 19:08 log.renumberMesh
+drwxr-sr-x   3 cou999 courses01    4096 Sep 15 19:08 constant
+drwxr-sr-x   2 cou999 courses01    4096 Sep 15 19:08 0
+-rw-r--r--   1 cou999 courses01    5782 Sep 15 19:08 log.decomposePar
+drwxr-sr-x 104 cou999 courses01    4096 Sep 15 19:08 processors8_4-7
+drwxr-sr-x 104 cou999 courses01    4096 Sep 15 19:08 processors8_0-3
+-rw-r--r--   1 cou999 courses01 1160982 Sep 15 19:08 log.pimpleFoam
+-rw-r--r--   1 cou999 courses01    2092 Sep 15 19:09 log.reconstructPar
+drwxr-sr-x   3 cou999 courses01    4096 Sep 15 19:09 200
+-rw-r--r--   1 cou999 courses01    1763 Sep 15 19:09 log.postChannel
+drwxr-sr-x   3 cou999 courses01    4096 Sep 15 19:13 graphs
 ```
 {: .output}
 
@@ -423,13 +480,45 @@ At runtime:
 * Compatible host MPI libraries and communication libraries are made available inside the container.
 * The application uses the host-optimised MPI stack to communicate between processes and nodes.
 
-The MPI implementation can be installed directly in the application image or inherited from an MPI-enabled base image. The following simplified Dockerfile excerpt illustrates how MPICH can be built from source. It is intended to show the main build steps, rather than serve as an optimised production recipe:
+The MPI implementation can be installed directly in the application image or inherited from an MPI-enabled base image. The OpenFOAM image used in this episode follows the second approach.
+
+#### From the MPICH base image to the OpenFOAM image
+
+Pawsey develops and maintains the Dockerfiles for its MPICH base images and OpenFOAM application images in the [Pawsey containers Git repository](https://github.com/PawseySC/pawsey-containers).
+
+The OpenFOAM recipes for this software environment start from Pawsey's MPICH base image:
 
 ```dockerfile
-#--- Define the image to build from
+FROM quay.io/pawsey/mpich-base:mpich4.2.2-ubuntu24.04
+```
+{: .output}
+
+The remaining instructions in those recipes install the OpenFOAM build requirements and compile OpenFOAM on top of the MPI-enabled software environment inherited from the base image. As a result, OpenFOAM is built using the MPICH installation already provided by `mpich-base`.
+
+The relationship between the images is therefore:
+
+```text
+ubuntu:24.04
+    |
+    v
+quay.io/pawsey/mpich-base:mpich4.2.2-ubuntu24.04
+    |
+    v
+Pawsey OpenFOAM image used in this episode
+```
+{: .output}
+
+The complete OpenFOAM recipe is not presented here because most of its instructions are specific to building OpenFOAM. For this container training, the relevant part is how the underlying MPICH base image provides the MPI build environment required by the application.
+
+#### Simplified MPICH base-image recipe
+
+Pawsey's production MPICH base-image recipe performs several additional tasks, including verifying downloaded source archives, installing MPI testing tools, adding image metadata, and preserving build information. The following simplified Dockerfile excerpt focuses only on the steps used to compile and install MPICH. It uses the same MPICH version and build configuration as Pawsey's production recipe, while omitting the multi-stage structure and the components that are not required to explain the MPI build procedure.
+
+```dockerfile
+#--- Define the base image
 FROM ubuntu:24.04
 
-#--- Install prerequisites
+#--- Install the prerequisites required to build MPICH
 RUN set -eux; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
@@ -437,35 +526,35 @@ RUN set -eux; \
         build-essential \
         ca-certificates \
         gfortran \
-        wget; \
+        wget \
+    ; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
 #--- Define the MPICH version and compilation options
 ARG MPICH_VERSION="4.2.2"
 ARG MPICH_CONFIGURE_OPTIONS="--enable-fast=O2 --enable-fortran --enable-romio --prefix=/usr --with-device=ch4:ofi CC=gcc CXX=g++ FC=gfortran FFLAGS=-fallow-argument-mismatch FCFLAGS=-fallow-argument-mismatch"
+ARG MPICH_MAKE_OPTIONS="-j16"
 
-#--- Download MPICH source
-WORKDIR /tmp/mpich-build
+#--- Download, compile and install MPICH
 RUN set -eux; \
+    mkdir -p /tmp/mpich-build; \
+    cd /tmp/mpich-build; \
     wget --no-hsts \
         "https://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz"; \
-    tar xzf "mpich-${MPICH_VERSION}.tar.gz"
-
-#--- Compile and install MPICH
-WORKDIR /tmp/mpich-build/mpich-${MPICH_VERSION}
-RUN set -eux; \
+    tar xzvf "mpich-${MPICH_VERSION}.tar.gz"; \
+    cd "mpich-${MPICH_VERSION}"; \
     ./configure ${MPICH_CONFIGURE_OPTIONS}; \
-    make -j16; \
+    make ${MPICH_MAKE_OPTIONS}; \
     make install; \
-    ldconfig
-
-WORKDIR /
-RUN rm -rf /tmp/mpich-build
+    ldconfig; \
+    rm -rf /tmp/mpich-build
 ```
 {: .source}
 
 This example installs the build tools, downloads MPICH, and installs it under `/usr`. Applications added in later Dockerfile instructions can then be compiled using MPI compiler wrappers such as `mpicc`, `mpicxx`, and `mpifort`.
+
+The complete Pawsey recipe verifies the downloaded MPICH archive with a SHA-256 checksum before extracting it. That verification is omitted here to keep the example focused on the MPI build procedure, but downloaded source archives should be verified in production recipes. The production recipe also installs `mpi4py`, the OSU Micro-Benchmarks, and additional Pawsey MPI test utilities.
 
 > ## Why not install MPICH with `apt-get`?
 >
