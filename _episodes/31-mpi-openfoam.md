@@ -9,14 +9,12 @@ questions:
 - What performance overhead can MPI containers introduce compared with native execution?
 
 objectives:
-- Copy files from a container image to the writable host filesystem using an OpenFOAM tutorial as an example.
 - Run a containerised MPI application using Singularity and the Slurm scheduler.
 - Explain how Slurm launches containerised MPI applications to run in parallel.
 - Describe the roles of the host and container MPI installations in the hybrid MPI model, and why MPI ABI compatibility and access to host interconnect libraries are required.
 - Identify how Pawsey's MPI-enabled Singularity module configures host integration.
 
 keypoints:
-- Files packaged inside a read-only container image can be copied to the writable host filesystem for modification and use.
 - Launchers such as `srun` start `singularity exec`, creating one container process for each task in the parallel job step.
 - In the hybrid MPI model, the host launches the MPI tasks while the container provides the MPI application and an MPI implementation used to build it.
 - The container MPI must be compatible with the host MPI, and efficient multi-node execution requires access to the host interconnect libraries.
@@ -24,16 +22,12 @@ keypoints:
 - A correctly configured MPI container can achieve communication performance close to native execution, but performance must be validated on the target system.
 ---
 
-### Request a new interactive allocation (we need more resources for this)
+### Request a new interactive allocation
 
-If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm.
-
-(If you are already using an interactive session in a compute node set with a previous `salloc` command, then exit by typing `exit`.)
-
-Now start a new interactive session in a compute node with:
+If you’re running this tutorial on a shared system (e.g. Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
 
 ```
-$ salloc -N 1 -n 1 -c 16 --reservation=ContainersTraining -t 4:00:00
+$ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 4:00:00
 ```
 {: .source}
 
@@ -54,14 +48,13 @@ If you haven't done so already, move to a suitable working directory and downloa
 $ cd "$MYSCRATCH"    # On Pawsey systems
 $ git clone https://github.com/PawseySC/singularity-containers
 $ export TUTO="$PWD/singularity-containers"
-$ cd "$TUTO"
 ```
 {: .source}
 
 Now move to the working directory for this episode:
 
 ```bash
-$ cd demos/openfoam
+$ cd "${TUTO}/demos/openfoam"
 $ pwd
 ```
 {: .source}
@@ -69,7 +62,7 @@ $ pwd
 The working directory should be something like:
 
 ```text
-/path/to/scratch/singularity-containers/demos/openfoam
+/path/to/your/scratch/singularity-containers/demos/openfoam
 ```
 {: .output}
 
@@ -82,11 +75,13 @@ $ module load singularity/4.1.0-mpi
 
 ### Choose an OpenFOAM image from Pawsey's Quay registry
 
-In your web browser, go to `https://quay.io/pawsey`.
+In your web browser, go to: [https://quay.io/pawsey](https://quay.io/organization/pawsey).
 
 Pawsey provides container images for several research applications. Find and select the `pawsey/openfoam` repository, then select the **Tags** icon on the left side of the page. (**Do not confuse this repository with `pawsey/openfoam-org`.**)
 
-Find the OpenFOAM image with the tag `v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04`. Select the **Fetch Tag** icon on the right, then select **Docker Pull (by tag)**. Copy only the image tag, **not the complete Docker command**, and close the window.
+Find the OpenFOAM image with the tag `v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04`.
+
+To avoid errors typing the image tag, select the **Fetch Tag** icon on the right, then select **Docker Pull (by tag)**. Copy only the image tag, **not the complete Docker command**, and close the window. We'll use that tag for the pulling command in the next section.
 
 ### Pull the OpenFOAM image into your personal library
 
@@ -108,6 +103,18 @@ $ singularity pull \
 {: .source}
 
 Pulling the OCI image and converting it into a SIF image may take a few minutes.
+
+> ## If the OpenFOAM image already exists
+>
+> You may see an error similar to:
+>
+> ```text
+> FATAL:   Image file already exists: "..../openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif" - will not overwrite
+> ```
+> {: .error}
+>
+> In this training, this message most likely means that `launch_image_pulls.sh`, run near the beginning of the training, has already downloaded the Trinity image to your local image library. Singularity will not overwrite the existing file unless you add the `--force` option to the pull command. Do not download force the download unless you need to; continue the exercise using the existing `openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif` file.
+{: .solution}
 
 ### Copy an OpenFOAM tutorial from the image to the host
 
@@ -236,7 +243,7 @@ $ squeue --me
 
 ```text
 JOBID        USER ACCOUNT             NAME EXEC_HOST ST  REASON START_TIME   END_TIME  TIME_LEFT NODES   PRIORITY     QOS
-48927321 course01 courses   mpi-openfoam-t nid002604  R    None 18:40:12     19:00:12      19:45     1      75246  normal
+48927321   cou999 courses01 mpi-openfoam-t nid002604  R    None 18:40:12     19:00:12      19:45     1      75246  normal
 ```
 {: .output}
 
@@ -257,22 +264,22 @@ $ ls -ltr periodicPlaneChannel
 {: .source}
 
 ```text
--rwxr-xr-x   1 courses01 courses     915 Sep 15 19:05 Allrun
--rwxr-xr-x   1 courses01 courses     340 Sep 15 19:05 Allclean
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 19:05 0.orig
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 19:06 system
--rw-r--r--   1 courses01 courses    3299 Sep 15 19:08 log.blockMesh
--rw-r--r--   1 courses01 courses    2167 Sep 15 19:08 log.renumberMesh
-drwxr-sr-x   3 courses01 courses    4096 Sep 15 19:08 constant
-drwxr-sr-x   2 courses01 courses    4096 Sep 15 19:08 0
--rw-r--r--   1 courses01 courses    5782 Sep 15 19:08 log.decomposePar
-drwxr-sr-x 104 courses01 courses    4096 Sep 15 19:08 processors8_4-7
-drwxr-sr-x 104 courses01 courses    4096 Sep 15 19:08 processors8_0-3
--rw-r--r--   1 courses01 courses 1160982 Sep 15 19:08 log.pimpleFoam
--rw-r--r--   1 courses01 courses    2092 Sep 15 19:09 log.reconstructPar
-drwxr-sr-x   3 courses01 courses    4096 Sep 15 19:09 200
--rw-r--r--   1 courses01 courses    1763 Sep 15 19:09 log.postChannel
-drwxr-sr-x   3 courses01 courses    4096 Sep 15 19:13 graphs
+-rwxr-xr-x   1 cou999 courses01     915 Sep 15 19:05 Allrun
+-rwxr-xr-x   1 cou999 courses01     340 Sep 15 19:05 Allclean
+drwxr-sr-x   2 cou999 courses01    4096 Sep 15 19:05 0.orig
+drwxr-sr-x   2 cou999 courses01    4096 Sep 15 19:06 system
+-rw-r--r--   1 cou999 courses01    3299 Sep 15 19:08 log.blockMesh
+-rw-r--r--   1 cou999 courses01    2167 Sep 15 19:08 log.renumberMesh
+drwxr-sr-x   3 cou999 courses01    4096 Sep 15 19:08 constant
+drwxr-sr-x   2 cou999 courses01    4096 Sep 15 19:08 0
+-rw-r--r--   1 cou999 courses01    5782 Sep 15 19:08 log.decomposePar
+drwxr-sr-x 104 cou999 courses01    4096 Sep 15 19:08 processors8_4-7
+drwxr-sr-x 104 cou999 courses01    4096 Sep 15 19:08 processors8_0-3
+-rw-r--r--   1 cou999 courses01 1160982 Sep 15 19:08 log.pimpleFoam
+-rw-r--r--   1 cou999 courses01    2092 Sep 15 19:09 log.reconstructPar
+drwxr-sr-x   3 cou999 courses01    4096 Sep 15 19:09 200
+-rw-r--r--   1 cou999 courses01    1763 Sep 15 19:09 log.postChannel
+drwxr-sr-x   3 cou999 courses01    4096 Sep 15 19:13 graphs
 ```
 {: .output}
 
@@ -473,13 +480,45 @@ At runtime:
 * Compatible host MPI libraries and communication libraries are made available inside the container.
 * The application uses the host-optimised MPI stack to communicate between processes and nodes.
 
-The MPI implementation can be installed directly in the application image or inherited from an MPI-enabled base image. The following simplified Dockerfile excerpt illustrates how MPICH can be built from source. It is intended to show the main build steps, rather than serve as an optimised production recipe:
+The MPI implementation can be installed directly in the application image or inherited from an MPI-enabled base image. The OpenFOAM image used in this episode follows the second approach.
+
+#### From the MPICH base image to the OpenFOAM image
+
+Pawsey develops and maintains the Dockerfiles for its MPICH base images and OpenFOAM application images in the [Pawsey containers Git repository](https://github.com/PawseySC/pawsey-containers).
+
+The OpenFOAM recipes for this software environment start from Pawsey's MPICH base image:
 
 ```dockerfile
-#--- Define the image to build from
+FROM quay.io/pawsey/mpich-base:mpich4.2.2-ubuntu24.04
+```
+{: .output}
+
+The remaining instructions in those recipes install the OpenFOAM build requirements and compile OpenFOAM on top of the MPI-enabled software environment inherited from the base image. As a result, OpenFOAM is built using the MPICH installation already provided by `mpich-base`.
+
+The relationship between the images is therefore:
+
+```text
+ubuntu:24.04
+    |
+    v
+quay.io/pawsey/mpich-base:mpich4.2.2-ubuntu24.04
+    |
+    v
+Pawsey OpenFOAM image used in this episode
+```
+{: .output}
+
+The complete OpenFOAM recipe is not presented here because most of its instructions are specific to building OpenFOAM. For this container training, the relevant part is how the underlying MPICH base image provides the MPI build environment required by the application.
+
+#### Simplified MPICH base-image recipe
+
+Pawsey's production MPICH base-image recipe performs several additional tasks, including verifying downloaded source archives, installing MPI testing tools, adding image metadata, and preserving build information. The following simplified Dockerfile excerpt focuses only on the steps used to compile and install MPICH. It uses the same MPICH version and build configuration as Pawsey's production recipe, while omitting the multi-stage structure and the components that are not required to explain the MPI build procedure.
+
+```dockerfile
+#--- Define the base image
 FROM ubuntu:24.04
 
-#--- Install prerequisites
+#--- Install the prerequisites required to build MPICH
 RUN set -eux; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
@@ -487,35 +526,35 @@ RUN set -eux; \
         build-essential \
         ca-certificates \
         gfortran \
-        wget; \
+        wget \
+    ; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
 #--- Define the MPICH version and compilation options
 ARG MPICH_VERSION="4.2.2"
 ARG MPICH_CONFIGURE_OPTIONS="--enable-fast=O2 --enable-fortran --enable-romio --prefix=/usr --with-device=ch4:ofi CC=gcc CXX=g++ FC=gfortran FFLAGS=-fallow-argument-mismatch FCFLAGS=-fallow-argument-mismatch"
+ARG MPICH_MAKE_OPTIONS="-j16"
 
-#--- Download MPICH source
-WORKDIR /tmp/mpich-build
+#--- Download, compile and install MPICH
 RUN set -eux; \
+    mkdir -p /tmp/mpich-build; \
+    cd /tmp/mpich-build; \
     wget --no-hsts \
         "https://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz"; \
-    tar xzf "mpich-${MPICH_VERSION}.tar.gz"
-
-#--- Compile and install MPICH
-WORKDIR /tmp/mpich-build/mpich-${MPICH_VERSION}
-RUN set -eux; \
+    tar xzvf "mpich-${MPICH_VERSION}.tar.gz"; \
+    cd "mpich-${MPICH_VERSION}"; \
     ./configure ${MPICH_CONFIGURE_OPTIONS}; \
-    make -j16; \
+    make ${MPICH_MAKE_OPTIONS}; \
     make install; \
-    ldconfig
-
-WORKDIR /
-RUN rm -rf /tmp/mpich-build
+    ldconfig; \
+    rm -rf /tmp/mpich-build
 ```
 {: .source}
 
 This example installs the build tools, downloads MPICH, and installs it under `/usr`. Applications added in later Dockerfile instructions can then be compiled using MPI compiler wrappers such as `mpicc`, `mpicxx`, and `mpifort`.
+
+The complete Pawsey recipe verifies the downloaded MPICH archive with a SHA-256 checksum before extracting it. That verification is omitted here to keep the example focused on the MPI build procedure, but downloaded source archives should be verified in production recipes. The production recipe also installs `mpi4py`, the OSU Micro-Benchmarks, and additional Pawsey MPI test utilities.
 
 > ## Why not install MPICH with `apt-get`?
 >
