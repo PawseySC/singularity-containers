@@ -73,7 +73,7 @@ The working directory should be something like:
 
 ### Singularity: the container engine used in this training
 
-Singularity is a container engine designed for shared HPC environments. It allows users to run containers without requiring elevated privileges and integrates containerised applications with host filesystems, schedulers, networks, and HPC hardware.
+**SingularityCE**, referred to as **Singularity** throughout this training, is a container engine designed for shared HPC environments. It allows users to run containers without requiring elevated privileges and integrates containerised applications with host filesystems, schedulers, networks, and HPC hardware.
 
 Throughout this training, we use Singularity to run containers. Many of the images used with Singularity were originally built and published through the Docker/OCI ecosystem. Singularity can retrieve these images directly from compatible registries, convert them to the Singularity Image Format (SIF), and run them without requiring the Docker engine.
 
