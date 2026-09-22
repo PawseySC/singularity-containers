@@ -34,19 +34,20 @@ keypoints:
 > Run the following commands in the terminal on the local computer where Docker was installed and tested. Do not run these Docker commands on a Setonix login or compute node. This location remains in effect until another location callout appears.
 {: .callout}
 
-Clone the training repository if you have not already done so:
+In your own computer, go to an adecuate directory and clone the training repository if you have not already done so:
 
 ```bash
+$ mkdir -p "$HOME/containersTrainingPawsey"
+$ cd "$HOME/containersTrainingPawsey"
 $ git clone https://github.com/PawseySC/singularity-containers
 $ export TUTO="$PWD/singularity-containers"
-$ cd "$TUTO"
 ```
 {: .source}
 
 Now move to the working directory for this episode:
 
 ```bash
-$ cd demos/build_lolcow_docker
+$ cd "${TUTO}/demos/build_lolcow_docker"
 $ pwd
 ```
 {: .source}
@@ -112,14 +113,6 @@ Docker is not used to run the workload on Setonix. A successful local Docker tes
 
 Perform the Docker sections of this episode on the computer where Docker was installed and tested in the installation episode. Do not run these commands on a Setonix login or compute node.
 
-Move to the Docker example in the training repository:
-
-```bash
-$ cd "$TUTO/demos/build_lolcow_docker"
-$ pwd
-```
-{: .source}
-
 List the files in the directory:
 
 ```bash
@@ -138,7 +131,7 @@ lolcow-message.txt
 
 The actual recipe is named `lolcow.dockerfile` so that its purpose remains clear when it is viewed outside this directory or alongside recipes for other images. The symbolic link named `Dockerfile` points to that recipe. `Dockerfile` is the default filename used by Docker, so the link allows the standard `docker build ... .` command to find the recipe without an additional option.
 
-The `lolcow-message.txt` file contains the message that will be copied into the image and displayed by the default container action.
+The `lolcow-message.txt` file contains the message that will be copied into the image and displayed by the default container action. Near the end of the build, the recipe and message file are also preserved inside the image for later inspection.
 
 ### Read the Dockerfile
 
@@ -147,11 +140,6 @@ The `lolcow.dockerfile` recipe is:
 ```dockerfile
 # Start from a versioned Ubuntu image on Docker Hub
 FROM docker.io/ubuntu:24.04
-
-# Record standard OCI image metadata
-LABEL org.opencontainers.image.title="lolcow training image" \
-      org.opencontainers.image.description="Small image used to teach Docker builds for HPC" \
-      org.opencontainers.image.vendor="Pawsey Supercomputing Research Centre"
 
 # Install the applications and remove package-manager cache files
 RUN set -eux; \
@@ -171,6 +159,20 @@ COPY lolcow-message.txt /usr/local/share/lolcow/message.txt
 
 # Define the default action for docker run and singularity run
 CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat"]
+
+# Preserve the recipe and build input files inside the image
+ARG IMAGE_BUILD_INFO_DIR="/opt/build-info-and-recipes/lolcow"
+RUN mkdir -p "${IMAGE_BUILD_INFO_DIR}"
+COPY lolcow.dockerfile \
+     lolcow-message.txt \
+     "${IMAGE_BUILD_INFO_DIR}/"
+
+# Record standard OCI image metadata and the build-information location
+LABEL org.opencontainers.image.title="lolcow training image" \
+      org.opencontainers.image.description="Small image used to teach Docker builds for HPC" \
+      org.opencontainers.image.vendor="Pawsey Supercomputing Research Centre" \
+      org.opencontainers.image.source="https://github.com/PawseySC/singularity-containers" \
+      au.org.pawsey.image.build-info-dir="${IMAGE_BUILD_INFO_DIR}"
 ```
 {: .source}
 
@@ -186,17 +188,6 @@ FROM docker.io/ubuntu:24.04
 `FROM` begins a build stage and selects its base image. This example starts from the versioned `docker.io/ubuntu:24.04` image rather than `docker.io/ubuntu:latest`. The explicit `docker.io` component identifies Docker Hub as the registry.
 
 Choose base images from trusted publishers and prefer a supported, suitably small image that provides what the application needs. A versioned tag communicates the intended base more clearly, although tags can still be updated by their publisher. For stricter provenance, production builds may pin the base image by digest and update that digest deliberately.
-
-#### `LABEL`: record image metadata
-
-```dockerfile
-LABEL org.opencontainers.image.title="lolcow training image" \
-      org.opencontainers.image.description="Small image used to teach Docker builds for HPC" \
-      org.opencontainers.image.vendor="Pawsey Supercomputing Research Centre"
-```
-{: .source}
-
-`LABEL` adds metadata to the image and accepts one or more key-value pairs. This example uses predefined annotation keys from the [OCI Image Specification](https://specs.opencontainers.org/image-spec/annotations/), including `org.opencontainers.image.title`, `org.opencontainers.image.description`, and `org.opencontainers.image.vendor`. Using these standard keys makes the metadata easier for OCI-compatible tools to interpret consistently.
 
 #### `RUN`: execute build-time commands
 
@@ -224,6 +215,40 @@ This instruction:
 The package-index update, installation, and cleanup are performed in the same `RUN` instruction. Removing files in a later layer would not remove them from the earlier layer in which they were created.
 
 Using fewer `RUN` instructions does not by itself guarantee a good Dockerfile. Combine commands when their changes belong in one filesystem layer, but keep the result readable and ensure failures stop the build.
+
+##### Combining commands in one `RUN` instruction
+
+The package-index update, installation, and cleanup are kept in one `RUN` instruction so their final filesystem changes are recorded in one image layer. This prevents temporary package data from remaining in an earlier layer.
+
+In this recipe:
+
+- `\` continues the Dockerfile instruction onto the next physical line; it does not join shell commands by itself
+- `;` separates one shell command from the next
+- `set -e` stops the shell after an unhandled command failure, which is important because semicolon-separated commands would otherwise continue
+- `set -u` reports an error when an unset variable is expanded
+- `set -x` prints expanded commands as they execute, making the build log easier to diagnose
+
+Together, `set -eux` provides failure handling, unset-variable checking, and command tracing for the remainder of this `RUN` instruction. Because `-x` prints expanded commands, do not use traced commands to handle passwords, access tokens, or other secrets.
+
+> ## Optional: Using `&&` instead
+>
+> A more common Dockerfile style connects the same commands with `&&`:
+>
+> ```dockerfile
+> RUN export DEBIAN_FRONTEND=noninteractive \
+>     && apt-get update \
+>     && apt-get install -y --no-install-recommends \
+>         cowsay \
+>         lolcat \
+>     && apt-get clean \
+>     && rm -rf /var/lib/apt/lists/*
+> ```
+> {: .source}
+>
+> The `&&` operator runs the next command only when the preceding command succeeds. For this simple linear sequence, it provides explicit failure chaining without requiring `set -e`.
+>
+> Both styles create one image layer because each uses one `RUN` instruction. This training keeps the `set -eux` style because it is also suitable for longer instructions that use variables, loops, or conditionals.
+{: .solution}
 
 #### `ENV`: define a runtime environment variable
 
@@ -267,6 +292,12 @@ Later in the episode, the `CMD` instruction is updated to use `lolcat --force`, 
 >
 > `RUN` executes while the image is built. `CMD` records the default command to execute later when a container is started. A Dockerfile can contain only one effective `CMD`; if several are present, the last one takes effect.
 {: .callout}
+
+#### Preserve the recipe, build inputs, and metadata
+
+Near the end of the recipe, `ARG`, `RUN`, and `COPY` preserve the Dockerfile and the files consumed by the build under `/opt/build-info-and-recipes/lolcow`. The final `LABEL` instruction records standard OCI metadata, the source repository, and the internal build-information directory.
+
+Keeping these frequently edited instructions near the end allows Docker to reuse the earlier package-installation layers when the preserved recipe or labels change. The embedded files support later inspection but do not replace the version-controlled source repository, image digest, base-image digest, and recorded build command.
 
 ### Build the image for the target HPC architecture
 
@@ -555,7 +586,7 @@ Which build steps are reused from the cache, and which part changes?
 
 > ## Solution
 >
-> The base image, package-installation layer, environment setting, and copied message are unchanged, so Docker can reuse their cached results. Only the final image configuration changes because the `CMD` instruction was modified.
+> The base image, package-installation layer, environment setting, and runtime copy of the message are unchanged, so Docker can reuse their cached results. The `CMD` instruction changes. Because the Dockerfile is also preserved near the end of the recipe, the build-information copy and final labels are processed again.
 >
 > This demonstrates why instructions that change frequently are normally placed after stable and expensive build steps.
 {: .solution}
@@ -743,19 +774,13 @@ FROM quay.io/pawsey/mpich-base:3.4.3_ubuntu24.04
 ```
 {: .source}
 
-The base image supplies MPICH, compiler wrappers, and MPI runtime tools. The derived image compiles `mpi-mandelbrot.cpp` with `mpic++`, installs ImageMagick for PPM-to-PNG conversion, and preserves `THIRD_PARTY_NOTICES.md` inside the image.
+The base image supplies MPICH, compiler wrappers, and MPI runtime tools. The derived image compiles `mpi-mandelbrot.cpp` with `mpic++`, installs ImageMagick for PPM-to-PNG conversion, and preserves `THIRD_PARTY_NOTICES.md` inside the image. The recipe and all image-build inputs are also preserved under `/opt/build-info-and-recipes/mandelbrot-mpi`.
 
 The complete recipe is:
 
 ```dockerfile
 # Build the application on Pawsey's Setonix-compatible MPICH base image
 FROM quay.io/pawsey/mpich-base:3.4.3_ubuntu24.04
-
-# Record standard OCI image metadata
-LABEL org.opencontainers.image.title="MPI Mandelbrot renderer" \
-      org.opencontainers.image.description="MPI training application built on Pawsey's MPICH base image" \
-      org.opencontainers.image.vendor="Pawsey Supercomputing Research Centre" \
-      org.opencontainers.image.licenses="MIT"
 
 # Install the utility used to convert the PPM result to PNG
 RUN set -eux; \
@@ -783,8 +808,26 @@ COPY THIRD_PARTY_NOTICES.md \
 
 # Display application help when no other command is supplied
 CMD ["mpi-mandelbrot", "--help"]
+
+# Preserve the recipe and build input files inside the image
+ARG IMAGE_BUILD_INFO_DIR="/opt/build-info-and-recipes/mandelbrot-mpi"
+RUN mkdir -p "${IMAGE_BUILD_INFO_DIR}"
+COPY mandelbrot_mpi.dockerfile \
+     mpi-mandelbrot.cpp \
+     THIRD_PARTY_NOTICES.md \
+     "${IMAGE_BUILD_INFO_DIR}/"
+
+# Record standard OCI image metadata and the build-information location
+LABEL org.opencontainers.image.title="MPI Mandelbrot renderer" \
+      org.opencontainers.image.description="MPI training application built on Pawsey's MPICH base image" \
+      org.opencontainers.image.vendor="Pawsey Supercomputing Research Centre" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.source="https://github.com/PawseySC/singularity-containers" \
+      au.org.pawsey.image.build-info-dir="${IMAGE_BUILD_INFO_DIR}"
 ```
 {: .source}
+
+The Mandelbrot Dockerfile and all files consumed by `docker build` are preserved under `/opt/build-info-and-recipes/mandelbrot-mpi`; the final labels record this location. The host-side run scripts are not copied because they are runtime launch policy, not image-build inputs.
 
 The image deliberately contains the application rather than a site-specific MPI launcher. A simple wrapper could have been copied into the image to run `mpiexec`, execute the renderer, and convert its output. That approach is convenient for a self-contained Docker demonstration, but it does not match the supported Setonix launch model, where Slurm starts the tasks outside the image. Embedding the launcher would also make it part of the immutable image, so refining the launch policy would require rebuilding and redistributing the image.
 
@@ -868,7 +911,7 @@ The lolcow and Mandelbrot examples demonstrate practices that should be retained
 
 - Start from an image maintained by a trusted project, vendor, or organisation, and prefer explicit application and base-image versions over `latest` where practical. In this episode, the examples use `docker.io/ubuntu:24.04` and `quay.io/pawsey/mpich-base:3.4.3_ubuntu24.04`.
 - Keep separate, focused build contexts for unrelated images. Keep each context small and use `.dockerignore` when needed to exclude unnecessary or sensitive files.
-- Record the Dockerfile and related build files in version control. Record standard OCI metadata and preserve licence notices with redistributed software.
+- Record the Dockerfile and related build files in version control. Preserve the recipe and image-build inputs inside the image when this supports provenance and later inspection. Record standard OCI metadata and preserve licence notices with redistributed software.
 - Use `COPY` for ordinary file and directory copies. Use `ADD` only when its additional behaviour is specifically required.
 - Install only required packages and remove package-manager caches in the same `RUN` instruction that installs them.
 - Place stable and expensive dependency steps before frequently changing application files to improve build-cache reuse.
@@ -1002,6 +1045,14 @@ Define the image path and inspect the file:
 $ SINGULARITY_MPI_IMAGE="${MY_LOCAL_LIBRARY}/mandelbrot-mpi--2026.09.sif"
 $ ls -lh "$SINGULARITY_MPI_IMAGE"
 $ singularity inspect "$SINGULARITY_MPI_IMAGE"
+```
+{: .source}
+
+Inspect the preserved image-build inputs:
+
+```bash
+$ singularity exec "$SINGULARITY_MPI_IMAGE" \
+    ls -l /opt/build-info-and-recipes/mandelbrot-mpi
 ```
 {: .source}
 
