@@ -25,9 +25,6 @@ RUN mpic++ \
 COPY THIRD_PARTY_NOTICES.md \
     /usr/local/share/doc/mpi-mandelbrot/THIRD_PARTY_NOTICES.md
 
-# Display application help when no other command is supplied
-CMD ["mpi-mandelbrot", "--help"]
-
 # Preserve the recipe and build input files inside the image
 ARG IMAGE_BUILD_INFO_DIR="/opt/build-info-and-recipes/mandelbrot-mpi"
 RUN mkdir -p "${IMAGE_BUILD_INFO_DIR}"
@@ -43,3 +40,7 @@ LABEL org.opencontainers.image.title="MPI Mandelbrot renderer" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/PawseySC/singularity-containers" \
       au.org.pawsey.image.build-info-dir="${IMAGE_BUILD_INFO_DIR}"
+
+
+# Display application help when no other command is supplied
+CMD ["mpi-mandelbrot", "--help"]

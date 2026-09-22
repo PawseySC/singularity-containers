@@ -157,9 +157,6 @@ ENV PATH="/usr/games:${PATH}"
 # Copy the message displayed by the default container action
 COPY lolcow-message.txt /usr/local/share/lolcow/message.txt
 
-# Define the default action for docker run and singularity run
-CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat"]
-
 # Preserve the recipe and build input files inside the image
 ARG IMAGE_BUILD_INFO_DIR="/opt/build-info-and-recipes/lolcow"
 RUN mkdir -p "${IMAGE_BUILD_INFO_DIR}"
@@ -173,6 +170,10 @@ LABEL org.opencontainers.image.title="lolcow training image" \
       org.opencontainers.image.vendor="Pawsey Supercomputing Research Centre" \
       org.opencontainers.image.source="https://github.com/PawseySC/singularity-containers" \
       au.org.pawsey.image.build-info-dir="${IMAGE_BUILD_INFO_DIR}"
+
+
+# Define the default action for docker run and singularity run
+CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat"]
 ```
 {: .source}
 
@@ -275,6 +276,12 @@ The source must be present in the build context and must not be excluded by `.do
 
 Another instruction that could copy this local file is `ADD`. However, `ADD` has additional capabilities, such as automatically extracting local tar archives and retrieving remote sources. For straightforward copies of local files and directories, prefer `COPY` because its behaviour and intent are clearer.
 
+#### Preserve the recipe, build inputs, and metadata
+
+Near the end of the recipe, `ARG`, `RUN`, and `COPY` preserve the Dockerfile and the files consumed by the build under `/opt/build-info-and-recipes/lolcow`. The final `LABEL` instruction records standard OCI metadata, the source repository, and the internal build-information directory.
+
+Keeping these frequently edited instructions near the end allows Docker to reuse the earlier package-installation layers when the preserved recipe or labels change. The embedded files support later inspection but do not replace the version-controlled source repository, image digest, base-image digest, and recorded build command.
+
 #### `CMD`: define the default action
 
 ```dockerfile
@@ -282,7 +289,7 @@ CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat"]
 ```
 {: .source}
 
-`CMD` defines the default command used when a Docker container is started without another command. The JSON, or exec, form preserves the command and arguments as separate values.
+`CMD` is the final instruction in this recipe and defines the default command used when a Docker container is started without another command. Placing it last makes the final runtime decision easy to locate. The JSON, or exec, form preserves the command and arguments as separate values.
 
 The redirection and pipeline must be interpreted by a shell, so the Dockerfile explicitly starts `bash -c`. `cowsay` reads the copied message through standard input, and `lolcat` processes the resulting output. This is the same shell-expression principle used with `singularity exec` in the basic Singularity episode.
 
@@ -293,13 +300,21 @@ Later in the episode, the `CMD` instruction is updated to use `lolcat --force`, 
 > `RUN` executes while the image is built. `CMD` records the default command to execute later when a container is started. A Dockerfile can contain only one effective `CMD`; if several are present, the last one takes effect.
 {: .callout}
 
-#### Preserve the recipe, build inputs, and metadata
-
-Near the end of the recipe, `ARG`, `RUN`, and `COPY` preserve the Dockerfile and the files consumed by the build under `/opt/build-info-and-recipes/lolcow`. The final `LABEL` instruction records standard OCI metadata, the source repository, and the internal build-information directory.
-
-Keeping these frequently edited instructions near the end allows Docker to reuse the earlier package-installation layers when the preserved recipe or labels change. The embedded files support later inspection but do not replace the version-controlled source repository, image digest, base-image digest, and recorded build command.
-
 ### Build the image for the target HPC architecture
+
+The general form of the build command is:
+
+```text
+docker build [OPTIONS] BUILD_CONTEXT
+```
+{: .output}
+
+The command builds a Docker/OCI image by processing a Dockerfile and the files available in the build context:
+
+- `[OPTIONS]` configures the build, including the target platform, image reference, and Dockerfile to use.
+- `BUILD_CONTEXT` identifies the directory, URL, or standard-input stream containing the files available to the build. A local directory is the most common choice.
+
+The build context is a required positional argument and normally appears last. Dockerfile instructions such as `COPY` and `ADD` can access files from this context. Docker normally looks for a file named `Dockerfile` at the root of the context unless another recipe is selected with `--file`.
 
 Define the complete local image reference, including its repository name and tag:
 
@@ -311,13 +326,17 @@ $ COW_IMAGE="lolcow:2026.09"
 Setonix compute nodes use the `amd64` architecture, also called `x86_64`. Build explicitly for that target:
 
 ```bash
-$ docker build --platform linux/amd64 -t "$COW_IMAGE" .
+$ docker build --platform linux/amd64 --tag "$COW_IMAGE" .
 ```
 {: .source}
 
-The `IMAGE` variable contains the local repository name `lolcow` and tag `2026.09`. The `-t` option assigns that complete reference to the image. Docker finds the recipe through the symbolic link named `Dockerfile`.
+In this command:
 
-The final `.` selects the current directory as the **build context**. The build context is the collection of files and directories made available to the Docker builder. Files in the context can be used by instructions such as `COPY` and `ADD`, so the context should contain only what the build requires.
+- `--platform linux/amd64` selects the target operating system and CPU architecture.
+- `--tag "$COW_IMAGE"` assigns the repository name and tag `lolcow:2026.09` to the resulting local image. The short form of `--tag` is `-t`.
+- `.` selects the current directory as the build context.
+
+The `COW_IMAGE` variable contains the local repository name `lolcow` and tag `2026.09`. Docker finds the recipe through the symbolic link named `Dockerfile`, while the final `.` makes the files in the current directory available to instructions such as `COPY` and `ADD`. The context should therefore contain only what the build requires.
 
 > ## Limiting a larger build context
 >
@@ -505,11 +524,8 @@ The exact error may differ between Docker versions. The build fails because no f
 Select the actual recipe explicitly with `--file`:
 
 ```bash
-$ docker build \
-    --platform linux/amd64 \
-    --file lolcow.dockerfile \
-    --tag "$COW_IMAGE" \
-    .
+$ docker build --platform linux/amd64 \
+    --file lolcow.dockerfile --tag "$COW_IMAGE" .
 ```
 {: .source}
 
@@ -537,10 +553,7 @@ Docker Buildx is a Docker CLI plugin that exposes extended capabilities of the B
 Buildx remains useful for additional operations such as build checks, multi-platform builds, configurable builders, cache import and export, and explicit output selection. For this episode, use its `--check` option to analyse the Dockerfile and build options without executing the complete image build:
 
 ```bash
-$ docker buildx build \
-    --check \
-    --file lolcow.dockerfile \
-    .
+$ docker buildx build --check --file lolcow.dockerfile .
 ```
 {: .source}
 
@@ -586,7 +599,7 @@ Which build steps are reused from the cache, and which part changes?
 
 > ## Solution
 >
-> The base image, package-installation layer, environment setting, and runtime copy of the message are unchanged, so Docker can reuse their cached results. The `CMD` instruction changes. Because the Dockerfile is also preserved near the end of the recipe, the build-information copy and final labels are processed again.
+> The base image, package-installation layer, environment setting, and runtime copy of the message are unchanged, so Docker can reuse their cached results. Because the Dockerfile itself is preserved inside the image, changing its final `CMD` also invalidates the build-information `COPY`. The following `LABEL` and final `CMD` instructions are therefore processed again, while the earlier package-installation layers remain cached.
 >
 > This demonstrates why instructions that change frequently are normally placed after stable and expensive build steps.
 {: .solution}
@@ -806,9 +819,6 @@ RUN mpic++ \
 COPY THIRD_PARTY_NOTICES.md \
     /usr/local/share/doc/mpi-mandelbrot/THIRD_PARTY_NOTICES.md
 
-# Display application help when no other command is supplied
-CMD ["mpi-mandelbrot", "--help"]
-
 # Preserve the recipe and build input files inside the image
 ARG IMAGE_BUILD_INFO_DIR="/opt/build-info-and-recipes/mandelbrot-mpi"
 RUN mkdir -p "${IMAGE_BUILD_INFO_DIR}"
@@ -824,6 +834,10 @@ LABEL org.opencontainers.image.title="MPI Mandelbrot renderer" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/PawseySC/singularity-containers" \
       au.org.pawsey.image.build-info-dir="${IMAGE_BUILD_INFO_DIR}"
+
+
+# Display application help when no other command is supplied
+CMD ["mpi-mandelbrot", "--help"]
 ```
 {: .source}
 

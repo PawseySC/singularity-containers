@@ -17,9 +17,6 @@ ENV PATH="/usr/games:${PATH}"
 # Copy the message displayed by the default container action
 COPY lolcow-message.txt /usr/local/share/lolcow/message.txt
 
-# Define the default action for docker run and singularity run
-CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat"]
-
 # Preserve the recipe and build input files inside the image
 ARG IMAGE_BUILD_INFO_DIR="/opt/build-info-and-recipes/lolcow"
 RUN mkdir -p "${IMAGE_BUILD_INFO_DIR}"
@@ -33,3 +30,7 @@ LABEL org.opencontainers.image.title="lolcow training image" \
       org.opencontainers.image.vendor="Pawsey Supercomputing Research Centre" \
       org.opencontainers.image.source="https://github.com/PawseySC/singularity-containers" \
       au.org.pawsey.image.build-info-dir="${IMAGE_BUILD_INFO_DIR}"
+
+
+# Define the default action for docker run and singularity run
+CMD ["bash", "-c", "cowsay < /usr/local/share/lolcow/message.txt | lolcat"]
