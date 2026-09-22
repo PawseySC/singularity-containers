@@ -1,12 +1,24 @@
 #!/bin/bash --login
 
+###Original request settings for this CPU job:
+###SBATCH --job-name=mpi-openfoam-training
+###SBATCH --partition=work
+###SBATCH --reservation=ContainersTraining
+###SBATCH --nodes=1
+###SBATCH --ntasks=8
+###SBATCH --ntasks-per-node=8
+###SBATCH --cpus-per-task=1
+###SBATCH --time=00:05:00
+
+#Forced request settinds due to this funny reservation for the Training only in GPU nodes:
+#This CPU application should be running in a CPU-only compute node requeste as indicate above,
+#but they only gave us access to the GPU nodes for this training, so we have to request a GPU node and then not use the GPU at all.
 #SBATCH --job-name=mpi-openfoam-training
-#SBATCH --partition=work
-#SBATCH --reservation=ContainersTraining
+#SBATCH --partition=gpu
+#SBATCH --account=courses01-gpu
+#SBATCH --reservation=ContainersTraining-gpu
 #SBATCH --nodes=1
-#SBATCH --ntasks=8
-#SBATCH --ntasks-per-node=8
-#SBATCH --cpus-per-task=1
+#SBATCH --gres=gpu:1
 #SBATCH --time=00:05:00
 
 #--- Load the singularity module (Pawsey's mpi-settings flavour):
