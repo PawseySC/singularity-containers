@@ -30,21 +30,14 @@ For this episode we need a compute node with a GPU, rather than the login node. 
 
 (If you already have an interactive allocation open from earlier in the workshop, exit it first by typing `exit`.)
 
-Load the Singularity module first, so it's available once we're on the compute node:
-
-```
-$ module load singularity/4.1.0-mpi
-```
-{: .bash}
-
 Now start a new interactive session on a compute node with:
 
+```bash
+$ salloc -p gpu -A courses01-gpu --gres=gpu:1 -N 1  --reservation=ContainersTraining-gpu -t 1:00:00
 ```
-$ salloc -p gpu -A courses01-gpu --gres=gpu:1 -N 1  --reservation=ContainersTraining-gpu -t 00:30:00
-```
-{: .bash}
+{: .source}
 
-```
+```text
 salloc: Granted job allocation 3453895
 salloc: Waiting for resource configuration
 salloc: Nodes nid002928 are ready for job
@@ -58,26 +51,39 @@ salloc: Nodes nid002928 are ready for job
 
 If you haven't done so already, move to a suitable working directory and download the tutorial repository.  On Pawsey systems, use your scratch directory:
 
-```
+```bash
 $ cd "$MYSCRATCH"
 $ git clone https://github.com/PawseySC/singularity-containers
 $ export TUTO="$PWD/singularity-containers"
-$ cd "$TUTO"
 ```
-{: .bash}
+{: .source}
 
 Now move to the working directory for this episode:
 
-```
-$ cd demos/pytorch
+```bash
+$ cd "${TUTO}/demos/pytorch"
 $ pwd
 ```
-{: .bash}
+{: .source}
 
 The working directory should be something like:
 
+```text
+/path/to/your/scratch/singularity-containers/demos/pytorch
 ```
-/path/to/scratch/singularity-containers/demos/pytorch
+{: .output}
+
+Load the Singularity module:
+
+```bash
+$ module load singularity/4.1.0-mpi-gpu
+$ module list
+```
+{: .source}
+
+```text
+...
+15) singularity/4.1.0-mpi-gpu
 ```
 {: .output}
 
@@ -100,35 +106,65 @@ Find the PyTorch image with the tag `2.7.1-rocm6.3.3`.  Select the *Fetch Tag* i
 
 In the terminal running within the interactive allocation on Setonix, define your personal library directory and create it if it does not already exist:
 
-```
+```bash
 $ export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
 $ mkdir -p "$MY_LOCAL_LIBRARY"
 ```
-{: .bash}
+{: .source}
 
 Pull the image for this example into your personal library directory:
 
-```
+```bash
 $ singularity pull \
   "${MY_LOCAL_LIBRARY}/pytorch--2.7.1-rocm6.3.3.sif" \
   docker://quay.io/pawsey/pytorch:2.7.1-rocm6.3.3
 ```
-{: .bash}
+{: .source}
 
-Pulling the OCI image and converting it into a SIF image may take a few minutes.  For the rest of this episode, we'll refer to it as `$image`:
+Pulling the OCI image and converting it into a SIF image may take a few minutes.  For the rest of this episode, we'll refer to it as `$TORCH_IMAGE`:
 
+```bash
+$ export TORCH_IMAGE="${MY_LOCAL_LIBRARY}/pytorch--2.7.1-rocm6.3.3.sif"
 ```
-$ export image="${MY_LOCAL_LIBRARY}/pytorch--2.7.1-rocm6.3.3.sif"
+{: .source}
+
+
+### Accessing GPUs from a container
+
+A GPU-enabled application inside a container needs access to the GPU devices and supporting libraries provided by the host system. Singularity provides vendor-specific options that make these resources available inside the container.
+
+For an AMD GPU with a ROCm-enabled container image, the general form is:
+
+```text
+singularity exec --rocm IMAGE COMMAND [ARGUMENTS...]
 ```
-{: .bash}
+{: .output}
+
+The `--rocm` option exposes the AMD GPU devices and the required host ROCm libraries inside the container.
+
+For an NVIDIA GPU with a CUDA-enabled container image, use the corresponding `--nv` option:
+
+```text
+singularity exec --nv IMAGE COMMAND [ARGUMENTS...]
+```
+{: .output}
+
+The `--nv` option exposes the NVIDIA GPU devices and the required host NVIDIA/CUDA libraries inside the container.
+
+The option and the container image must match the GPU platform on the host:
+
+- AMD GPU with a ROCm-enabled image: `--rocm`
+- NVIDIA GPU with a CUDA-enabled image: `--nv`
+
+Setonix uses AMD GPUs, and the PyTorch image selected for this episode is built for ROCm. Therefore, the commands in the remainder of this episode use `--rocm`.
 
 
 ### A quick sanity check
 
 Before running a full training job, it's worth checking interactively that the container can actually see the GPU:
 
-```
-$ singularity exec --rocm "$image" python3 -c '
+```bash
+$ singularity exec --rocm "$TORCH_IMAGE" python3 -c '
 import torch
 print("PyTorch:", torch.__version__)
 print("HIP:", torch.version.hip)
@@ -138,9 +174,9 @@ if torch.cuda.is_available():
     print("GPU:", torch.cuda.get_device_name(0))
 '
 ```
-{: .bash}
+{: .source}
 
-```
+```text
 PyTorch: 2.7.1a0+gite2d141d
 HIP: 6.3.42134-a9a80e791
 CUDA available: True
@@ -153,12 +189,12 @@ GPU: AMD Instinct MI250X
 
 > ## Have you spotted the `python` vs `python3` gotcha yet?
 >
-> If you try `singularity exec --rocm "$image" python -c '...'` (**without** the `3`), you'll get:
-> ```
+> If you try `singularity exec --rocm "$TORCH_IMAGE" python -c '...'` (**without** the `3`), you'll get:
+> ```text
 > FATAL:   "python": executable file not found in $PATH
 > ```
-> {: .output}
-> This image simply doesn't alias `python` to `python3` — only `python3` is on `PATH`.  Don't assume a command name inside a container, check what's actually there: `singularity exec "$image" ls /usr/bin | grep python` (or just trying it) will tell you.
+> {: .error}
+> This image simply doesn't alias `python` to `python3` — only `python3` is on `PATH`.  Don't assume a command name inside a container, check what's actually there: `singularity exec "$TORCH_IMAGE" ls /usr/bin | grep python` (or just trying it) will tell you.
 {: .callout}
 
 Once you've confirmed the GPU is visible, `exit` the interactive allocation — we'll submit the actual training as a batch job.
@@ -168,15 +204,15 @@ Once you've confirmed the GPU is visible, `exit` the interactive allocation — 
 
 The training script downloads *FashionMNIST* the first time it runs.  Setonix's compute nodes do have outbound internet access, but it's still good practice to fetch a dataset once rather than re-downloading it on every job run.  Let's fetch it now, while we still have our interactive allocation:
 
-```
-$ singularity exec --rocm "$image" python3 -c '
+```bash
+$ singularity exec --rocm "$TORCH_IMAGE" python3 -c '
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 datasets.FashionMNIST(root="mnist_data", train=True, download=True, transform=ToTensor())
 datasets.FashionMNIST(root="mnist_data", train=False, download=True, transform=ToTensor())
 '
 ```
-{: .bash}
+{: .source}
 
 This creates a `mnist_data` directory in the current folder (`demos/pytorch`) with the dataset already downloaded, so the batch job below won't need to reach out to the internet at all.
 
@@ -185,14 +221,14 @@ This creates a `mnist_data` directory in the current folder (`demos/pytorch`) wi
 
 The current directory has a training script, `mnist.py` — a small fully-connected network, trained for 10 epochs.  It reads where to find the dataset from the `DATA_DIR` environment variable, so the Slurm script controls that:
 
-```
+```bash
 $ cat mnist.py
 ```
-{: .bash}
+{: .source}
 
 And here's the Slurm batch script, `gpu.sh`:
 
-```
+```bash
 #!/bin/bash --login
 
 #SBATCH --job-name=pytorch-gpu
@@ -202,11 +238,11 @@ And here's the Slurm batch script, `gpu.sh`:
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --time=00:10:00
-#SBATCH --output=pytorch_gpu.out
+#SBATCH --output=pytorch_gpu-%j.out
 
-image="${MYSOFTWARE}/singularity/images/pytorch--2.7.1-rocm6.3.3.sif"
-module load singularity/4.1.0-nompi
-module load rocm   # provides rocm-smi on the host, for the hardware check below
+TORCH_IMAGE="${MYSOFTWARE}/singularity/images/pytorch--2.7.1-rocm6.3.3.sif"
+module load singularity/4.1.0-mpi-gpu
+module load rocm/6.4.1   # Only needed for rocm-smi check from the host below, not for running the container.
 
 # Cache the (small) FashionMNIST dataset inside this demo directory, so
 # the example is self-contained -- for real work, prefer a persistent
@@ -224,25 +260,31 @@ srun -N 1 -n 1 -c 8 --gres=gpu:1 rocm-smi --showhw
 
 echo -e "\n\n#------------------------#"
 echo "Code execution:"
+# Note: srun needs its own explicit resource flags for the job step; these
+# are independent from the allocation flags above and are not inherited.
+# With a single task and a single GPU there's no binding to fine-tune, so
+# --gpus-per-task/--gpu-bind aren't needed here.  "-c 8" reserves a full
+# CPU chiplet, matched to the GPU chiplet requested via --gres.
 srun -l -u -N 1 -n 1 -c 8 --gres=gpu:1 \
-    singularity exec --rocm "$image" python3 mnist.py
+    singularity exec --rocm "$TORCH_IMAGE" python3 mnist.py
 
 rm -rf ${TMPDIR}
 
 echo -e "\n\n#------------------------#"
 echo "Printing information of finished jobs steps using sacct:"
 sacct -j ${SLURM_JOBID} -o jobid%20,Start%20,elapsed%20
+
 ```
-{: .bash}
+{: .output}
 
 This follows a familiar shape: `srun` combined with `singularity exec --rocm`, plus the account `-gpu` suffix required for GPU jobs on Setonix.  We can submit it with:
 
-```
+```bash
 $ sbatch --account=courses01-gpu --reservation=ContainersTraining-gpu gpu.sh
 ```
-{: .bash}
+{: .source}
 
-Once it completes, check `pytorch_gpu.out` for the training loss printed every 100 batches, decreasing epoch over epoch.
+Once it completes, check `pytorch_gpu-<JobID>.out` for the training loss printed every 100 batches, decreasing epoch over epoch.
 
 
 ### Where to go from here
