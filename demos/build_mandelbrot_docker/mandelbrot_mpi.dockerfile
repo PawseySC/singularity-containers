@@ -11,7 +11,8 @@ RUN set -eux; \
 
 # Copy and compile the MPI application with the compiler from the base image
 COPY mpi-mandelbrot.cpp /tmp/mpi-mandelbrot.cpp
-RUN mpic++ \
+RUN set -eux; \
+    mpic++ \
         -std=c++17 \
         -O3 \
         -Wall \
@@ -19,7 +20,8 @@ RUN mpic++ \
         -Wpedantic \
         -o /usr/local/bin/mpi-mandelbrot \
         /tmp/mpi-mandelbrot.cpp \
-    && rm -f /tmp/mpi-mandelbrot.cpp
+    ; \
+    rm -f /tmp/mpi-mandelbrot.cpp
 
 # Preserve third-party acknowledgements and licence information
 COPY THIRD_PARTY_NOTICES.md \

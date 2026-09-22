@@ -13,7 +13,7 @@ set -euo pipefail
 
 #--- Load modules and define image
 module load singularity/4.1.0-mpi
-SINGULARITY_MPI_IMAGE="${MYSOFTWARE}/singularity/images/mandelbrot-mpi--2026.09.sif"
+MANDEL_IMAGE="${MYSOFTWARE}/singularity/images/mandelbrot-mpi--2026.09.sif"
 
 #--- Set environment and default values for the Mandelbrot workload and view
 WIDTH="${WIDTH:-6000}"
@@ -40,7 +40,7 @@ srun \
     -N "$SLURM_JOB_NUM_NODES" \
     -n "$SLURM_NTASKS" \
     -c 1 \
-    singularity exec "$SINGULARITY_MPI_IMAGE" \
+    singularity exec "$MANDEL_IMAGE" \
     mpi-mandelbrot \
         --width "$WIDTH" \
         --height "$HEIGHT" \
@@ -51,7 +51,7 @@ srun \
         --output "$OUTPUT_DIR/$FILE_PPM"
 
 #--- Convert the output PPM file to PNG format using ImageMagick's convert command inside the Singularity image
-singularity exec "$SINGULARITY_MPI_IMAGE" \
+singularity exec "$MANDEL_IMAGE" \
    convert "$OUTPUT_DIR/$FILE_PPM" "$OUTPUT_DIR/$FILE_PNG"
 
 rm -f "$OUTPUT_DIR/$FILE_PPM"
