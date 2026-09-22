@@ -13,7 +13,7 @@ set -euo pipefail
 IMAGES=(
     "docker://quay.io/pawsey/openfoam:v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04|openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif|openfoam"
     "docker://docker.io/trinityrnaseq/trinityrnaseq:2.8.6|trinityrnaseq--2.8.6.sif|trinity"
-    "docker://quay.io/pawsey/pytorch:2.7.1-rocm6.3.3.sif|pytorch--2.7.1-rocm6.3.3.sif|pytorch"
+    "docker://quay.io/pawsey/pytorch:2.7.1-rocm6.3.3|pytorch--2.7.1-rocm6.3.3.sif|pytorch"
 )
 
 

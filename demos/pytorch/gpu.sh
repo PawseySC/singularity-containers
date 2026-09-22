@@ -7,11 +7,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --time=00:10:00
-#SBATCH --output=pytorch_gpu.out
+#SBATCH --output=pytorch_gpu-%j.out
 
-image="${MYSOFTWARE}/singularity/images/pytorch--2.7.1-rocm6.3.3.sif"
-module load singularity/4.1.0-mpi
-module load rocm   # provides rocm-smi on the host, for the hardware check below
+TORCH_IMAGE="${MYSOFTWARE}/singularity/images/pytorch--2.7.1-rocm6.3.3.sif"
+module load singularity/4.1.0-mpi-gpu
+module load rocm/6.4.1   # Only needed for rocm-smi check from the host below, not for running the container.
 
 # Cache the (small) FashionMNIST dataset inside this demo directory, so
 # the example is self-contained -- for real work, prefer a persistent
@@ -35,7 +35,7 @@ echo "Code execution:"
 # --gpus-per-task/--gpu-bind aren't needed here.  "-c 8" reserves a full
 # CPU chiplet, matched to the GPU chiplet requested via --gres.
 srun -l -u -N 1 -n 1 -c 8 --gres=gpu:1 \
-    singularity exec --rocm "$image" python3 mnist.py
+    singularity exec --rocm "$TORCH_IMAGE" python3 mnist.py
 
 rm -rf ${TMPDIR}
 
