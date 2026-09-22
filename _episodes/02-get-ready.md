@@ -156,6 +156,7 @@ The launcher in the `demos` directory submits one independent Slurm job for each
 Run the launcher:
 
 ```bash
+$ chmod 755 launch_image_pulls.sh
 $ ./launch_image_pulls.sh
 ```
 {: .source}

@@ -13,6 +13,7 @@ set -euo pipefail
 IMAGES=(
     "docker://quay.io/pawsey/openfoam:v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04|openfoam--v2606-gcc13DPInt32Opt-mpich3.4.3-ubuntu24.04.sif|openfoam"
     "docker://docker.io/trinityrnaseq/trinityrnaseq:2.8.6|trinityrnaseq--2.8.6.sif|trinity"
+    "docker://quay.io/pawsey/pytorch:2.7.1-rocm6.3.3.sif|pytorch--2.7.1-rocm6.3.3.sif|pytorch"
 )
 
 
@@ -54,6 +55,11 @@ for image in "${IMAGES[@]}"; do
         job_id="$(
             sbatch --parsable \
                 --job-name="$job_name" \
+                --partition="gpu" \
+                --account="courses01-gpu" \
+                -N 1 \
+                --gres=gpu:1 \
+                --reservation="ContainersTraining-gpu" \
                 "$JOB_SCRIPT" \
                 "$image_reference" \
                 "$output_filename"
@@ -62,6 +68,11 @@ for image in "${IMAGES[@]}"; do
         job_id="$(
             sbatch --parsable \
                 --job-name="$job_name" \
+                --partition="gpu" \
+                --account="courses01-gpu" \
+                -N 1 \
+                --gres=gpu:1 \
+                --reservation="ContainersTraining-gpu" \
                 --dependency="afterany:${previous_job_id}" \
                 "$JOB_SCRIPT" \
                 "$image_reference" \
