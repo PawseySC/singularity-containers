@@ -22,7 +22,9 @@ objectives:
 
 keypoints:
 - Bind mounts make host files directly accessible at selected paths inside a container
+- A bind mount replaces whatever the image provides at that path; a persistent overlay merges with it. The choice is not just about file counts
 - An immutable container image can be combined with a separate writable overlay
+- A persistent overlay is an EXT3 filesystem inside a single file, with its own fixed size and inode count decided at creation time
 - Persistent overlays can reduce host-visible file counts, preserve application output across container runs, and store additional software without modifying the container image
 - Changes stored in a persistent overlay remain available across container runs
 - From the host filesystem's perspective, an overlay consolidates many internal files into a single overlay file
@@ -32,10 +34,10 @@ keypoints:
 
 ### Request an interactive allocation
 
-If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
+If you're running this tutorial on a shared system (*e.g.* Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allo cation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
 
 ```
-$ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 4:00:00
+$ salloc -p gpu -A courses01-gpu --gres=gpu:1 -N 1  --reservation=ContainersTraining-gpu -t 4:00:00
 ```
 {: .source}
 
@@ -147,7 +149,7 @@ Bind mounts can also expose host-provided software and libraries inside a contai
 
 Bind mounts are generally the simplest approach when files should remain directly accessible on the host. However, every file remains a separate entry on the host filesystem. A persistent overlay can be more suitable when a workflow creates a very large number of small files, or when persistent changes are needed across multiple paths in the container filesystem.
 
-### Create a persistent overlay file
+## Persistent overlays
 
 In a previous episode, we saw that the filesystem packaged in a SIF container image is **read-only**. In other words, files within that filesystem cannot normally be created, modified or removed.
 
@@ -159,22 +161,57 @@ A persistent overlay can reduce this metadata workload by storing those files wi
 
 Singularity supports persistent overlays for this purpose. A persistent overlay stores changes separately from the immutable container image and makes those changes available again whenever the overlay is mounted.
 
-The general form of the command for creating a separate overlay file is:
+> ## How an overlay filesystem works underneath
+>
+> This is standard Linux kernel behaviour (*OverlayFS*), not something specific to Singularity or to Pawsey. Docker uses the same mechanism for its image layers.
+>
+> The kernel is given three directories and presents a single merged view:
+>
+> - **lower**: the read-only root filesystem inside the SIF (a SquashFS image)
+> - **upper**: a writable directory, here held inside the overlay file
+> - **work**: scratch space the kernel needs to make changes atomically
+>
+> Four rules follow from this, and they explain everything an overlay does:
+>
+> | Operation | What happens |
+> |---|---|
+> | Read a file | Taken from **upper** if present, otherwise from **lower** |
+> | Create a new file | Written to **upper** |
+> | Modify a file that came from the image | **Copy-up**: the whole file is copied to **upper** first, then modified there |
+> | Delete a file that came from the image | A *whiteout* marker is recorded in **upper** to mask it |
+>
 
-```text
-singularity overlay create --size SIZE OVERLAY_FILE
-```
-{: .output}
+{: .callout}
 
-The `--size` option specifies the overlay capacity in MiB, and `OVERLAY_FILE` specifies the name and location of the file to create. Singularity creates an EXT3 filesystem inside this file. The overlay is not itself a container image; it is mounted together with a container image in subsequent `singularity run`, `exec`, or `shell` commands.
 
-For this example, create a 200 MiB overlay named `my_overlay.ext3`:
 
-```bash
-$ singularity overlay create --size 200 my_overlay.ext3
-```
-{: .source}
 
+### Comparing bind mounts and persistent overlays
+
+Bind mounts and persistent overlays both let a containerised application write data that outlives the read-only container image. They differ along three independent axes:
+
+**1. What happens at the target path**
+
+A bind mount *replaces*. Whatever the container image provides at that path is hidden for the duration of the run, as we saw with `/run` above.
+
+A persistent overlay *merges* (overlays). The container image's content at that path stays visible, and anything written is added alongside it. This is why an overlay can make the *entire* container filesystem writable, including paths such as `/usr/lib` or `/etc` that already hold content you need to keep. A bind mount cannot do this at all: mounting a host directory over `/usr/lib` would hide the image's libraries and break the container.
+
+**2. Where the bytes are stored**
+
+Files written through a bind mount are ordinary files in the host directory: immediately visible to `ls`, to other jobs, and to any non-containerised post-processing.
+
+Files written into an overlay live inside the overlay file. From the host they are not individually visible at all; you need to mount the overlay with a container to read them back.
+
+**3. What the host filesystem has to keep track of**
+
+Through a bind mount, every file the application creates becomes a separate object on `/scratch`, with its own inode and its own metadata operations against Lustre's metadata servers.
+
+In an overlay, all of it is one host file, no matter how many files it contains internally.
+
+
+
+
+The two mechanisms also combine freely, and in practice that is often the best answer: run the workload inside an overlay, and bind mount a host directory for the handful of outputs you actually want to keep. That is exactly the pattern used further below, running Trinity inside an overlay and copying only the two files we need back onto the host.
 
 ### Mount a persistent overlay with a container image
 
@@ -198,6 +235,22 @@ Read-write is the default mode. However, we include the `:rw` suffix to make the
 
 ```bash
 $ singularity shell --overlay "my_overlay.ext3:rw" "$UBUNTU_IMAGE"
+```
+{: .source}
+
+The general form of the command for creating a separate overlay file is:
+
+```text
+singularity overlay create --size SIZE OVERLAY_FILE
+```
+{: .output}
+
+The `--size` option specifies the overlay capacity in MiB, and `OVERLAY_FILE` specifies the name and location of the file to create. Singularity creates an EXT3 filesystem inside this file. The overlay is not itself a container image; it is mounted together with a container image in subsequent `singularity run`, `exec`, or `shell` commands.
+
+For this example, create a 200 MiB overlay named `my_overlay.ext3`:
+
+```bash
+$ singularity overlay create --size 200 my_overlay.ext3
 ```
 {: .source}
 
@@ -267,6 +320,26 @@ The directory and files are stored in the persistent overlay and remain availabl
 
 
 The newly created directories and files persist in the overlay and can be accessed again in future container runs whenever `my_overlay.ext3` is mounted. Data files may also be accessed with other compatible container images, although software stored in an overlay may depend on the original container image.
+
+> ## Choose the overlay size carefully
+>
+> Singularity overlays have a fixed size that must be chosen at creation time. If you do not reserve enough space, an installation or run can fail partway through, and you will need to create a larger overlay and start again. When in doubt, err on the generous side.
+>
+> An EXT3 filesystem also fixes its **inode count** at creation, derived from the size you requested. A workload that creates enormous numbers of very small files can therefore exhaust inodes while free space remains. This is reported, unhelpfully, as `No space left on device`. If you ever hit that error with space apparently free, check inode usage rather than block usage:
+>
+> ```bash
+> # Check inode usage inside the overlay
+> $ singularity exec --overlay "my_overlay.ext3:rw" "$UBUNTU_IMAGE" df -i /
+>
+> # Check space usage inside the overlay
+> $ singularity exec --overlay "my_overlay.ext3:rw" "$UBUNTU_IMAGE" df -h /
+> ```
+> {: .source}
+>
+> An alternative approach for storing large collections of small files is to package them into a SquashFS file (see Pawsey's documentation page: ["How to use SquashFS to avoid file quota issues"](https://pawsey.atlassian.net/wiki/spaces/US/pages/51927678/How+to+use+SquashFS+to+avoid+file+quota+issues)). Unlike overlays, SquashFS files do not require preallocating storage space. As SquashFS is a filesystem packaging technology rather than a container technology, it is outside the scope of this lesson.
+{: .callout}
+
+
 
 
 ### Run a Trinity genome assembly from inside the container
@@ -405,11 +478,9 @@ $ singularity overlay create --size 5000 my_conda_overlay.ext3
 ```
 {: .source}
 
-> ## Choose the overlay size carefully
+> ## Remember: overlay size (and inode count) is fixed at creation
 >
-> Singularity overlays have a fixed size that must be chosen at creation time. If you do not reserve enough space, the installation will fail partway through and you will need to create a larger overlay and start again. When in doubt, err on the generous side.
->
-> An alternative approach for storing large collections of small files is to package them into a SquashFS file (see the Pawsey's documentation page: ["How to use SquashFS to avoid file quota issues"](https://pawsey.atlassian.net/wiki/spaces/US/pages/51927678/How+to+use+SquashFS+to+avoid+file+quota+issues)). Unlike overlays, SquashFS files do not require preallocating storage space. As SquashFS is a filesystem packaging technology rather than a container technology, it is outside the scope of this lesson.
+> As discussed earlier when we first created an overlay, size (and the inode count derived from it) can't be changed after the fact. A Conda/Mamba installation is exactly the kind of large, many-file workload where getting this wrong (and having to start over) is most costly. When in doubt, err on the generous side.
 {: .callout}
 
 We're going to use `ubuntu--24.04.sif` again for this example. This minimal Ubuntu container image does not ship with `wget` or `curl`, so rather than downloading the Miniforge installer *from inside* the container, we'll download it first on the **host** into the current directory. Singularity will bind mount the current working directory into the container by default, making the installer available from inside the container later. On the x86-64 system used in this lesson, download the corresponding Miniforge installer:
