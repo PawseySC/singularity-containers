@@ -180,10 +180,7 @@ Singularity supports persistent overlays for this purpose. A persistent overlay 
 > | Modify a file that came from the image | **Copy-up**: the whole file is copied to **upper** first, then modified there |
 > | Delete a file that came from the image | A *whiteout* marker is recorded in **upper** to mask it |
 >
-
 {: .callout}
-
-
 
 
 ### Comparing bind mounts and persistent overlays
@@ -208,12 +205,25 @@ Through a bind mount, every file the application creates becomes a separate obje
 
 In an overlay, all of it is one host file, no matter how many files it contains internally.
 
-
-
-
 The two mechanisms also combine freely, and in practice that is often the best answer: run the workload inside an overlay, and bind mount a host directory for the handful of outputs you actually want to keep. That is exactly the pattern used further below, running Trinity inside an overlay and copying only the two files we need back onto the host.
 
 ### Mount a persistent overlay with a container image
+
+The general form of the command for creating a separate overlay file is:
+
+```text
+singularity overlay create --size SIZE OVERLAY_FILE
+```
+{: .output}
+
+The `--size` option specifies the overlay capacity in MiB, and `OVERLAY_FILE` specifies the name and location of the file to create. Singularity creates an EXT3 filesystem inside this file. The overlay is not itself a container image; it is mounted together with a container image in subsequent `singularity run`, `exec`, or `shell` commands.
+
+For this example, create a 200 MiB overlay named `my_overlay.ext3`:
+
+```bash
+$ singularity overlay create --size 200 my_overlay.ext3
+```
+{: .source}
 
 Creating an overlay file does not activate it automatically. The overlay must be specified each time a container is started with the changes stored in that overlay.
 
@@ -235,22 +245,6 @@ Read-write is the default mode. However, we include the `:rw` suffix to make the
 
 ```bash
 $ singularity shell --overlay "my_overlay.ext3:rw" "$UBUNTU_IMAGE"
-```
-{: .source}
-
-The general form of the command for creating a separate overlay file is:
-
-```text
-singularity overlay create --size SIZE OVERLAY_FILE
-```
-{: .output}
-
-The `--size` option specifies the overlay capacity in MiB, and `OVERLAY_FILE` specifies the name and location of the file to create. Singularity creates an EXT3 filesystem inside this file. The overlay is not itself a container image; it is mounted together with a container image in subsequent `singularity run`, `exec`, or `shell` commands.
-
-For this example, create a 200 MiB overlay named `my_overlay.ext3`:
-
-```bash
-$ singularity overlay create --size 200 my_overlay.ext3
 ```
 {: .source}
 
