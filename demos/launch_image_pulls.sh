@@ -17,6 +17,73 @@ IMAGES=(
 )
 
 
+# Display help for the launcher.
+usage() {
+    cat <<EOF_USAGE
+Usage: $(basename "$0") [OPTIONS]
+
+Options:
+  -p, --partition PARTITION       Override the partition in the Slurm script
+      --partition=PARTITION       Same as above
+      --reservation RESERVATION   Use the specified Slurm reservation
+      --reservation=RESERVATION   Same as above
+  -h, --help                      Display this help and exit
+EOF_USAGE
+}
+
+
+# Read the supported Slurm-style command-line options.
+partition=""
+reservation=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -p|--partition)
+            [[ $# -ge 2 && -n "$2" ]] || { echo "ERROR: $1 requires a value." >&2; exit 1; }
+            partition="$2"
+            shift 2
+            ;;
+        --partition=*)
+            partition="${1#*=}"
+            [[ -n "$partition" ]] || { echo "ERROR: --partition requires a value." >&2; exit 1; }
+            shift
+            ;;
+        --reservation)
+            [[ $# -ge 2 && -n "$2" ]] || { echo "ERROR: $1 requires a value." >&2; exit 1; }
+            reservation="$2"
+            shift 2
+            ;;
+        --reservation=*)
+            reservation="${1#*=}"
+            [[ -n "$reservation" ]] || { echo "ERROR: --reservation requires a value." >&2; exit 1; }
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "ERROR: Unsupported option: $1" >&2
+            echo >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+done
+
+
+# Build the optional arguments that will override or extend the Slurm script.
+SBATCH_OPTIONS=()
+
+if [[ -n "$partition" ]]; then
+    SBATCH_OPTIONS+=(--partition="$partition")
+fi
+
+if [[ -n "$reservation" ]]; then
+    SBATCH_OPTIONS+=(--reservation="$reservation")
+fi
+
+
 # Set the personal image library used throughout the training.
 export MY_LOCAL_LIBRARY="${MYSOFTWARE}/singularity/images"
 
@@ -48,37 +115,27 @@ for image in "${IMAGES[@]}"; do
 
     echo "Submitting pull job for: $image_reference"
     echo "Image will be saved as:  ${MY_LOCAL_LIBRARY}/${output_filename}"
+
     job_name="pulling:${short_name}"
     echo "Slurm job name:          $job_name"
 
-    if [[ -z "$previous_job_id" ]]; then
-        job_id="$(
-            sbatch --parsable \
-                --job-name="$job_name" \
-                --partition="gpu" \
-                --account="courses01-gpu" \
-                -N 1 \
-                --gres=gpu:1 \
-                --reservation="ContainersTraining-gpu" \
-                "$JOB_SCRIPT" \
-                "$image_reference" \
-                "$output_filename"
-        )"
-    else
-        job_id="$(
-            sbatch --parsable \
-                --job-name="$job_name" \
-                --partition="gpu" \
-                --account="courses01-gpu" \
-                -N 1 \
-                --gres=gpu:1 \
-                --reservation="ContainersTraining-gpu" \
-                --dependency="afterany:${previous_job_id}" \
-                "$JOB_SCRIPT" \
-                "$image_reference" \
-                "$output_filename"
-        )"
+    submission_options=(
+        --parsable
+        --job-name="$job_name"
+        "${SBATCH_OPTIONS[@]}"
+    )
+
+    if [[ -n "$previous_job_id" ]]; then
+        submission_options+=(--dependency="afterany:${previous_job_id}")
     fi
+
+    job_id="$(
+        sbatch \
+            "${submission_options[@]}" \
+            "$JOB_SCRIPT" \
+            "$image_reference" \
+            "$output_filename"
+    )"
 
     # Remove a cluster name if sbatch returns JOB_ID;CLUSTER_NAME.
     job_id="${job_id%%;*}"

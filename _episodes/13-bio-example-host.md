@@ -168,29 +168,29 @@ bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  
 
 
 > ## What happens on Setonix?
-> 
-> This last example won't work as expected on Setonix.  
-> This is due to site defaults that are meant to make users' life easier: in particular, `/scratch` — where your `$TUTO` directory lives — is bind mounted into every container by default, regardless of your current working directory.  
+>
+> This last example won't work as expected on Setonix.
+> This is due to site defaults that are meant to make users' life easier: in particular, `/scratch` — where your `$TUTO` directory lives — is bind mounted into every container by default, regardless of your current working directory.
 > If you want to experience this example as shown above, you should first `unset SINGULARITY_BINDPATH`.
 {: .callout}
 
 
 > ## And by the way, can we write inside a container?
-> 
+>
 > Try and create a file called `example` in the container root directory.  (**Hint**: run `touch /example` inside the container).
-> 
+>
 > > ## Solution
-> > 
+> >
 > > ```
 > > $ singularity exec "$image" touch /example
 > > ```
 > > {: .bash}
-> > 
+> >
 > > ```
 > > touch: cannot touch '/example': Read-only file system
 > > ```
 > > {: .output}
-> > 
+> >
 > > We have just learn something more on containers: by default, they are **read-only**.  How can we get a container to write files then?  Read on...
 > {: .solution}
 {: .challenge}
@@ -203,7 +203,7 @@ To summarise what we've learnt in the previous examples, we may say that a conta
 
 Singularity has the runtime flag `--bind`, `-B` in short, to mount host directories.
 
-There is a long syntax, which allows to map the host dir onto a container dir with a different name/path, `-B hostdir:containerdir`.  
+There is a long syntax, which allows to map the host dir onto a container dir with a different name/path, `-B hostdir:containerdir`.
 There is also a short syntax, that just mounts the dir using the same name and path: `-B hostdir`.
 
 Let's use the latter syntax to mount `$TUTO` into the container and re-run `ls`.
@@ -254,7 +254,7 @@ $ export SINGULARITY_BINDPATH="dir1,dir2,dir3"
 
 > ## Mounting $HOME
 >
-> Depending on the site configuration of Singularity, user home directories might or might not be mounted into containers by default.  
+> Depending on the site configuration of Singularity, user home directories might or might not be mounted into containers by default.
 > We do recommend that you **avoid mounting home** whenever possible, to avoid sharing potentially sensitive data, such as SSH keys, with the container, especially if exposing it to the public through a web service.
 >
 > If you need to share data inside the container home, you might just mount that specific file/directory, *e.g.*
@@ -290,7 +290,7 @@ world
 ```
 {: .output}
 
-There might be situations where you want to isolate the shell environment of the container; to this end you can use the flag `-C`, or `--containall`:  
+There might be situations where you want to isolate the shell environment of the container; to this end you can use the flag `-C`, or `--containall`:
 (Note that this will also isolate system directories such as `/tmp`, `/dev` and `/run`)
 
 ```
@@ -332,7 +332,7 @@ mondo
 
 ### Running BLAST from a container
 
-We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro).  BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics packages.  
+We'll be running a BLAST (Basic Local Alignment Search Tool) example with a container from [BioContainers](https://biocontainers.pro).  BLAST is a tool bioinformaticians use to compare a sample genetic sequence to a database of known sequences; it's one of the most widely used bioinformatics packages.
 This example is adapted from the [BioContainers documentation](http://biocontainers-edu.biocontainers.pro/en/latest/running_example.html).
 
 
@@ -347,10 +347,10 @@ $ module load singularity/4.1.0-nompi
 
 Now start a new interactive session on a compute node with:
 
+```bash
+$ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 0:30:00
 ```
-$ salloc -p gpu -A courses01-gpu --gres=gpu:1 -N 1  --reservation=ContainersTraining-gpu -t 00:30:00
-```
-{: .bash}
+{: .source}
 
 Let's `cd` into `demos/blast`, where the input FASTA file for this example lives:
 
@@ -388,13 +388,13 @@ $ export image="${MY_LOCAL_LIBRARY}/blast--2.9.0--pl526h3066fca_4.sif"
 
 
 > ## Bonus: search for the BLAST image on an online registry
-> 
-> **If time allows**, you might want to give it a go with looking for the container image yourself.  
-> Start with the assumption that most bioinformatics packages can be found within the *BioContainers* project (this is the repo/name you'll be looking for), and are hosted in both [Red Hat Quay](https://quay.io) and [BioContainers](https://biocontainers.pro).  
-> These two registries contain the same images, they just offer a slightly different user interface.  At the time of writing, *Quay* has a cleaner and more readable interface compared to *BioContainers*; hopefully this will change in the future.  
-> 
+>
+> **If time allows**, you might want to give it a go with looking for the container image yourself.
+> Start with the assumption that most bioinformatics packages can be found within the *BioContainers* project (this is the repo/name you'll be looking for), and are hosted in both [Red Hat Quay](https://quay.io) and [BioContainers](https://biocontainers.pro).
+> These two registries contain the same images, they just offer a slightly different user interface.  At the time of writing, *Quay* has a cleaner and more readable interface compared to *BioContainers*; hopefully this will change in the future.
+>
 > > ## Solution: Red Hat Quay
-> > 
+> >
 > > * Go to https://quay.io (NO registration required!);
 > > * Locate the *Search* field on the top right of the page (you might need to widen the browser window), and type `blast`;
 > > * We want an image from `biocontainers`, so look for `biocontainers/blast` and click on it;
@@ -402,9 +402,9 @@ $ export image="${MY_LOCAL_LIBRARY}/blast--2.9.0--pl526h3066fca_4.sif"
 > > * At the time of writing, the resulting image will be `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`;
 > > * You can click on the *Fetch* icon at the rightmost side of the record, select *Pull by Tag*, and then copy the full image name in your clipboard.
 > {: .solution}
-> 
+>
 > > ## Solution: BioContainers
-> > 
+> >
 > > * Go to https://biocontainers.pro;
 > > * Click on the *Registry* button on the top of the page;
 > > * In the new page, type `blast` in the search field;
@@ -412,9 +412,9 @@ $ export image="${MY_LOCAL_LIBRARY}/blast--2.9.0--pl526h3066fca_4.sif"
 > > * The list of images here is quite rich, with entries for *Docker*, *Singularity* and *Conda*; consider only the *Docker* entries, look for the highest Blast version (`2.9.0` at the time of writing) and, among the multiple tags for this version, identify the most recent one (*Hint*: sort by *Modified date*).  You might need to widen your window to read the full image names and tags, and on some smaller screens you won't be able to; **^Alternative download**
 > > * At the time of writing, the resulting image will be `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`;
 > > * You can click on the *Copy* icon just at the right of the image name field, to copy the full image name in your clipboard (you will need to get rid of *docker pull*).
-> > 
+> >
 > > **^Alternative download**: *Singularity* image
-> > 
+> >
 > > * Pick the highest version and latest tag from the list of *Singularity* entries;
 > > * At the time of writing, the resulting image is again `quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4`;
 > > * Click on the *Copy* icon just at the right of the image name field, to copy the full image name in your clipboard.  In this case, this is a *URL* to download the SIF image straight away: to achieve this, on your shell you will execute `wget <PASTE THE IMAGE NAME FROM CLIPBOARD>`.
@@ -488,7 +488,7 @@ $ gunzip zebrafish.1.protein.faa.gz
 {: .challenge}
 
 
-After the container has terminated, you should see several new files in the current directory (try `ls`).  
+After the container has terminated, you should see several new files in the current directory (try `ls`).
 Now let's proceed to the final alignment step using `blastp`. We need to cd into `demos/blast`:
 
 ```

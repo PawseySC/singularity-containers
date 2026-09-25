@@ -995,7 +995,7 @@ After the push completes, inspect the repository and tag in Docker Hub. For this
 Request an interactive allocation if you are not already working on a compute node:
 
 ```bash
-$ salloc -p gpu -A courses01-gpu --gres=gpu:1 -N 1 --reservation=ContainersTraining-gpu -t 4:00:00
+$ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 4:00:00
 ```
 {: .source}
 
@@ -1087,9 +1087,20 @@ SCALE=0.002
 Submit it with:
 
 ```bash
-$ sbatch runMandelbrotSingularityPawsey.slurm.sh
+$ sbatch --reservation=ContainersTraining runMandelbrotSingularityPawsey.slurm.sh
 ```
 {: .source}
+
+> ## If no reservation is available: submit the script with defaults
+>
+> If you are following the tutorial outside a live training session, there will not be a reservation available. The submit the script with its default request of a compute partition with no reservation:
+>
+> ```bash
+> $ sbatch runMandelbrotSingularityPawsey.slurm.sh
+> ```
+> {: .source}
+>
+{: .solution}
 
 The host-side `srun` command starts one `singularity exec` per Slurm task, following the Pawsey hybrid MPI model covered in the MPI container episode. The larger workload gives the 16 ranks substantially more pixel and iteration work than the default local test.
 

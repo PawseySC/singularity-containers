@@ -284,6 +284,17 @@ $ sbatch --account=courses01-gpu --reservation=ContainersTraining-gpu gpu.sh
 ```
 {: .source}
 
+> ## If no reservation is available: submit the script with defaults
+>
+> If you are following the tutorial outside a live training session, there will not be a reservation available. The submit the script with its default request of a compute partition with no reservation:
+>
+> ```bash
+> $ sbatch --account=<yourPawseyProject>-gpu gpu.sh
+> ```
+> {: .source}
+>
+{: .solution}
+
 Once it completes, check `pytorch_gpu-<JobID>.out` for the training loss printed every 100 batches, decreasing epoch over epoch.
 
 

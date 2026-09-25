@@ -102,12 +102,16 @@ For additional connection details and troubleshooting, see Pawsey's [How to log 
 If you're running this tutorial on a shared system (_e.g._ Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
 
 ```bash
-$ salloc -p gpu -A courses01-gpu --gres=gpu:1 -N 1 --reservation=ContainersTraining-gpu -t 4:00:00
+$ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 4:00:00
+```
+{: source}
+
+```text
 salloc: Granted job allocation 3453895
 salloc: Waiting for resource configuration
 salloc: Nodes nid000152 are ready for job
 ```
-{: .source}
+{: .output}
 
 The job allocation number and compute-node hostname in your output will be different. Keep this terminal open while completing the hands-on exercises. Exiting the shell ends the interactive allocation.
 
@@ -157,9 +161,20 @@ Run the launcher:
 
 ```bash
 $ chmod 755 launch_image_pulls.sh
-$ ./launch_image_pulls.sh
+$ ./launch_image_pulls.sh --reservation=ContainersTraining --partition=work
 ```
 {: .source}
+
+> ## If no reservation is available: run the launcher script with defaults
+>
+> If you are following the tutorial outside a live training session, there will not be a reservation available. Then use the defaults of the scripts (which launches jobs in the `copy` partition):
+>
+> ```bash
+> $ ./launch_image_pulls.sh
+> ```
+> {: .source}
+>
+{: .solution}
 
 The launcher initially requests the following images:
 

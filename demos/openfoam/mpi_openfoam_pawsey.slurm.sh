@@ -1,27 +1,12 @@
 #!/bin/bash --login
 
-###Original request settings for this CPU job:
-###SBATCH --job-name=mpi-openfoam-training
-###SBATCH --partition=work
-###SBATCH --reservation=ContainersTraining
-###SBATCH --nodes=1
-###SBATCH --ntasks=8
-###SBATCH --ntasks-per-node=8
-###SBATCH --cpus-per-task=1
-###SBATCH --time=00:05:00
-###nProcs=$SLURM_NTASKS
-
-#Forced request settinds due to this funny reservation for the Training only in GPU nodes:
-#This CPU application should be running in a CPU-only compute node requeste as indicate above,
-#but they only gave us access to the GPU nodes for this training, so we have to request a GPU node and then not use the GPU at all.
 #SBATCH --job-name=mpi-openfoam-training
-#SBATCH --partition=gpu
-#SBATCH --account=courses01-gpu
-#SBATCH --reservation=ContainersTraining-gpu
+#SBATCH --partition=work
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:1
+#SBATCH --ntasks=8
+#SBATCH --ntasks-per-node=8
+#SBATCH --cpus-per-task=1
 #SBATCH --time=00:05:00
-nProcs=8 #This should not go here, but in the commented line below, but the allocation is forcing these changes (the similar line indicated above neither should exist)
 
 #--- Load the singularity module (Pawsey's mpi-settings flavour):
 module load singularity/4.1.0-mpi
@@ -42,7 +27,7 @@ cp -r 0.orig 0
 
 #--- Automating the list of IORANKS for collated fileHandler
 echo "Setting the grouping ratio for collated fileHandling"
-###nProcs=$SLURM_NTASKS #Number of total processors in decomposition for this case
+nProcs=$SLURM_NTASKS #Number of total processors in decomposition for this case
 mGroup=4             #Size of the groups for collated fileHandling (32 is the initial recommendation for Setonix)
 of_ioRanks="0"
 iC=$mGroup

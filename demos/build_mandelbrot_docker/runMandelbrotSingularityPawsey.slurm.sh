@@ -1,7 +1,6 @@
 #!/bin/bash --login
 #SBATCH --job-name=mpi-mandelbrot
 #SBATCH --partition=work
-#SBATCH --reservation=ContainersTraining
 #SBATCH --nodes=1
 #SBATCH --ntasks=16
 #SBATCH --ntasks-per-node=16

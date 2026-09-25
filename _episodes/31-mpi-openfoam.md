@@ -27,7 +27,7 @@ keypoints:
 If you’re running this tutorial on a shared system (e.g. Setonix at Pawsey), you should use one of the compute nodes rather than the login node. You can do this by requesting an interactive allocation from the scheduler, for instance on Setonix with Slurm (do this if you are not in an `salloc` interactive session yet):
 
 ```bash
-$ salloc -p gpu -A courses01-gpu --gres=gpu:1 -N 1 --reservation=ContainersTraining-gpu -t 4:00:00
+$ salloc -N 1 -n 1 -c 8 --reservation=ContainersTraining -t 4:00:00
 ```
 {: .source}
 
@@ -195,9 +195,20 @@ The script stops if a `periodicPlaneChannel` directory already exists, rather th
 Submit the Slurm job script:
 
 ```bash
-$ sbatch mpi_openfoam_pawsey.slurm.sh
+$ sbatch --reservation=ContainersTraining mpi_openfoam_pawsey.slurm.sh
 ```
 {: .source}
+
+> ## If no reservation is available: submit the script with defaults
+>
+> If you are following the tutorial outside a live training session, there will not be a reservation available. The submit the script with its default request of a compute partition with no reservation:
+>
+> ```bash
+> $ sbatch mpi_openfoam_pawsey.slurm.sh
+> ```
+> {: .source}
+>
+{: .solution}
 
 Check the execution status of the job with:
 
@@ -266,7 +277,6 @@ $ cat mpi_openfoam_pawsey.slurm.sh
 
 #SBATCH --job-name=mpi-openfoam-training
 #SBATCH --partition=work
-#SBATCH --reservation=ContainersTraining
 #SBATCH --nodes=1
 #SBATCH --ntasks=8
 #SBATCH --ntasks-per-node=8
@@ -335,7 +345,6 @@ Instead of reviewing the complete script line by line, we will focus on the part
 >
 > #SBATCH --job-name=mpi-openfoam-training
 > #SBATCH --partition=work
-> #SBATCH --reservation=ContainersTraining
 > #SBATCH --nodes=1
 > #SBATCH --ntasks=8
 > #SBATCH --ntasks-per-node=8

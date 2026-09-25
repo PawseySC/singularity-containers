@@ -1,11 +1,10 @@
 #!/bin/bash -l
 
 #SBATCH --job-name=pull-image
-#SBATCH --partition=work
-##SBATCH --reservation=ContainersTraining
+#SBATCH --partition=copy
 #SBATCH --nodes=1
-##SBATCH --ntasks=16
-##SBATCH --cpus-per-task=1
+#SBATCH --ntasks=16
+#SBATCH --cpus-per-task=1
 #SBATCH --time=00:30:00
 #SBATCH --output=pull-image-%j.out
 
